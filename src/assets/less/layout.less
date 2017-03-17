@@ -1,0 +1,89 @@
+//flex布局
+.flex {
+  display: -moz-box;
+  display: -webkit-box;
+  display: flex;
+  display: -webkit-flex;
+}
+.justify-center {
+  /*主轴水平对齐*/
+  -moz-justify-content: center;
+  -moz-box-pack: center;
+  -webkit-box-pack: center;
+   justify-content: center;
+  -webkit-justify-content: center;
+}
+.justify-space-between {
+  /*主轴左右对齐,项目之间的间隔都相等*/
+  justify-content: space-between;
+  -moz-justify-content: space-between;
+  -webkit-justify-content: space-between;
+  -webkit-box-pack: justify;
+}
+.just-space-around {
+  justify-content: space-around;
+  -moz-justify-content: space-around;
+  -webkit-justify-content: space-around;
+  -webkit-box-pack: justify;
+}
+.justify-start {
+  /*主轴左对齐*/
+  justify-content: flex-start;
+  -moz-justify-content: flex-start;
+  -webkit-justify-content: flex-start;
+  -webkit-box-pack: start;
+}
+.justify-end {
+  /*主轴右对齐*/
+  -moz-justify-content: flex-end;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+}
+.align-items-center {
+  /*交叉轴居中对齐*/
+  -webkit-box-align: center;
+  -moz-align-items: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -moz-align-items: center;
+  -webkit-align-items: center;
+}
+.align-items-start {
+  /*交叉轴顶部对齐*/
+  -webkit-box-align: start;
+  -moz-align-items: start;
+  -webkit-align-items: start;
+  align-items: flex-start;
+  -moz-align-items: flex-start;
+  -webkit-align-items: flex-start;
+}
+.align-items-end {
+  /*交叉轴底部对齐*/
+  -webkit-box-align: end;
+  -moz-align-items: end;
+  -webkit-align-items: end;
+  align-items: flex-end;
+  -moz-align-items: flex-end;
+  -webkit-align-items: flex-end;
+}
+.flex-direction-column {
+  /*主轴方向垂直*/
+  flex-direction: column;
+  -moz-flex-direction: column;
+  -webkit-flex-direction: column;
+}
+.text-overflow {
+  overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+  text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用。*/
+  word-break:keep-all;/* 不换行 */
+  white-space:nowrap;/* 不换行 */
+}
+.flex-direction-column-reverse {
+  /*主轴方向垂直下到上*/
+  -webkit-box-pack: end;
+  -webkit-box-direction: reverse;
+  -webkit-box-orient: vertical;
+  flex-direction: column-reverse;
+  -moz-flex-direction: column-reverse;
+  -webkit-flex-direction: column-reverse;
+}
