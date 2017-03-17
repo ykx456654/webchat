@@ -89,6 +89,7 @@ export default {
 					type:'application/x-mpegURL'
 				},
 				poster:vdo.coverpicUrl,
+				LoadingSpinner: true,
 				live:true,
 				controls: true,
 				fluid:true,
@@ -107,19 +108,12 @@ export default {
 			}
 
 			var _this = this
-			_this.player = videojs('video-play',videoOption,function onPlayerReady () {
+			_this.player = videojs(document.getElementById('video-play'),videoOption,function onPlayerReady () {
 				videojs.log('Your player is ready!');
-				// this.play();
 				this.on('ended', function() {
 			    	videojs.log('Awww...over so soon?!');
 				});
 			})
-		},
-		videoplay () {
-			this.player.play()
-		},
-		playerStateChanged (playerCurrentState) {
-			 console.log(playerCurrentState)
 		},
 		signIn () {
 			if (this.vdo.signup) {
@@ -133,7 +127,7 @@ export default {
 					this.toast(res.msg)
 				}else{
 					this.toast('报名成功')
-					this.videos[index][vindex].signup = true
+					this.vdo.signup = true
 				}
 			})
 			.catch(e=>{
