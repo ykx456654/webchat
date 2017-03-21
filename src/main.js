@@ -22,7 +22,6 @@ time()
 
 
 router.beforeEach((to, from, next) => {
-    // 需要登录态
     const cookie = getCookie('uid')
     if (!cookie) {
         const code = getUrlParam('code')

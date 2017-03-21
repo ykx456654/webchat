@@ -41,6 +41,7 @@ export default {
 @import url(./assets/less/reset.less);
 @import url(./assets/less/layout.less);
 @import url(./assets/less/mint.less);
+@import url(./assets/less/vux.less);
 @import url(./assets/less/set.less);
 @import url(./assets/less/video.less);
 video::-webkit-media-controls-panel,

@@ -31,6 +31,32 @@ const Channel = resolve => {
   require(['src/components/course/Channel'],resolve)
 }
 
+const Recommond = resolve => {
+  require(['src/components/recommond/Recommond'],resolve)
+}
+
+const Me = resolve => {
+  require(['src/components/me/Me'],resolve)
+}
+
+
+const Setting = resolve => {
+  require(['src/components/me/Setting'],resolve)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default new Router({
   routes: [
     {
@@ -49,16 +75,18 @@ export default new Router({
       		path: 'CourseSave',
       		component:CourseSave
       	}
-      ],
-      meta:{requiresAuth:true}
+      ]
     },
     {
-      path:'/CourseDetailLive',
+      path:'/CourseDetailLive/:vdoid',
+      name:'CourseDetailLive',
       component:CourseDetailLive
     },
     {
-      path:'/CourseDetailSave',
-      component:CourseDetailSave
+      path:'/CourseDetailSave/:vdoid',
+      name:'CourseDetailSave',
+      component:CourseDetailSave,
+      meta:{requiresAuth:true}
     },
     {
       path:'/SearchVideo',
@@ -67,6 +95,19 @@ export default new Router({
     {
       path:'/Channel',
       component:Channel
+    },
+    {
+      path:'/Recommond',
+      component:Recommond
+    },
+    {
+      path:'/Me',
+      component:Me,
+      meta:{requiresAuth:true}
+    },
+    {
+      path:'/Setting',
+      component:Setting
     }
   ]
 })

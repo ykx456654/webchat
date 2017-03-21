@@ -1,13 +1,18 @@
 <template>
 	<div class="course-detail-live">
-		<x-header title="fasfdsfdsa">
+		<x-header :title="vdo.title">
 			<router-link to="/CourseLive" slot="left">
 				<img src="../../assets/images/back2.png">
 			</router-link>
 			<a class="btn course-detail-btn" slot="right">关注</a>
 		</x-header>
-		<div class="video-pannel">
+<!-- 		<div class="video-pannel">
 			<video class="video-js vjs-custom-skin" id="video-play" playsinline></video>
+		</div> -->
+		<div class="zy_media">
+			<video id="ss" :poster="vdo.coverpicUrl" playsinline>
+		        <source :src="playurl"  type="application/x-mpegURL">
+		    </video>
 		</div>
 		<div class="course-menu flex">
 			<div class="flex align-items-center" :class="{'active':vdo.signup}" @click="signIn">
@@ -47,15 +52,16 @@
 import {mapMutations} from 'vuex'
 import {api} from '../../utils/api.js'
 import { Header } from 'mint-ui';
-import videojs from 'video.js'
-require('videojs-contrib-hls')
+// import videojs from 'video.js'
+// require('videojs-contrib-hls')
+import zy from '../../lib/zymedia/zy.media.js'
 export default {
 	components:{xHeader:Header},
-	created () {
-		const query = this.$route.query
+	mounted () {
+		const params = this.$route.params
 		const uid = this.uid
-		const vdoid = query.vdoid
-		this.vdoid = query.vdoid
+		const vdoid = params.vdoid
+		this.vdoid = vdoid
 		api(uid,{srv: "video_video",cmd: "get_live_video"},{vdoid:vdoid,src:0})
 		.then(res=>{
 			let data = res.data
@@ -64,6 +70,7 @@ export default {
 				this.toast(data.msg)
 			}else{
 				this.vdo = data.rsps[0].body.video
+				this.playurl = data.rsps[0].body.video.newPlayUrl
 			}
 			this.hideLoad()
 			this.initVideoOption()
@@ -74,46 +81,25 @@ export default {
 			vdoid:0,
 			vdo:{},
 			videoOption:{},
-			player:null
+			player:null,
+			playurl:''
 		}
 	},
 	methods:{
 		...mapMutations([
-			'showLoad','hideLoad'
+			'showLoad','hideLoad','showTab'
 		]),
 		initVideoOption () {
 			const vdo = this.vdo
-			const videoOption = {
-				source:{
-					src:vdo.newPlayUrl,
-					type:'application/x-mpegURL'
-				},
-				poster:vdo.coverpicUrl,
-				LoadingSpinner: true,
-				live:true,
-				controls: true,
-				fluid:true,
-				autoplay: false,
-             	preload: 'auto',
-              	controlBar: {
-	                children: {
-	                 	FullscreenToggle: true,
-	                 	ProgressControl: {
-	                   		children: {
-	                    		PlayProgressBar: false
-	                    	}
-	                  	}
-	                }
-              	}
-			}
-
+			const height = window.innerWidth * 0.56
 			var _this = this
-			_this.player = videojs(document.getElementById('video-play'),videoOption,function onPlayerReady () {
-				videojs.log('Your player is ready!');
-				this.on('ended', function() {
-			    	videojs.log('Awww...over so soon?!');
-				});
-			})
+			_this.player =  zy(document.getElementById('ss'),{
+				videoHeight:height,
+				audioHeight: 40,
+				error:function(){
+					_this.toast('视频错误')
+				}
+			}) 
 		},
 		signIn () {
 			if (this.vdo.signup) {
@@ -161,18 +147,18 @@ export default {
 			return this.$store.getters.uid
 		}
 	},
-	mounted () {
-
-	},
 	beforeRouteLeave  (to ,from ,next) {
-		this.player &&　this.player.dispose()
+		this.player && this.player.media.pause()		
 		this.player = null
 		delete this.player
+		this.show = false
+		this.showTab()
 		next()
 	}
 }
 </script>
 <style lang="less">
+@import '../../lib/zymedia/zy.media.css';
 .course-detail{background-color: #f2f2f2;}.video{margin-bottom: 5px;}
 .video{position: relative;width: 100%;margin-bottom: 0;padding-bottom:56.25%; height: 0}
 .poster{

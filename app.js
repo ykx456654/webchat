@@ -6,8 +6,10 @@ var request = require('request-json');
 var client = request.createClient('http://test.api.yishengzhan.cn');
 app = express()
 app.use(bodyParser.json())
-
-
+app.use(express.static(__dirname + '/dist'))
+app.get('/',function(req, res){
+	res.sendfile("./dist/index.html");
+})
 
 
 // app.post('/api',function(req, res){
@@ -48,7 +50,7 @@ app.post('/api',function(req,res){
   var data = req.body
   client.post('/',data,function(error,response,body){
     return (function(){
-      console.log(body)
+      console.log(JSON.stringify(body))
       res.send(body)
     })()
   })

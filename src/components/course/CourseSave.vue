@@ -127,7 +127,7 @@ export default {
         },
         link (id) {
             this.showLoad()
-            this.$router.push({path:'CourseDetailSave',query:{vdoid:id}})
+            this.$router.push({name:'CourseDetailSave', params:{ vdoid:id }})
         },
         toChannel () {
             this.$router.push({path:'Channel'})

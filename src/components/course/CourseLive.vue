@@ -96,7 +96,7 @@ export default {
 		},
 		link (id) {
 			this.showLoad()
-			this.$router.push({path:'CourseDetailLive',query:{vdoid:id}})
+			this.$router.push({name:'CourseDetailLive',params:{vdoid:id}})
 		},
 		...mapMutations([
 			'showLoad','hideLoad'

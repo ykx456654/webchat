@@ -35,9 +35,12 @@ export default {
 	methods: {
 		link (n) {
 			n = Number(n)
+			if (this.active === n) return false
 			this.active = n
 			switch (n){
-				// case 1 :
+				case 1 : this.$router.push({path:'/'});this.showLoad();break;
+				case 2 : this.$router.push({path:'/Recommond'});this.showLoad();break;
+				case 3 : this.$router.push({path:'/me'});this.showLoad();break;
 			}
 		},
 		...mapMutations([
