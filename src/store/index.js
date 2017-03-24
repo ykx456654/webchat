@@ -7,6 +7,9 @@ import base from './modules/base'
 import course from './modules/course'
 
 export default new vuex.Store({
+	state:{
+		system:''
+	},
 	modules: {
 		user,base,course
 	}

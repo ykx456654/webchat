@@ -16,11 +16,11 @@ const CourseSave = resolve => {
 }
 
 const CourseDetailLive = resolve => {
-  require(['src/components/courseDetail/CourseDetailLive'],resolve)
+  require(['src/components/course/courseDetail/CourseDetailLive'],resolve)
 }
 
 const CourseDetailSave = resolve => {
-  require(['src/components/courseDetail/CourseDetailSave'],resolve)
+  require(['src/components/course/courseDetail/CourseDetailSave'],resolve)
 }
 
 const SearchVideo = resolve => {
@@ -44,10 +44,13 @@ const Setting = resolve => {
   require(['src/components/me/Setting'],resolve)
 }
 
+const Auth = resolve => {
+  require(['src/components/me/Auth'],resolve)
+}
 
-
-
-
+const UpAuthImg = resolve => {
+  require(['src/components/me/UpAuthImg'],resolve)
+}
 
 
 
@@ -108,6 +111,14 @@ export default new Router({
     {
       path:'/Setting',
       component:Setting
+    },
+    {
+      path:'/Auth',
+      component:Auth
+    },
+    {
+      path:'/UpAuthImg',
+      component:UpAuthImg
     }
   ]
 })

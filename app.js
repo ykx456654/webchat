@@ -5,6 +5,8 @@ var express = require('express');
 var request = require('request-json');
 var client = request.createClient('http://test.api.yishengzhan.cn');
 app = express()
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 app.use(bodyParser.json())
 app.use(express.static(__dirname + '/dist'))
 app.get('/',function(req, res){

@@ -2,7 +2,7 @@
 	<div class="course-detail-save">
 		<x-header :title="vdo.title">
 			<router-link to="/CourseSave" slot="left">
-				<img src="../../assets/images/back2.png">
+				<img src="../../../assets/images/back2.png">
 			</router-link>
 			<a class="btn course-detail-btn" slot="right">关注</a>
 		</x-header>
@@ -34,14 +34,14 @@
 							<p class="course-detail-content" :class="{'active':lanchContent}" v-text="vdo.content"></p>
 							<div class="course-toggle" @click="lanch">
 								<span>展开</span>
-								<img :class="{'lanch':lanchContent}" src="../../assets/images/arrow-bottom.png">
+								<img :class="{'lanch':lanchContent}" src="../../../assets/images/arrow-bottom.png">
 							</div>
 						</div>
 						<div style="height: 10px;background-color: #f2f2f2"></div>
 						<ul class="course-this-list">
 							<h4>课程目录</h4>
 							<li class="flex align-items-center" :class="{'v-active':i===playId}" v-for="(v,i) in classify" @click="setPlay(i)">
-								<div class="c-t-icon"><img src="../../assets/images/video.png" alt=""></div>
+								<div class="c-t-icon"><img src="../../../assets/images/video.png" alt=""></div>
 								<div class="c-t-title text-overflow">{{v.title}}</div>
 								<div class="c-t-durition">{{v.duration}}</div>
 							</li>
@@ -52,7 +52,7 @@
 					<!-- <div></div> -->
 					<div class="flex comment justify-space-between" @click="listComment($event)" v-if="commentList.length != 0">
 						<div class="comment-head">
-							<img src="../../assets/images/default_head.png">
+							<img src="../../../assets/images/default_head.png">
 						</div>
 						<div class="comment-item">
 							<p class="comment-name">jackMapo</p>
@@ -60,12 +60,12 @@
 							<p class="comment-content">122fsdaf</p>
 						</div>
 						<div class="comment-zan c-z flex align-items-center">
-							<img class="c-z" src="../../assets/images/zan_.png">
+							<img class="c-z" src="../../../assets/images/zan_.png">
 							<span class="c-z" zan>赞</span>
 						</div>
 					</div>
 					<div v-else class="no-comment">
-						<img src="../../assets/images/comment.png">
+						<img src="../../../assets/images/comment.png">
 					</div>
 				</tab-container-item>
 				<tab-container-item id="course-detail-tab-3">
@@ -86,7 +86,7 @@
 						</div>
 					</div>
 					<div v-else class="relative-course flex align-items-center justify-center">
-						<img src="../../assets/images/relevent_pinglun@3x.png">
+						<img src="../../../assets/images/relevent_pinglun@3x.png">
 					</div>
 				</tab-container-item>
 				<tab-container-item class="course-detail-tab-loading flex justify-center align-items-center" id="course-detail-tab-loading">
@@ -128,13 +128,10 @@
 // 'https://www.yishengzhan.cn/download?channel=release_webysz';
 import {mapMutations} from 'vuex'
 import { mapGetters } from 'vuex'
-import {api} from '../../utils/api'
+import {api} from '../../../utils/api'
 import { Header ,TabContainer, TabContainerItem,Actionsheet,Spinner,MessageBox} from 'mint-ui';
-// import videojs from 'video.js'
 import { Popup } from 'vux'
-import zy from '../../lib/zymedia/zy.media.js'
-
-// require('videojs-resolution-switcher')
+import zy from '../../../lib/zymedia/zy.media.js'
 	export default {
 		components:{xHeader:Header,TabContainer,TabContainerItem , Actionsheet ,Popup,Spinner,MessageBox},
 		mounted () {
@@ -363,7 +360,7 @@ import zy from '../../lib/zymedia/zy.media.js'
 		},
 		beforeRouteLeave (to ,from, next) {
 			// console.log(this.player.media.ended)
-			this.player.media.pause()		
+			this && this.player.media.pause()		
 			this.player = null
 			delete this.player
 			this.show = false
@@ -373,7 +370,7 @@ import zy from '../../lib/zymedia/zy.media.js'
 	}
 </script>
 <style lang="less" scoped>
-@import '../../lib/zymedia/zy.media.css';
+@import '../../../lib/zymedia/zy.media.css';
 	.course-detail-save{
 		padding-bottom: 50px;
 	}
@@ -395,7 +392,7 @@ import zy from '../../lib/zymedia/zy.media.js'
 			width: 26px;
 			height: 26px;
 			display: block;
-			background: url(../../assets/images/sprites/css_sprite.png) no-repeat 100px;
+			background: url(../../../assets/images/sprites/css_sprite.png) no-repeat 100px;
     		background-size: 248px 460px;
     		vertical-align: middle;
     		margin-right: 10px;

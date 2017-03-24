@@ -2,7 +2,7 @@
 	<div class="course-detail-live">
 		<x-header :title="vdo.title">
 			<router-link to="/CourseLive" slot="left">
-				<img src="../../assets/images/back2.png">
+				<img src="../../../assets/images/back2.png">
 			</router-link>
 			<a class="btn course-detail-btn" slot="right">关注</a>
 		</x-header>
@@ -50,11 +50,11 @@
 </template>
 <script>
 import {mapMutations} from 'vuex'
-import {api} from '../../utils/api.js'
+import {api} from '../../../utils/api.js'
 import { Header } from 'mint-ui';
 // import videojs from 'video.js'
 // require('videojs-contrib-hls')
-import zy from '../../lib/zymedia/zy.media.js'
+import zy from '../../../lib/zymedia/zy.media.js'
 export default {
 	components:{xHeader:Header},
 	mounted () {
@@ -158,7 +158,7 @@ export default {
 }
 </script>
 <style lang="less">
-@import '../../lib/zymedia/zy.media.css';
+@import '../../../lib/zymedia/zy.media.css';
 .course-detail{background-color: #f2f2f2;}.video{margin-bottom: 5px;}
 .video{position: relative;width: 100%;margin-bottom: 0;padding-bottom:56.25%; height: 0}
 .poster{
@@ -172,7 +172,7 @@ export default {
 	background-repeat: no-repeat;
 }
 .play-button{
-	background-image: url(../../assets/images/play_btn.png);
+	background-image: url(../../../assets/images/play_btn.png);
 	background-size: 100%;
 	background-position: center;
 	display: block;
@@ -211,7 +211,7 @@ export default {
 	background-position: -34px -187px;
 }
 .sprite-icon{
-	background: url(../../assets/images/sprites/css_sprite.png);
+	background: url(../../../assets/images/sprites/css_sprite.png);
 	background-size: 248px 460px;
 	width: 26px;
 	height: 26px;

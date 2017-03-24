@@ -45,13 +45,20 @@ export const getUrlParam = function  (name) {
 }
 
 
-export const throttle = function (delay, action) {
-    var last = 0
+
+
+export const throttle = function(method,delay,duration){
+    var timer=null, begin=new Date();
     return function(){
-        var curr = +new Date()
-        if (curr - last > delay){
-          action.apply(this, arguments)
-          last = curr 
+        var context=this, args=arguments, current=new Date();;
+        clearTimeout(timer);
+        if(current-begin>=duration){
+             method.apply(context,args);
+             begin=current;
+        }else{
+            timer=setTimeout(function(){
+                method.apply(context,args);
+            },delay);
         }
     }
 }

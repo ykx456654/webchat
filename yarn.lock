@@ -1653,6 +1653,10 @@ evp_bytestokey@^1.0.0:
   dependencies:
     create-hash "^1.1.1"
 
+exif-js@^2.1.1:
+  version "2.1.1"
+  resolved "http://registry.npm.taobao.org/exif-js/download/exif-js-2.1.1.tgz#2962e6aa6600340a454b24c52e458b81ccf1e6d6"
+
 expand-brackets@^0.1.4:
   version "0.1.5"
   resolved "http://registry.npm.taobao.org/expand-brackets/download/expand-brackets-0.1.5.tgz#df07284e342a807cd733ac5af72411e581d1177b"

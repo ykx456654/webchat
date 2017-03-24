@@ -7,6 +7,7 @@ import store from './store'
 import { Toast } from 'mint-ui'
 import { Lazyload } from 'mint-ui'
 import time from './utils/time.js'
+import system from './utils/checkSystem.js'
 import {checkUser,getUser} from './utils/auth.js'
 import {responseInterceptor} from './utils/interceptors.js'
 import {getUrlParam,getCookie,setCookie} from './utils/func'
@@ -18,7 +19,7 @@ Vue.use(Lazyload);
 Vue.config.productionTip = false
 Vue.prototype.toast = Toast
 time()
-
+store.state.system = system()
 
 
 router.beforeEach((to, from, next) => {
