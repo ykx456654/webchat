@@ -6,7 +6,18 @@
 				<router-link to="/Setting">
 					<img src="http://wx.qlogo.cn/mmopen/SaNfE90PbPL3gjlRc2SCMRzJqMmCpSPkEaTbr5u387bvFw169s7AlzSpU2kvYcW4uzrun7ktBWlgT79KOZ48pPLuewapQuFq/0">
 				</router-link>
+				<div class="me-info">
+				<p class="flex justify-center">
+					<span class="ft14" v-text="userInfo.nickName"></span>
+					<span class="ft12" v-text="userInfo.title"></span>
+				</p>
+				<p class="flex justify-center">
+					<span class="ft12" v-text="userInfo.hospital"></span>
+					<span class="ft12" v-text="userInfo.department"></span>
+				</p>
 			</div>
+			</div>
+
 		</div>
 		<div class="">
 			<cellx is-link>
@@ -17,14 +28,14 @@
 			</cellx>
 			<cellx is-link>
 				<div class="cells flex align-items-center" slot="left">
-					<img src="../../assets/images/icon_wdzbj.png">
+					<img src="../../assets/images/wgldzbj.png">
 					<p>我关注的直播间</p>
 				</div>
 			</cellx>
 			<cellx is-link>
 				<div class="cells flex align-items-center" slot="left">
-					<img src="../../assets/images/icon_wdzbj.png">
-					<p>我浏览过的直播间</p>
+					<img src="../../assets/images/wgzdzbj.png">
+					<p>我浏览过的话题</p>
 				</div>
 			</cellx>
 		</div>
@@ -49,13 +60,12 @@
 		max-height: 210px;
 	}
 	.me-header{
-		width: 20%;
+		width: 100%;
 		position: absolute;
-		left: 50%;
-		margin-left: -10%;
 		margin-top: 10%;
 		img{
-			width: 100%;
+			width: 20%;
+			margin: 0 auto;
 			border-radius: 50%;
 		}
 	}
@@ -67,6 +77,12 @@
 		p{
 			font-size: 16px;
 			margin-left: 10px;
+		}
+	}
+	.me-info{
+		color: #fff;
+		span{
+			margin: 5px 10px;
 		}
 	}
 </style>

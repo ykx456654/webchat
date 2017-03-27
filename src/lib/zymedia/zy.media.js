@@ -781,16 +781,16 @@ import { Toast } from 'mint-ui'
 
 			t.media.addEventListener('play', function() {
 				// Only for user click
-
+				console.log('play')
 				if (t.media.isUserClick) {
 					bigPlay.style.display = 'none';
 					loading.style.display = '';
 					t.buffering.style.display = 'none'
 				}
 			 	if (t.media.networkState === 3) {
-					Toast('视频链接错误')
+					// Toast('视频链接错误')
 					loading.style.display = 'none';
-					return false
+					bigPlay.style.display = '';
 				}
 				// console.log(t.media.networkState)
 			});
@@ -803,6 +803,7 @@ import { Toast } from 'mint-ui'
 			});
 
 			t.media.addEventListener('seeking', function() {
+				console.log('seeking video')
 				loading.style.display = '';
 				bigPlay.style.display = 'none';
 				t.buffering.style.display = '';
@@ -814,10 +815,12 @@ import { Toast } from 'mint-ui'
 			});
 
 			t.media.addEventListener('pause', function() {
-				bigPlay.style.display = ''
+				console.log('pasue ')
+				bigPlay.style.display = 'block'
 			});
 
 			t.media.addEventListener('waiting', function() {
+				console.log('wait video')
 				loading.style.display = '';
 				bigPlay.style.display = 'none';
 				t.buffering.style.display = '';

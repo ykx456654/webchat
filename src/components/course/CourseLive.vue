@@ -65,6 +65,7 @@ export default {
 		next()
 	},
 	mounted () {
+		console.log(2)
 		const uid = this.uid
 		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0})
 		.then(res=>{

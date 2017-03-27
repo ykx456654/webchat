@@ -11,6 +11,9 @@ export default {
 		},
 		userInfo: state => {
 			return state.userInfo
+		},
+		myStudioID: state => {
+			return state.userInfo.studioId
 		}
 	},
 	mutations: {
@@ -18,7 +21,7 @@ export default {
 			state.uid = uid
 		},
 		setUserInfo (state, info) {
-			state.userInfo = Object.assign(state.userInfo,info)
+			state.userInfo = Object.assign({},state.userInfo,info)
 		}
 	},
 	actions:{

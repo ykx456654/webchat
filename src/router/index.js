@@ -41,15 +41,19 @@ const Me = resolve => {
 
 
 const Setting = resolve => {
-  require(['src/components/me/Setting'],resolve)
+  require(['src/components/me/Setting'], resolve)
 }
 
 const Auth = resolve => {
-  require(['src/components/me/Auth'],resolve)
+  require(['src/components/me/Auth'], resolve)
 }
 
 const UpAuthImg = resolve => {
-  require(['src/components/me/UpAuthImg'],resolve)
+  require(['src/components/me/UpAuthImg'], resolve)
+}
+
+const Studio = resolve => {
+  require(['src/components/studio/Studio.vue'], resolve)
 }
 
 
@@ -119,6 +123,11 @@ export default new Router({
     {
       path:'/UpAuthImg',
       component:UpAuthImg
+    },
+    {
+      path:'/Studio',
+      component:Studio,
+      meta:{hideTab:true}
     }
   ]
 })

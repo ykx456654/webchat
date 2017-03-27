@@ -21,8 +21,14 @@ Vue.prototype.toast = Toast
 time()
 store.state.system = system()
 
-
+console.log(1)
 router.beforeEach((to, from, next) => {
+    if (to.matched.some(record => record.meta.hideTab)) {
+        console.log('hidetab')
+        store.state.base.tabShow = false
+    }else{
+        store.state.base.tabShow = true
+    }
     const cookie = getCookie('uid')
     if (!cookie) {
         const code = getUrlParam('code')
@@ -68,5 +74,5 @@ const app = new Vue({
 if (!/MicroMessenger/i.test(navigator.userAgent)) {
 	app.$mount('#app')
 }else{
-
+    app.$mount('#app')
 }

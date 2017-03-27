@@ -32,12 +32,10 @@
 <script>
 	import { mapMutations,mapGetters } from 'vuex'
 	export default {
-		beforeRouteLeave (to, from , next){
-			next()
-		},
 		created () {
 		},
 		mounted () {
+			console.log(3)
 			// this.toast('dfssd')
 		},
 		data () {

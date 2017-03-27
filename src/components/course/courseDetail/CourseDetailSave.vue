@@ -4,7 +4,7 @@
 			<router-link to="/CourseSave" slot="left">
 				<img src="../../../assets/images/back2.png">
 			</router-link>
-			<a class="btn course-detail-btn" slot="right">关注</a>
+			<!-- <a class="btn course-detail-btn" slot="right">关注</a> -->
 		</x-header>
 		<div class="zy_media">
 			<video id="ss" :poster="vdo.coverpicUrl">
@@ -162,8 +162,8 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				relativeVideoLimt:30,
 				relativeVideoIsEnd:0,
 				actions:[
-					{name:'回复评论',method:()=>{this.toast('fsas')}},
-					{name:'举报评论',method:()=>{this.toast('fsafdas')}}
+					{name:'回复评论',method:()=>{this.toast('需要接口')}},
+					{name:'举报评论',method:()=>{this.toast('需要接口')}}
 				]
 			}
 		},
@@ -223,6 +223,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					self.playurl = ''
 				}else{
 					self.playurl = self.classify[0].downUrl || vdo.newPlayUrl
+					self.poster = vdo.coverpicUrl
 				}
 				self.player =  zy(document.getElementById('ss'),{
 					videoHeight:height,
@@ -247,7 +248,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						this.toast(data.msg)
 					}else{
 						this.vdo = data.rsps[0].body.video
-						this.classify = this.classify.concat(data.rsps[0].body.classify)
+						this.classify = data.rsps[0].body.classify
 						this.initSaveVdo()
 						this.hideLoad()
 					}
@@ -260,7 +261,11 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				this.lanchContent = !this.lanchContent
 			},
 			setPlay (n) {
+				n = Number(n)
 				this.playId = n
+				this.player.media.pause()
+				this.player.media.src = this.classify[n].downUrl
+				this.player.media.play()
 			},
 			tabClick (n) {
 				const uid = this.uid
@@ -354,13 +359,19 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				})
 			},
 			toRelative (id) {
+				this.player.media && this.player.media.pause()
+				this.showLoad()
+				this.$forceUpdate()
 				this.$router.push({name:'CourseDetailSave',params:{vdoid:id}})
-				this.getDetail()
+				this.$nextTick(function(){
+					this.getDetail()
+					console.log(this.player)
+				})
 			}
 		},
 		beforeRouteLeave (to ,from, next) {
 			// console.log(this.player.media.ended)
-			this && this.player.media.pause()		
+			this.player.media && this.player.media.pause()		
 			this.player = null
 			delete this.player
 			this.show = false

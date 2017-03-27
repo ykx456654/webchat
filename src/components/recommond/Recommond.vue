@@ -3,26 +3,27 @@
 		<loadmore :autoFill="false" :bottom-method="load" :bottom-all-loaded="allLoaded" ref="loadmore">
 			<div class="recommond flex" v-for="r in recommondList">
 				<section>
-					<div class="header">
-						<img src="../../assets/images/shared_icon.jpg">
+					<div class="header" @click="linkStudio(r.studioId)">
+						<img :src="r.studioImg" v-if="r.studioImg !== ''">
+						<img src="../../assets/images/shared_icon.jpg" v-else>
 					</div>
 				</section>
 				<section class="flex flex-direction-column">
 					<div class="content-title flex align-items-center justify-space-between">
-						<h4>里法师法的直播间</h4>
-						<a class="btn">关注</a>
+						<h4>{{r.studioTitle}}</h4>
+						<a class="btn" v-if="r.isFan" @click="focus(r.studioId)">关注</a>
 					</div>
-					<div class="content-box">
+					<div class="content-box" @click="linkSubject(r.studioId,r.subjectId)">
 						<div class="img-box">
 							<img class="page" src="../../assets/images/pic_ht_mr.png">	
-							<span class="tag status">正在直播</span>
+							<span class="tag status">{{ r.liveStatus | status}}</span>
 							<div class="bottom-tag flex">
-								<span class="price">$54.2</span>
-								<span class="num">4515人次</span>
+								<span class="price" v-if="r.fee != 0">{{(r.fee/100).toFixed(2)}}</span>
+								<span class="num">{{r.uvNum}}人次</span>
 							</div>
 						</div>
-						<h4>晚期法司法hi多撒谎发大四</h4>
-						<p>今天 18:30</p>
+						<h4>{{r.subjectTitle}}</h4>
+						<p>{{ r.startTime | time }}</p>
 					</div>
 				</section>
 			</div>
@@ -30,19 +31,15 @@
 	</div>
 </template>
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations,mapGetters } from 'vuex'
 import { Loadmore } from 'mint-ui';
-
+import { api } from '../../utils/api'
 	export default {
 		components:{
 			Loadmore
 		},
 		created () {
-			setTimeout(()=>{
-				this.load()
-				this.hideLoad()
-			},1000)
-
+			this.load()
 		},
 		data () {
 			return {
@@ -58,14 +55,60 @@ import { Loadmore } from 'mint-ui';
 				'showLoad','hideLoad'
 			]),
 			load () {
-				if (this.start > 5) return false;
-				for(var i = 0;i < 5;i++){
-					this.recommondList.push(this.start)
-				}
-				// this.allLoaded = true
-				this.$refs.loadmore.onBottomLoaded();
-				this.start++
+				api(this.uid,{cmd:'get_recommend_subject',srv:'studio_studio'},{start:this.start,limit:this.limit})
+				.then(res=>{
+					res = res.data
+					if (res.result != 0 ) {
+						this.toast(res.msg)
+					}else{
+						if (this.recommondList.length == 0) {
+							this.hideLoad()
+						}
+						this.recommondList = this.recommondList.concat(res.rsps[0].body.subjects)
+						this.start+=this.limit
+						this.is_end = res.rsps[0].body.is_end
+						if (this.is_end) {
+							this.allLoaded = true
+						}
+						this.$refs.loadmore.onBottomLoaded();
+					}
+				})
+			},
+			linkStudio (id) {
+				this.showLoad()
+				this.$router.push({path:'/Studio',query:{studioId:id}})
+			},
+			linkSubject (studioId,subjectId) {
+				alert(1)
+				console.log(studioId,subjectId)
+			},
+			focus (id) {
+				alert(id)
 			}
+		},
+		filters: {
+			status (n) {
+				n = Number(n)
+				switch(n){
+					case 0:return '未开始';break;
+					case 1:return '直播中';break;
+					case 2:return '回答中';break;
+					case 9:return '回顾';break;
+					default:return '未开始';
+				}
+			},
+			time (t) {
+				var today = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
+				var t_today = +new Date(today)/1000
+				if (t > t_today) {
+					return new Date(t).Format('yyyy-MM-dd HH:ss')
+				}else{
+					return '今天  ' + new Date(t).Format('hh:ss')
+				}
+			}
+		},
+		computed : {
+			...mapGetters(['uid'])
 		}
 	}
 </script>
