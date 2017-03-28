@@ -17,23 +17,22 @@
 				</p>
 			</div>
 			</div>
-
 		</div>
 		<div class="">
 			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left">
+				<div class="cells flex align-items-center" slot="left" @click="link(0)">
 					<img src="../../assets/images/icon_wdzbj.png">
 					<p>全部直播间</p>
 				</div>
 			</cellx>
 			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left">
+				<div class="cells flex align-items-center" slot="left" @click="link(1)">
 					<img src="../../assets/images/wgldzbj.png">
 					<p>我关注的直播间</p>
 				</div>
 			</cellx>
 			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left">
+				<div class="cells flex align-items-center" slot="left" @click="link(2)">
 					<img src="../../assets/images/wgzdzbj.png">
 					<p>我浏览过的话题</p>
 				</div>
@@ -95,16 +94,7 @@ import cellx from '../common/cell-x'
 			cellx
 		},
 		created () {
-			// this.getUserInfo()
-			// .then(res=>{
-			// 	if (res.result != 0) {
-			// 		this.toast(res.msg)
-			// 	}else{
-			// 		this.userInfo = res.rsps[0].body.user
-			// 		this.hideLoad()
-			// 	}
-			// })
-			// 
+
 			this.GETUSERINFO()
 			.then((msg)=>{
 				if (msg) {this.toast(msg)}
@@ -121,17 +111,28 @@ import cellx from '../common/cell-x'
 		computed: {
 			...mapGetters(['uid','userInfo'])
 		},
-		methods : {
+		methods: {
 			...mapMutations([
 				'showLoad','hideLoad'
 			]),
-			...mapActions(['GETUSERINFO'])
-			// getUserInfo () {
-			// 	return api(this.uid,{ srv: "user_user",cmd: "get_user_info"},{})
-			// 	.then(res => {
-			// 		return res.data
-			// 	})
-			// }
+			...mapActions(['GETUSERINFO']),
+			link (n) {
+				n = Number(n)
+				// alert(n)
+				switch(n){
+					case 0:
+					this.showLoad()
+					this.$router.push({path:'/StudioList'})
+					break;
+					case 1:
+					this.showLoad()
+					this.$router.push({path:'/StudioList',query:{type:1}})
+					break;
+					case 2:
+					this.$router.push({path:'/WatchedSubjects'})
+					break;
+				}
+			}
 		}
 	}
 </script>

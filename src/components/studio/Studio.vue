@@ -5,7 +5,7 @@
 				<i class="icon icon-arrow-back"></i>
 			</a>
 		</x-header>
-		<div class="header">
+		<div class="header" :class="{'lanch':isLanch}">
 			<div class="user-info">
 				<div class="flex justify-center">
 					<img src="../../assets/images/default_head.png">
@@ -24,8 +24,11 @@
 					</div>
 				</div>
 				<div class="ft12 flex info-wrap justify-center">
-					<p  class="studio-intro-p flex ">简介：<span class="text-overflow" id="studio-intro" v-text="studio.studioIntro"></span></p>
-					<span class="lanch-info icon icon-arrow-down-white" v-if="showLanch" @click="lanchStudioInfo"></span>
+					<p class="studio-intro-p flex justify-center">
+						<span class="studio-jj">简介：</span>
+						<span :class="{'lanch':isLanch,'text-overflow':!isLanch}" id="studio-intro" v-text="studio.studioIntro"></span>
+					</p>
+					<span class="lanch-info icon icon-arrow-down-white" :class="{'lanched':isLanch}" v-if="showLanchInfoArrow" @click="lanchStudioInfo"></span>
 				</div>
 			</div>
 		</div>
@@ -121,14 +124,23 @@ import SubjectItem from './common/SubjectItem'
 				})
 			},
 			checkInfoSize () {
-				// alert($('#studio-intro').width())
+				if (this.studio.studioIntro.length > 20) {
+					this.showLanchInfoArrow = true
+				}else{
+					this.showLanchInfoArrow = false
+				}
 			},
 			loadMore () {
 				if (this.subejectsIsEnd) return false;
 				this.getSubjects()
 			},
 			link (s) {
-				console.log(s)
+				if (s.fee > 0) {
+					this.$router.push({path:'/SubjectIntro',query:{subjectId:s.subjectId,studioId:s.studioId}})
+				}else{
+					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId}})
+				}
+				// console.log(s)
 			},
 			goBcak () {
 				history.back()
@@ -172,6 +184,12 @@ import SubjectItem from './common/SubjectItem'
 		background-position: 50%;
 		background-size: 100% 100%;
 		background-repeat: no-repeat;
+		&.lanch{
+			@media screen and (min-width:375px) {
+				padding-bottom: 53.5%;
+			}
+			padding-bottom: 57.5%;
+		}
 	}
 	.user-info{
 		position: absolute;
@@ -197,7 +215,7 @@ import SubjectItem from './common/SubjectItem'
 		    }
 		}
 		.info-wrap{
-			padding:0 20px;
+			padding:0 30px;
 			flex-wrap: wrap;
 			position: relative;
 			width: 100%;
@@ -206,8 +224,16 @@ import SubjectItem from './common/SubjectItem'
 		.studio-intro-p{
 			position: relative;
 			width: 100%;
+			.studio-jj{
+				width: 36px;
+				flex:0 0 36px;
+			}
+			span.lanch{
+				height: 48px;
+				text-align: left;
+			}
 			span{
-				width: 85%;
+				display: block;
 			}
 		}
 		.lanch-info{

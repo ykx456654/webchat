@@ -5,7 +5,7 @@
 			<div class="head-input flex align-items-center">
 				<img src="../../assets/images/search.png" alt="">
 				<form target="sub_frame">
-					<input type="search" @change="delaySearch"  placeholder="搜索视频" v-model="searchWord" v-on:search="search">
+					<input type="search" v-on:input="search"  placeholder="搜索视频" v-model="searchWord" v-on:search="search">
                 </form>
 			</div>
 			<button type="button" name="button" @click="search">搜索</button>
@@ -161,13 +161,9 @@ export default {
         ...mapMutations([
             'hideLoad','showLod'
         ]),
-		search () {
-            console.log(1)
-		},
-        delaySearch () {
-            // console.log(1)
-            throttle(800,this.search())
-        }
+		search:throttle(function(){
+           console.log(1)
+		},1000,600)
 	}
 }
 </script>

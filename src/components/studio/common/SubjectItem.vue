@@ -3,17 +3,22 @@
 		<div class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
 			<img src="../../../assets/images/banner_zbj_small.png">
+			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
 		<div class="flex justify-space-between flex-direction-column">
 			<div class="topic-item-title flex justify-space-between">
 				<p class="text-overflow">{{subject.subjectTitle}}</p>
 			</div>
 			<div class="topic-start-time flex align-items-center">
-				开始时间：<span>{{new Date(subject.startTime).Format("yyyy-MM-dd hh:mm")}}</span>
+				开始时间：<span>{{new Date(subject.startTime*1000).Format("yyyy-MM-dd hh:mm")}}</span>
 			</div>
 			<div class="flex topic-item-num align-items-center">
 				<i class="icon icon-people"></i>
 				<span v-text="subject.uvNum"></span>
+			</div>
+			<div class="studio-owner" v-if="subject.studioTitle">
+				<img :src="subject.studioImg">
+				<span v-text="subject.studioTitle"></span>
 			</div>
 		</div>
 	</div>
@@ -75,6 +80,11 @@
 	    img{
 	    	width: 100%;
 	    	display: block;
+	    }
+	    .icon-fee{
+	    	position: absolute;
+	    	bottom: 1px;
+	    	left: 5px;
 	    }
 	    .status{
 	    	position: absolute;

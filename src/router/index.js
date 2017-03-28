@@ -23,8 +23,8 @@ const CourseDetailSave = resolve => {
   require(['src/components/course/courseDetail/CourseDetailSave'],resolve)
 }
 
-const SearchVideo = resolve => {
-  require(['src/components/search/SearchVideo'],resolve)
+const Search = resolve => {
+  require(['src/components/search/Search'],resolve)
 }
 
 const Channel = resolve => {
@@ -53,15 +53,24 @@ const UpAuthImg = resolve => {
 }
 
 const Studio = resolve => {
-  require(['src/components/studio/Studio.vue'], resolve)
+  require(['src/components/studio/Studio'], resolve)
 }
 
+const studioList = resolve => {
+  require(['src/components/studio/StudioList'], resolve)
+}
 
+const SubjectIntro = resolve => {
+  require(['src/components/subject/SubjectIntro'], resolve)
+}
 
+const Subject = resolve => {
+  require(['src/components/subject/Subject'], resolve)
+}
 
-
-
-
+const WatchedSubjects = resolve => {
+  require(['src/components/studio/WatchedSubjects'], resolve)
+}
 
 
 export default new Router({
@@ -96,8 +105,8 @@ export default new Router({
       meta:{requiresAuth:true}
     },
     {
-      path:'/SearchVideo',
-      component:SearchVideo
+      path:'/Search',
+      component:Search
     },
     {
       path:'/Channel',
@@ -127,6 +136,25 @@ export default new Router({
     {
       path:'/Studio',
       component:Studio,
+      meta:{hideTab:true}
+    },
+    {
+      path:'/SubjectIntro',
+      component:SubjectIntro,
+      meta:{hideTab:true}
+    },
+    {
+      path:'/Subject',
+      component:Subject,
+      meta:{hideTab:true}
+    },
+    {
+      path:'/StudioList',
+      component:studioList,
+      meta:{hideTab:true}
+    },{
+      path:'/WatchedSubjects',
+      component:WatchedSubjects,
       meta:{hideTab:true}
     }
   ]

@@ -361,11 +361,10 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			toRelative (id) {
 				this.player.media && this.player.media.pause()
 				this.showLoad()
-				this.$forceUpdate()
+				// this.$destroy()
 				this.$router.push({name:'CourseDetailSave',params:{vdoid:id}})
 				this.$nextTick(function(){
 					this.getDetail()
-					console.log(this.player)
 				})
 			}
 		},

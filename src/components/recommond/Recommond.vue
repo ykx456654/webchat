@@ -26,6 +26,9 @@
 						<p>{{ r.startTime | time }}</p>
 					</div>
 				</section>
+				<div class="no-more" v-if="allLoaded">
+					没有更多了
+				</div>
 			</div>
 		</loadmore>
 	</div>
@@ -101,7 +104,7 @@ import { api } from '../../utils/api'
 				var today = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
 				var t_today = +new Date(today)/1000
 				if (t > t_today) {
-					return new Date(t).Format('yyyy-MM-dd HH:ss')
+					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
 				}else{
 					return '今天  ' + new Date(t).Format('hh:ss')
 				}
