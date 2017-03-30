@@ -51,7 +51,7 @@
 				<span v-else>{{userInfo.hospital}}</span>
 			</div>
 		</cellx>
-		<cellx is-link v-show="userInfo.type == 1">
+		<cellx is-link v-show="userInfo.type == 1" @onclick="setDepartment">
 			<div class="setting flex align-items-center" slot="left">
 				<span>科室</span>
 			</div>
@@ -62,7 +62,6 @@
 		<cellx is-link v-show="userInfo.type == 1 || userInfo.type == 4" @onclick="setTitle">
 			<div class="setting flex align-items-center" slot="left">
 				<span>职称</span>
-				<input type="text" name="">
 			</div>
 			<div class="setting-item-right" slot="right">
 				{{userInfo.title}}
@@ -81,7 +80,7 @@
 				<span>专业</span>
 			</div>
 			<div class="setting-item-right" slot="right">
-				反反复复
+				{{userInfo.major}}
 			</div>
 		</cellx>
 		<cellx is-link>
@@ -102,6 +101,7 @@
 				</x-header>
 				<status @hideStatu="SetUserStatus" :status="userInfo.type"  v-show="option == 1"></status>
 				<hospital :list="hlist" @load="loadList" @selH="selHospital" @search="searchHospital" v-show="option == 2"></hospital>
+				<department v-show="option == 4" @load="loadDepartments" @setD="setProp" :list="dlist"></department>
 				<normal-list :list="list" :prop="prop" @setP="setProp" v-show="option == 3"></normal-list>
 			</div>
 		</popup>
@@ -115,6 +115,7 @@ import { api } from '../../utils/api.js'
 import status from './setPart/status'
 import hospital from './setPart/hospital'
 import normalList from './setPart/normalList'
+import department from './setPart/department'
 import cellx from '../common/cell-x'
 	export default {
 		created () {
@@ -136,7 +137,7 @@ import cellx from '../common/cell-x'
 			}
 		},
 		components: {
-			xHeader:Header,cellx,XInput,Group,Popup,status,hospital,Spinner,normalList
+			xHeader:Header,cellx,XInput,Group,Popup,status,hospital,Spinner,normalList,department
 		},
 		data () {
 			return {
@@ -148,7 +149,8 @@ import cellx from '../common/cell-x'
 				name:'',
 				option:0,
 				hlist:[],  //选择医院时的列表
-				list:[],	//选择学校、专业、科室时的列表
+				dlist:[], //科室列表
+				list:[],	//选择学校、专业时的列表
 				loadingData:false,
 				prop:'',
 				type:''
@@ -176,6 +178,7 @@ import cellx from '../common/cell-x'
 						this.hlist = res.rsps[0].body.provinces
 						this.loadingData = false
 						this.showPopup = true
+						this.hideTab()
 						this.popupTitle = '医院设置'
 						this.popupHeight = '100%'
 					}
@@ -186,6 +189,7 @@ import cellx from '../common/cell-x'
 				this.popupTitle = '学历设置'
 				this.list = ['高中/中专','大专','本科','硕士','博士','其他']
 				this.prop = 'education'
+				this.hideTab()
 				this.showPopup = true
 				this.popupHeight = '100%'
 			},
@@ -199,24 +203,36 @@ import cellx from '../common/cell-x'
 					if (res.result!=0) {
 						this.toast(res.msg)
 					}else{
-
+						this.list = res.rsps[0].body.majors.map(item=>{return item.name})
+						this.hideTab()
+						this.showPopup = true
+						this.popupHeight = '100%'
 					}
 				})
-				this.list = ['高中/中专','大专','本科','硕士','博士','其他']
-				this.showPopup = true
-				this.popupHeight = '100%'
 			},
 			setTitle () {
 				this.option = 3
 				this.popupTitle = '职称设置'
 				this.prop = 'title'
-				if (this.userStatus == 1) {
+				if (this.userInfo.type == 1) {
 					this.list = ['主任医师','副主任医师','主治医师','住院医师','其他']
 				}else{
 					this.list = ['护士长','护士']
 				}
+				this.hideTab()
 				this.showPopup = true
 				this.popupHeight = '100%'
+			},
+			setDepartment () {
+				this.option = 4
+				this.popupTitle = '科室设置'
+				this.prop = 'department'
+				this.hideTab()
+				this.loadDepartments(1)
+				.then(res=>{
+					this.showPopup = true
+					this.popupHeight = '100%'
+				})
 			},
 			selHospital (id,name) {
 				// alert('修改个人信息---医院接口'+id+name)
@@ -284,6 +300,14 @@ import cellx from '../common/cell-x'
 					}
 				})
 			},
+			loadDepartments (pid) {
+				pid = Number(pid)
+				return api(this.uid,{ srv: "user_user",cmd: "get_department_list"},{pid:pid})
+				.then(res=>{
+					res = res.data
+					this.dlist = res.rsps[0].body.departments
+				})
+			},
 			setProp (prop,value) {
 				// alert('设置用户数据  4.9' + value)
 				const uid = this.uid
@@ -301,6 +325,7 @@ import cellx from '../common/cell-x'
 				})
 			},
 			hidePopup () {
+				this.showTab()
 				this.showPopup = false
 			},
 			SetUserStatus (v) {

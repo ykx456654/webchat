@@ -33,7 +33,7 @@
 					<span>jack的直播间</span>
 				</div>
 				<div class="flex align-items-center">
-					<a class="btn" v-if="subject.subjectRole == 100">关注</a>
+					<a class="btn" @click="focus" v-if="subject.subjectRole == 100">关注</a>
 				</div>
 			</div>
 			<div class="flex studio-num align-items-center">
@@ -47,7 +47,7 @@
 				</div>
 			</div>
 		</div>
-		<a class="enter">进入直播间</a>
+		<a class="enter" @click="enter">进入直播间</a>
 	</div>
 </template>
 <script>
@@ -86,6 +86,12 @@ export default {
 					this.subject = res.rsps[0].body.subject
 				}
 			})
+		},
+		enter () {
+			alert('enter')
+		},
+		focus () {
+			alert('关注')
 		}
 	},
 	computed: {

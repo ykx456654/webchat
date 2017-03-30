@@ -8,7 +8,7 @@
 			</div>
 		</header>
 		<transition :name="animation">
-			<router-view class="course-transition"></router-view>
+			<router-view :key="$route.path" class="course-transition"></router-view>
 		</transition>
 	</div>
 </template>
@@ -35,7 +35,7 @@
 		created () {
 		},
 		mounted () {
-			console.log(3)
+			// console.log(3)
 			// this.toast('dfssd')
 		},
 		data () {
@@ -60,7 +60,7 @@
 			},
 			toSearch () {
 				this.hideLoad()
-				this.$router.push({path:'SearchVideo'})
+				this.$router.push({path:'Search'})
 			}
 		},
 		computed: {

@@ -10,7 +10,7 @@
 				<p class="text-overflow">{{subject.subjectTitle}}</p>
 			</div>
 			<div class="topic-start-time flex align-items-center">
-				开始时间：<span>{{new Date(subject.startTime*1000).Format("yyyy-MM-dd hh:mm")}}</span>
+				<span>{{new Date(subject.startTime*1000).Format("yyyy-MM-dd hh:mm")}}</span>
 			</div>
 			<div class="flex topic-item-num align-items-center">
 				<i class="icon icon-people"></i>
@@ -40,11 +40,11 @@
 			status (n) {
 				n = Number(n)
 				switch(n){
-					case 0:return '未开始';break;
-					case 1:return '直播中';break;
+					case 0:return '预告';break;
+					case 1:return '正在直播';break;
 					case 2:return '回答中';break;
 					case 9:return '回顾';break;
-					default:return '未开始';
+					default:return '预告';
 				}
 			}
 		}
@@ -115,6 +115,11 @@
 		>.icon{
 			width: .11rem;
     		margin-right: 5px;
+		}
+		>span{
+			display: block;
+			height: 20px;
+			line-height: 24px;
 		}
 	}
 </style>

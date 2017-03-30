@@ -56,6 +56,7 @@ import { api } from '../../utils/api.js'
 	export default{
 		components:{xHeader:Header,XInput, Group, Cell, Selector, Datetime, hospital, Popup, Spinner},
 		created (){
+			this.hideTab()
 			if (JSON.stringify(this.userInfo) == '{}') {
 				this.GETUSERINFO()
 				.then((msg)=>{
@@ -110,7 +111,7 @@ import { api } from '../../utils/api.js'
 			}
 		},
 		methods:{
-			...mapMutations(['showLoad','hideLoad','setUserInfo']),
+			...mapMutations(['showLoad','hideLoad','setUserInfo','hideTab','showTab']),
 			...mapActions(['GETUSERINFO']),
 			selectHospital () {
 				if (this.loadingData) { return false}

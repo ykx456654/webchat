@@ -78,6 +78,7 @@ import EXIF from 'exif-js'
 			xHeader:Header,Group,Spinner
 		},
 		created () {
+			this.hideTab()
 			this.hideLoad()
 		},
 		data () {
@@ -99,7 +100,7 @@ import EXIF from 'exif-js'
 			}
 		},
 		methods:{
-			...mapMutations(['hideLoad','showLoad']),
+			...mapMutations(['hideLoad','showLoad','hideTab','showTab']),
 			chooseImage (n) {
 				var obj = document.getElementById('upLoad')
 				if (obj) {

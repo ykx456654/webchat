@@ -2,7 +2,7 @@
 	<div class="course-detail-save">
 		<x-header :title="vdo.title">
 			<router-link to="/CourseSave" slot="left">
-				<img src="../../../assets/images/back2.png">
+				<i class="icon icon-arrow-back"></i>
 			</router-link>
 			<!-- <a class="btn course-detail-btn" slot="right">关注</a> -->
 		</x-header>
@@ -122,6 +122,9 @@
 				<textarea v-model="comment" placeholder="我要评论.." maxlength="1000"></textarea>
 			</div>
 		</popup>
+<!-- 		<video id="zzz" style="display: none" src="http://7xnvc7.com1.z0.glb.clouddn.com/yv0_1490067507481.mp4" type="video/mp4">
+		</video>
+		<button id="but">start</button> -->
 	</div>
 </template>
 <script>
@@ -179,6 +182,9 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			...mapMutations([
 				'showLoad','hideLoad','showTab','hideTab'
 			]),
+			back () {
+				history.back()
+			},
 			tabChange (n) {
 				const uid = this.uid
 				const vdoid = Number(this.vdoid)
@@ -216,6 +222,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				}
 			},
 			initSaveVdo () {
+				console.log('init video')
 				const height = window.innerWidth * 0.56  
 				const vdo = this.vdo
 				var self = this
@@ -238,7 +245,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				const uid = this.uid
 				const vdoid = params.vdoid
 				this.vdoid = params.vdoid
-				api(uid,{srv: "video_video",cmd: "get_save_video"},{vdoid:vdoid})
+				return api(uid,{srv: "video_video",cmd: "get_save_video"},{vdoid:vdoid})
 				.then(res=>{
 					this.hideLoad()
 					this.hideTab()
@@ -249,7 +256,9 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					}else{
 						this.vdo = data.rsps[0].body.video
 						this.classify = data.rsps[0].body.classify
-						this.initSaveVdo()
+						setTimeout(()=>{
+							this.initSaveVdo()
+						},0)
 						this.hideLoad()
 					}
 				})
@@ -360,21 +369,26 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			},
 			toRelative (id) {
 				this.player.media && this.player.media.pause()
+				// console.log(id)
+				this.$router.push({name:'CourseDetailSave',params:{vdoid:id},force: true})
 				this.showLoad()
-				// this.$destroy()
-				this.$router.push({name:'CourseDetailSave',params:{vdoid:id}})
-				this.$nextTick(function(){
-					this.getDetail()
+				this.getDetail()
+				.then(res=>{
+					this.$forceUpdate()
+					this.hideLoad()
+					$('#ss')[0].load()
+					this.initSaveVdo()
 				})
 			}
 		},
 		beforeRouteLeave (to ,from, next) {
-			// console.log(this.player.media.ended)
+			// console.log(to)
 			this.player.media && this.player.media.pause()		
 			this.player = null
 			delete this.player
 			this.show = false
 			this.showTab()
+			
 			next()
 		}
 	}

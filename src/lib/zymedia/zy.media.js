@@ -309,13 +309,15 @@ import { Toast } from 'mint-ui'
 
 		// Make sure it can't be instantiated again
 		if (media.isInstantiated) {
+			// console.log(t)
+			// t.buildTimeline()
 			return
 		} else {
 			media.isInstantiated = true
 		}
 
 		t.media = media;
-
+		// console.log(t.media)
 		// Detect video or audio
 		var _tagName = t.media.tagName.toLowerCase();
 		if (!/audio|video/.test(_tagName)) return;
@@ -428,6 +430,7 @@ import { Toast } from 'mint-ui'
 		},
 
 		setControlsTimer: function(timeout) {
+			// console.log(22)
 			var t = this;
 			clearTimeout(t.controlsTimer);
 
@@ -477,6 +480,7 @@ import { Toast } from 'mint-ui'
 		},
 
 		updateTime: function() {
+			// console.log('4545435')
 			var t = this;
 			t.currentTime.innerHTML = timeFormat(t.media.currentTime, t.options);
 
@@ -845,10 +849,11 @@ import { Toast } from 'mint-ui'
 		},
 		dispose :function () {
 			var t = this
+			// console.log(t.media)
 		},
 		init: function() {
 			var t = this;
-			// console.log(t.media)
+			console.log(t.media)
 			// Build
 			var batch = ['Container', 'Playpause', 'Timeline', 'Time'];
 			if (t.options.enableFullscreen && !zyMedia.features.isVendorFullscreen && t.isVideo) {
@@ -983,6 +988,7 @@ import { Toast } from 'mint-ui'
 			});
 
 			t.media.addEventListener('loadedmetadata', function(e) {
+				// console.log('4545435')
 				t.updateTime()
 			});
 

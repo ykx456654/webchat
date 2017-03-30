@@ -5,32 +5,139 @@
 			<div class="head-input flex align-items-center">
 				<img src="../../assets/images/search.png" alt="">
 				<form target="sub_frame">
-					<input type="search" v-on:input="search"  placeholder="搜索视频" v-model="searchWord" v-on:search="search">
+					<input type="search" v-on:input="search"  placeholder="搜索视频" v-model="searchWord" v-on:search="recordSearch">
                 </form>
 			</div>
-			<button type="button" name="button" @click="search">搜索</button>
+			<button type="button" name="button" @click="recordSearch">搜索</button>
 		</header>
-        <div class="search-part hot">
-            <h5>热门搜索</h5>
-            <ul class="hot-list">
-                <li v-for="h in hotSearch">{{h}}</li>
-            </ul>
+        <div v-show="!showResult || showTip">
+            <div class="search-part hot">
+                <h5>热门搜索</h5>
+                <ul class="hot-list">
+                    <li v-for="h in hotSearch" @click="searchHot(h)">{{h}}</li>
+                </ul>
+            </div>
+            <div class="search-part history" v-if="historySearch.length != 0">
+                <h5>历史搜索</h5>
+                <ul class="history-list">
+                    <li v-for="(h,i) in historySearch" @click="searchHistory(h)">
+                        <i class="icon icon-time"></i>
+                        {{h}}
+                        <i class="icon icon-del" @click.stop="delHistory(i)">×</i>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="search-part history">
-            <h5>历史搜索</h5>
-            <ul class="history-list">
-                <li v-for="h in historySearch">
-                    <i class="icon icon-time"></i>
-                    {{h}}
-                    <i class="icon icon-del">×</i>
-                </li>
-            </ul>
+        <div class="root" v-show="showResult && !showTip">
+            <div class="search-result" v-show="searchVideos.length !== 0">
+                <h5>视频</h5>
+                <ul>
+                    <li v-for="v in searchVideos" @click="link(v.vdoid)">
+                        <section class="flex">
+                            <div>
+                                <img :src="v.coverpicUrl">
+                            </div>
+                            <div class="flex flex-direction-column justify-space-between">
+                                <p class="text-overflow" v-text="v.title"></p>
+                                <p class="text-overflow" v-text="v.content"></p>
+                            </div>
+                        </section>
+                    </li>
+<!--                     <div class="more">
+                        更多视频 
+                    </div> -->
+                </ul>
+            </div>
+            <div class="seat" v-show="searchVideos.length === 0 && showResult">
+                <img src="../../assets/images/seat_topic.png">
+                <p>暂无视频</p>
+            </div>
         </div>
-        <ul class="root">
-            
-        </ul>
 	</div>
 </template>
+<script>
+import { mapMutations,mapGetters } from 'vuex'
+import { throttle } from '../../utils/func'
+import { api } from '../../utils/api'
+import ls from 'storejs'
+export default {
+    created () {
+        this.hideLoad()
+        this.getHotSearch()
+        var history = ls.get('histroy') 
+        // console.log(history)
+        this.historySearch = JSON.parse(history).slice(0,5)
+    },
+    components:{
+        // Loadmore
+    },
+    data () {
+        return {
+            searchWord:'',
+            searchRes: 0, // 0搜索前，1有结果，2没结果
+            hotSearch:[],
+            historySearch:[],
+            searchVideos:[],
+            showResult:false
+        }
+    },
+    methods: {
+        ...mapMutations([
+            'hideLoad','showLod'
+        ]),
+        search:throttle(function(){
+           api(this.uid,{srv: "article_article",cmd: "search_list"},{content:this.searchWord})
+           .then(res=>{
+                res = res.data
+                if (res.result != 0) {
+                    this.toast(res.msg)
+                }else{
+                    this.showResult = true
+                    this.searchVideos = res.rsps[0].body.videos
+                }
+           })
+        },1000,1000),
+        recordSearch () {
+            var word = this.searchWord
+            this.historySearch.unshift(word)
+            ls.set('histroy',JSON.stringify(this.historySearch))
+        },
+        getHotSearch () {
+            api(this.uid,{ srv: "article_article",cmd: "get_hot_search"},{})
+            .then(res=>{
+                res = res.data
+                if (res.result != 0) {
+                    this.toast(res.msg)
+                }else{
+                    this.hotSearch = res.rsps[0].body.hotList
+                }
+            })
+        },
+        searchHistory (h) {
+            this.searchWord = h
+            this.search()
+        },
+        searchHot (h) {
+            this.searchWord = h
+            this.search()
+        },
+        delHistory (index) {
+            // alert(index)
+            this.historySearch.splice(index,1)
+            ls.set('histroy',JSON.stringify(this.historySearch))
+        },
+        link (id) {
+            this.$router.push({name:'CourseDetailSave',params:{vdoid:id}})
+        }
+    },
+    computed: {
+        ...mapGetters(['uid']),
+        showTip () {
+            return this.searchWord === ''
+        }
+    }
+}
+</script>
 <style lang="less">
 .search{
     background-color: #f2f2f2;
@@ -137,33 +244,58 @@
         }
     }
 }
-</style>
-<script>
-import { mapMutations } from 'vuex'
-import { throttle } from '../../utils/func'
-import { Loadmore } from 'mint-ui'
-export default {
-    created () {
-        this.hideLoad()
-    },
-    components:{
-        Loadmore
-    },
-	data () {
-		return {
-			searchWord:'',
-			searchRes: 0, // 0搜索前，1有结果，2没结果
-            hotSearch:['内科','内分泌','儿童咳嗽','欢乐好声音','神经外科','心电图','甲状腺','儿童咳嗽','欢乐好声音'],
-            historySearch:['欢乐好声音','神经外科','心电图']
-		}
-	},
-	methods: {
-        ...mapMutations([
-            'hideLoad','showLod'
-        ]),
-		search:throttle(function(){
-           console.log(1)
-		},1000,600)
-	}
+.search-result {
+    background-color: #fff;
+    >h5{
+        font-size: 16px;
+        color: #666;
+        margin: 0;
+        height: 40px;
+        line-height: 40px;
+        padding-left: 12px;
+        text-align: left;
+        font-weight: normal;
+        border-bottom: 1px solid #e2e2e2;
+    }
+    section{
+        padding: 8px 12px;
+        border-bottom: 1px solid #e2e2e2;
+        min-height: 50px;
+        >div:nth-child(1){
+            width: 30%;
+            min-height: 50px;
+            img{
+                width: 100%;
+                height: 100%;
+            }
+        }
+        >div:nth-child(2){
+            width: 70%;
+            >:first-child{
+                text-align: left;
+                padding-left: 10px;
+                color: #333;
+                font-size: 14px;
+            }
+            >:last-child{
+                color: #999;
+                padding-left: 10px;
+                font-size: 12px;
+                text-align: left;
+                margin-bottom: 5px;
+                width: 100%;
+                span{
+                    display: inline-block;
+                    margin: 0 10px;
+                }
+            }
+        }
+    }
 }
-</script>
+.more{
+    height: 40px;
+    line-height: 40px;
+    padding-left: 12px;
+    font-size: 16px;color: #666;text-align: left;
+}
+</style>

@@ -62,3 +62,5 @@ export const throttle = function(method,delay,duration){
         }
     }
 }
+
+

@@ -45,6 +45,9 @@
 			<article>
 				{{vdo.proOrg}}
 			</article>
+<!-- 		<audio id="zzz" style="display: none" :src="playurl" type="application/x-mpegURL">
+		</audio>
+		<button id="but">start</button> -->
 		</section>
 	</div>
 </template>
@@ -75,6 +78,10 @@ export default {
 			this.hideLoad()
 			this.initVideoOption()
 		})
+
+		// $('#but').click(function(){
+		// 	$('#zzz')[0].play()
+		// })
 	},
 	data () {
 		return {

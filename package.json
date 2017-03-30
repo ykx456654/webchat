@@ -17,6 +17,7 @@
     "less-loader": "^3.0.0",
     "mint-ui": "^2.2.0",
     "request-json": "^0.6.1",
+    "storejs": "^1.0.13",
     "video.js": "^5.17.0",
     "videojs-contrib-hls": "^5.3.3",
     "videojs-resolution-switcher": "^0.4.2",

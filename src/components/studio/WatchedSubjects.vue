@@ -11,10 +11,7 @@
 					<div class="no-more" v-if="allLoaded && subjects.length != 0">
 						没有更多了
 					</div>
-					<div class="seat" v-if="subjects.length == 0">
-						<img src="../../assets/images/seat_topic.png">
-						<p>暂无浏览过的话题</p>
-					</div>
+					<seat-img v-if="subjects.length == 0" msg="暂无浏览过的话题"></seat-img>
 				</li>
 			</ul>
 		</Loadmore>
@@ -23,11 +20,12 @@
 <script>
 import {Header,Loadmore } from 'mint-ui'
 import SubjectItem from './common/SubjectItem'
+import seatImg from '../common/seat-img'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { api } from '../../utils/api'
 	export default {
 		components:{
-			xHeader:Header,Loadmore,SubjectItem
+			xHeader:Header,Loadmore,SubjectItem,seatImg
 		},
 		created () {
 			this.hideLoad()

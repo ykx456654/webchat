@@ -93,11 +93,11 @@ import { api } from '../../utils/api'
 			status (n) {
 				n = Number(n)
 				switch(n){
-					case 0:return '未开始';break;
-					case 1:return '直播中';break;
+					case 0:return '预告';break;
+					case 1:return '正在直播';break;
 					case 2:return '回答中';break;
 					case 9:return '回顾';break;
-					default:return '未开始';
+					default:return '预告';
 				}
 			},
 			time (t) {
@@ -136,7 +136,7 @@ import { api } from '../../utils/api'
 			padding: 10px 10px 10px 12px;
 		}
 		.content-title{
-			height: 47px;
+			height: 40px;
 			padding-right: 12px;
 			h4{
 				font-size: 15px;

@@ -13,9 +13,7 @@
 				<div class="no-more" v-if="allLoaded">
 					没有更多了
 				</div>
-				<div v-if="studios.length == 0">
-					<img src="../../assets/images/seat_topic.png">
-				</div>
+				<seat-img v-if="studios.length == 0" msg="暂无直播间"></seat-img>
 			</ul>
 		</Loadmore>
 	</div>
@@ -27,6 +25,7 @@
 import {Header,Loadmore } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { api } from '../../utils/api'
+import seatImg from '../common/seat-img'
 import studioItem from './common/studioItem'
 	export default {
 		created () {
@@ -36,12 +35,12 @@ import studioItem from './common/studioItem'
 				this.request = {cmd:'get_subscribe_studio',srv:'studio_studio'}
 			}else{
 				this.request = {cmd:'get_recommend_studio',srv:'studio_studio'}
-			}
-			
+			}	
 			this.loadStudios()
+			window.scroll(0,0)
 		},
 		components:{
-			xHeader:Header,Loadmore,studioItem 
+			xHeader:Header,Loadmore,studioItem,seatImg 
 		},
 		data () {
 			return {
