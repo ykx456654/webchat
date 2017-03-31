@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view v-show="!show"></router-view>
+    <keep-alive include="Subject,Discuss">
+      <router-view v-show="!show"></router-view>
+    </keep-alive>
     <loading v-show="show"></loading>
     <transition  name="fade-bottom">
       <tab class="app-tab-bottom" v-show="tabS"></tab>

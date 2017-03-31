@@ -32,7 +32,9 @@
 <script>
 	import { mapMutations,mapGetters } from 'vuex'
 	export default {
+		name:"Course",
 		created () {
+
 		},
 		mounted () {
 			// console.log(3)

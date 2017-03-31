@@ -59,13 +59,13 @@ import { Swipe, SwipeItem } from 'mint-ui';
 import {api} from '../../utils/api.js'
 import { mapMutations } from 'vuex'
 export default {
+	name:'CourseLive',
 	components:{Swipe, SwipeItem},
 	beforeRouteLeave (to, from , next) {
-		// this.showLoad()
 		next()
 	},
 	mounted () {
-		console.log(2)
+		// console.log(2)
 		const uid = this.uid
 		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0})
 		.then(res=>{

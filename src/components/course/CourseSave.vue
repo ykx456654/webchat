@@ -9,23 +9,25 @@
         </div>
         <div class="channel-add" @click="toChannel">+</div>
     </div>
-    <div v-show="saveVideoList.length != 0"
+    <div v-show="saveVideoList.length != 0">
+        <div 
         class="course-list"
         v-infinite-scroll="loadMore"
         infinite-scroll-disabled="loading"
         infinite-scroll-distance="100">
-        <div v-for="saveVideo in saveVideoList" class="course-item" @click="link(saveVideo.vdoid)">
-            <div class="course-img">
-                <img  v-lazy="saveVideo.coverpicUrl" alt="">
-                <div class="course-teacher">
-                    <span>{{saveVideo.proName}}</span>
-                    <span>{{saveVideo.proTitle}}</span>
+            <ul v-for="saveVideo in saveVideoList" class="course-item" @click="link(saveVideo.vdoid)">
+                <div class="course-img">
+                    <img  v-lazy="saveVideo.coverpicUrl" alt="">
+                    <div class="course-teacher">
+                        <span>{{saveVideo.proName}}</span>
+                        <span>{{saveVideo.proTitle}}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="course-info">
-                <h5>{{saveVideo.title}}</h5>
-                <p>{{saveVideo.proOrg}}</p>
-            </div>
+                <div class="course-info">
+                    <h5>{{saveVideo.title}}</h5>
+                    <p>{{saveVideo.proOrg}}</p>
+                </div>
+            </ul>
         </div>
     </div>
     <div v-show="saveVideoList.length == 0" class="seat-img">
@@ -39,6 +41,7 @@ import { mapMutations } from 'vuex'
 import { InfiniteScroll } from 'mint-ui'
 import {api} from '../../utils/api'
 export default {
+    name:'CourseSave',
     data () {
         return {
             defaultCategoryList: [],
@@ -49,7 +52,7 @@ export default {
             limit: 10
         }
     },
-    created () {
+    mounted () {
         this.getDefaultCategoryList()
     },
     computed: {
@@ -122,7 +125,7 @@ export default {
             this.getSaveVideoList(catid)
         },
         loadMore () {
-            // this.loading = true
+            this.loading = true
             this.getSaveVideoList(this.catid)
         },
         link (id) {

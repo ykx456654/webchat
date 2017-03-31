@@ -35,17 +35,36 @@ export default {
 	methods: {
 		link (n) {
 			n = Number(n)
-			if (this.active === n) return false
-			this.active = n
+			// if (this.active === n) return false
 			switch (n){
-				case 1 : this.$router.push({path:'/'});this.showLoad();this.tabChange(1);break;
-				case 2 : this.$router.push({path:'/Recommond'});this.showLoad();break;
-				case 3 : this.$router.push({path:'/me'});this.showLoad();break;
+				case 1 :
+					if (this.active !== n) {
+						this.showLoad()	
+					}
+					this.$router.push({path:'/CourseLive',force: true});
+					this.tabChange(1);
+					break;
+				case 2 :
+					if (this.active !== n) {
+						this.showLoad()	
+					}
+					this.$router.push({path:'/Recommond'});
+					break;
+				case 3 :
+					if (this.active !== n) {
+						this.showLoad()	
+					}
+					this.$router.push({path:'/me'});		
+					break;
 			}
+			this.active = n
 		},
 		...mapMutations([
    			'showLoad','hideLoad','tabChange'
       	])
+	},
+	beforeRouteUpdate  (to, from , next) {
+		// console.log('sadasdas')
 	}
 }
 </script>

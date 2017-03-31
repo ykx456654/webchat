@@ -13,12 +13,12 @@
 				<div class="no-more" v-if="allLoaded">
 					没有更多了
 				</div>
-				<seat-img v-if="studios.length == 0" msg="暂无直播间"></seat-img>
+				<seat-img v-if="(studios.length == 0) && isLoadOnce" msg="暂无直播间"></seat-img>
 			</ul>
 		</Loadmore>
 	</div>
 </template>
-<style lang="less">
+<style lang="less" scoped>
 
 </style>
 <script>
@@ -28,6 +28,7 @@ import { api } from '../../utils/api'
 import seatImg from '../common/seat-img'
 import studioItem from './common/studioItem'
 	export default {
+		name:'StudioList',
 		created () {
 			const type = this.$route.query.type
 			this.type = Number(type)
@@ -37,13 +38,16 @@ import studioItem from './common/studioItem'
 				this.request = {cmd:'get_recommend_studio',srv:'studio_studio'}
 			}	
 			this.loadStudios()
-			window.scroll(0,0)
+			.then(()=>{
+				window.scroll(0,0)
+			})
 		},
 		components:{
 			xHeader:Header,Loadmore,studioItem,seatImg 
 		},
 		data () {
 			return {
+				isLoadOnce:false,
 				type:0,
 				allLoaded:false,
 				studios:[],
@@ -56,7 +60,7 @@ import studioItem from './common/studioItem'
 			...mapMutations(['hideLoad']),
 			...mapActions(['GETUSERINFO']),
 			loadStudios () {
-				api(this.uid,this.request,{start:this.start,limit:this.limit})
+				return api(this.uid,this.request,{start:this.start,limit:this.limit})
 				.then(res=>{
 					res = res.data
 					if (this.studios.length == 0) {
@@ -65,6 +69,7 @@ import studioItem from './common/studioItem'
 					if (res.result != 0) {
 						this.toast(res.msg)
 					}else{
+						this.isLoadOnce = true
 						this.studios = this.studios.concat(res.rsps[0].body.studios)
 						this.start+=this.limit
 						this.allLoaded = res.rsps[0].body.is_end

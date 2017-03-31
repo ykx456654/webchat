@@ -118,6 +118,7 @@ import normalList from './setPart/normalList'
 import department from './setPart/department'
 import cellx from '../common/cell-x'
 	export default {
+		name:'Setting',
 		created () {
 			if (JSON.stringify(this.userInfo) == '{}') {
 				this.GETUSERINFO()

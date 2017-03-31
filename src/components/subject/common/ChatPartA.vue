@@ -1,5 +1,5 @@
 <template>
-	<div class="chat-a">
+	<div class="chat-a chat-part-a">
 		<loadmore 
 		:auto-fill="false"
 		:top-method="refresh"
@@ -15,16 +15,15 @@
 				</span>
 				<spinner :size="15" v-show="topStatus == 'loading'"></spinner>
 			</div>
-			<ul class="msg-list">
-				<div class="live-start-time">
+
+			<transition-group class="msg-list" name="list" tag="ul">
+				<div class="live-start-time" key="1">
 					直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始
 				</div>
-				<li v-for="m in advanceMsgList">
-					<span>
-						<a-chat-item></a-chat-item>
-					</span>
+				<li v-for="(m,index) in advanceMsgList" :key="m"  v-bind:data-index="index">
+					<a-chat-item></a-chat-item>
 				</li>
-			</ul>
+			</transition-group>
 			<div class="flex mint-loadmore-bottom  align-items-center justify-center" slot="bottom">
 				<span class="arrow" v-show="bottomStatus !== 'loading'" :class="{ 'rotate': bottomStatus === 'drop' }">
 					<i class="icon icon-drop-up"></i>
@@ -107,11 +106,27 @@ import AChatItem from './AChatItem'
 		height: 100%;
 	}
 	.msg-list{
-		margin-top: 50px;
+		margin-top: .5rem;
 		padding: .1rem;
 	}
 	.live-start-time{
 		color: #c1c1c1;
-		font-size: 12px;
+		font-size: 13px;
+	}
+	.live-tips{
+		// display: flex;
+		// flex: 1 1 auto;
+		background-color: rgba(0,0,0,.15);
+		border-radius: 3px;
+		padding:3px 5px;
+		color: #fff;
+		margin: 15px 0;
+	}
+	.list-enter-active, .list-leave-active {
+	  transition: all 1s;
+	}
+	.list-enter, .list-leave-active {
+	  opacity: 0;
+	  transform: translateY(30px);
 	}
 </style>

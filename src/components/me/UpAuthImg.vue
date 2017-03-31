@@ -74,6 +74,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Group,Selector} from 'vux'
 import EXIF from 'exif-js'
 	export default {
+		name:'UpAuthImg',
 		components:{
 			xHeader:Header,Group,Spinner
 		},

@@ -61,6 +61,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 export default {
 	components:{xHeader:Header},
 	mounted () {
+		// console.log(1)
 		const params = this.$route.params
 		const uid = this.uid
 		const vdoid = params.vdoid
@@ -78,10 +79,6 @@ export default {
 			this.hideLoad()
 			this.initVideoOption()
 		})
-
-		// $('#but').click(function(){
-		// 	$('#zzz')[0].play()
-		// })
 	},
 	data () {
 		return {

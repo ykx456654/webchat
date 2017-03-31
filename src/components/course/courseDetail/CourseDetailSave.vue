@@ -136,6 +136,7 @@ import { Header ,TabContainer, TabContainerItem,Actionsheet,Spinner,MessageBox} 
 import { Popup } from 'vux'
 import zy from '../../../lib/zymedia/zy.media.js'
 	export default {
+		name:'CourseDetailSave',
 		components:{xHeader:Header,TabContainer,TabContainerItem , Actionsheet ,Popup,Spinner,MessageBox},
 		mounted () {
 			this.getDetail()
@@ -369,27 +370,24 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			},
 			toRelative (id) {
 				this.player.media && this.player.media.pause()
-				// console.log(id)
-				this.$router.push({name:'CourseDetailSave',params:{vdoid:id},force: true})
-				this.showLoad()
-				this.getDetail()
-				.then(res=>{
-					this.$forceUpdate()
-					this.hideLoad()
-					$('#ss')[0].load()
-					this.initSaveVdo()
-				})
+				this.$router.go({name:'CourseDetailSave',params:{vdoid:id},force: true})
+				// this.showLoad()
+				// this.getDetail()
+				// .then(res=>{
+				// 	this.$forceUpdate()
+				// 	this.hideLoad()
+				// 	$('#ss')[0].load()
+				// 	this.initSaveVdo()
+				// })
 			}
 		},
-		beforeRouteLeave (to ,from, next) {
+		destroyed () {
 			// console.log(to)
 			this.player.media && this.player.media.pause()		
 			this.player = null
 			delete this.player
 			this.show = false
 			this.showTab()
-			
-			next()
 		}
 	}
 </script>

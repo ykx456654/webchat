@@ -5,15 +5,15 @@
 				<i class="icon icon-arrow-back"></i>
 			</a>
 		</x-header>
-		<section class="swiper-ppt">
+		<section class="swiper-ppt" v-if="subject.subjectType != 1">
 			<img src="../../assets/images/pic__zbht.jpg">
 		</section>
-		<section class="chat">
-			<div class="subject-intro flex align-items-center justify-space-between">
+		<section class="chat" :class="{'no-ppt':subject.subjectType == 1}">
+			<div class="subject-intro flex align-items-center justify-space-between" @click="linkSubjectIntro">
 				<i class="icon icon-subject-intro"></i>
 				<span>话题介绍</span>
 			</div>
-			<div class="discuss flex align-items-center justify-center">
+			<div class="discuss flex align-items-center justify-center" @click="linkDiscuss">
 				<div class="members flex align-items-center">
 					<img src="../../assets/icons/icon_rq.png">
 					<span>456</span>
@@ -23,12 +23,8 @@
 			<div class="studio-home">
 				<i class="icon icon-studio-home"></i>
 			</div>
-			<div class="chat-part-b">
-				<chat-part-b></chat-part-b>
-			</div>
-			<div class="chat-part-a">
-				<chat-part-a :subject-info="subject"></chat-part-a>
-			</div>
+			<chat-part-b></chat-part-b>
+			<chat-part-a :subject-info="subject"></chat-part-a>	
 		</section>
 		<section>
 			<normal-input></normal-input>
@@ -45,6 +41,7 @@ import ChatPartB from './common/ChatPartB'
 import NormalInput from './common/NormalInput'
 import HighInput from './common/HighInput'
 	export default {
+		name:'Subject',
 		created () {
 			const query = this.$route.query
 			this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
@@ -54,6 +51,12 @@ import HighInput from './common/HighInput'
 		mounted () {
 			this.hideLoad()
 		},
+		activated () {
+			this.hideLoad()
+		},
+		deactivated () {
+
+		},
 		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB},
 		data () {
 			return {
@@ -61,18 +64,32 @@ import HighInput from './common/HighInput'
 			}
 		},
 		computed: {
-			...mapGetters(['subject'])
+			...mapGetters(['subject','id'])
 		},
 		methods:{
-			...mapMutations(['hideLoad','setSubjectInfo']),
+			...mapMutations(['showLoad','hideLoad','setSubjectInfo']),
 			...mapActions(['getSubjectInfo']),
+			checkLayout() {
+
+			},
 			goBcak () {
+				this.$destroy()
 				history.back()
+			},
+			linkSubjectIntro () {
+				this.showLoad()
+				setTimeout(()=>{
+					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId}})
+				},1000)
+			},
+			linkDiscuss () {
+				this.showLoad()
+				this.$router.push({path:'/Discuss'})
 			}
 		}
 	}
 </script>
-<style lang="less">
+<style lang="less" scoped>
 	.swiper-ppt{
 		height: 2.1rem;
 		width: 100%;
@@ -83,10 +100,13 @@ import HighInput from './common/HighInput'
 	}
 	.chat{
 		position: relative;
-		flex:1 1 100%;
+		// flex:1 1 100%;
 		background-color: #f7f7f7;
 		height: calc(~'100vh - 3.05rem');
 		overflow: hidden;
+		&.no-ppt{
+			height: calc(~'100vh - 0.95rem');
+		}
 	}
 	.input{
 		flex:0 0 auto;
@@ -133,7 +153,8 @@ import HighInput from './common/HighInput'
 	.chat-part-a{
 		position: relative;
 		height: 100%;
-		overflow: scroll;
+		overflow-y: scroll;
+		overflow-x:hidden;
 	}
 	.chat-part-b{
 		position: absolute;

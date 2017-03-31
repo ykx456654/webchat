@@ -24,6 +24,7 @@ import { mapMutations } from 'vuex'
 import { Header } from 'mint-ui'
 import { api } from '../../utils/api.js'
 	export default {
+		name:'Channel',
 		components: {
 			xHeader:Header
 		},

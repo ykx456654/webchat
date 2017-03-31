@@ -54,6 +54,7 @@ import {XInput, Group, Cell,Selector,Datetime,Popup} from 'vux'
 import hospital from './setPart/hospital';
 import { api } from '../../utils/api.js'
 	export default{
+		name:'Auth',
 		components:{xHeader:Header,XInput, Group, Cell, Selector, Datetime, hospital, Popup, Spinner},
 		created (){
 			this.hideTab()

@@ -38,11 +38,15 @@ import { mapMutations,mapGetters } from 'vuex'
 import { Loadmore } from 'mint-ui';
 import { api } from '../../utils/api'
 	export default {
+		name:'Recommond',
 		components:{
 			Loadmore
 		},
 		created () {
 			this.load()
+			.then(()=>{
+				window.scroll(0,0)
+			})
 		},
 		data () {
 			return {
@@ -58,7 +62,7 @@ import { api } from '../../utils/api'
 				'showLoad','hideLoad'
 			]),
 			load () {
-				api(this.uid,{cmd:'get_recommend_subject',srv:'studio_studio'},{start:this.start,limit:this.limit})
+				return api(this.uid,{cmd:'get_recommend_subject',srv:'studio_studio'},{start:this.start,limit:this.limit})
 				.then(res=>{
 					res = res.data
 					if (res.result != 0 ) {

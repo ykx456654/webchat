@@ -24,6 +24,7 @@ import seatImg from '../common/seat-img'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { api } from '../../utils/api'
 	export default {
+		name:'WatchedSubjects',
 		components:{
 			xHeader:Header,Loadmore,SubjectItem,seatImg
 		},

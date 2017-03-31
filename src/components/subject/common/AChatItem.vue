@@ -1,22 +1,61 @@
 <template>
-	<div class="flex chat-a-item">
-		<div class="chat-speaker">
-			<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
-			<i class="icon icon-dashang"></i>
-		</div>
-		<div class="chat-content">
-			<div class="chat-speaker-name">
-				<span>jackmao</span>
-				<!-- <span></span> -->
+	<div class="chat-a-item">
+		<div class="flex">
+			<div class="chat-speaker">
+				<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
+				<i class="icon icon-dashang"></i>
 			</div>
-			<div class="chat-speaker-conten">
-				<div class="word-content flex align-items-center">
-					<div class="triangle"></div>
-					<div class="triangle-border"></div>
-					<div class="word-msg"></div>
+			<div class="chat-content">
+				<div class="chat-speaker-name ">
+					<span>jackmao</span>
+					<span></span>
+				</div>
+				<div class="chat-speaker-content">
+					<!-- 文字 -->
+					<div class="content flex align-items-center">
+						<div class="triangle"></div>
+						<div class="triangle-border"></div>
+						<div class="word-msg">
+							<div class="msg">fdasfdsfdsafdsfsdafds</div>
+						</div>
+					</div>
+
+
+					<!-- 语音 -->
+					<div class="flex align-items-center voice"> 
+						<div class="content ">
+							<div class="triangle"></div>
+							<div class="triangle-border"></div>
+							<div class="voice-msg">
+								<i class="icon icon-voice"></i>
+							</div>
+						</div>
+						<span class="times">3s</span>
+					</div>
+
+
+					<!-- 图片 -->
+					<div class="image">
+						<img src="">
+					</div>
+
 				</div>
 			</div>
 		</div>
+<!-- 		<div class="tip-to-app">
+			<a>要开始直播，请使用医生站APP。</a>
+		</div> -->
+<!-- 		<div class="gain">
+			<div>
+				<div class="gain-inner flex align-items-center justify-center">
+					<i class="icon icon-gain"></i>
+					<span>XX</span>
+					<span>打赏了</span>
+					<span>ZZ</span>
+					<span>1元</span>
+				</div>
+			</div>
+		</div> -->
 	</div>
 </template>
 <script>
@@ -53,8 +92,9 @@
 		// margin-top: 0.05rem;
 		color: #4a4a4a;
 		font-size: 0.15rem;
+		text-align: left;
 	}
-	.word-content{
+	.content{
 		font-size: .15rem;
 	    color: #4a4a4a;
 	    border: 1px solid #d8d8d8;
@@ -93,5 +133,59 @@
 	}
 	.word-msg{
 		text-align: left;
+	}
+	.voice{
+		margin-top: 10px;
+		.content{
+			margin-top: 0;
+			margin-right: 5px;
+		}
+	}
+	.voice-msg{
+		.icon{
+			animation:  1.5s linear infinite blink;
+		}
+		.times{
+			color: #666;
+		}
+	}
+	@keyframes blink {
+		0% { background-image: url(../../../assets/icons/yuying1.png)}
+		50% { background-image: url(../../../assets/icons/yuying2.png) }
+		100% { background-image: url(../../../assets/icons/yuying1.png)}
+	}
+
+	.tip-to-app{
+		a{
+			color: #c1c1c1;
+			text-decoration: underline;
+		}
+	}
+	.gain{
+		margin:.1rem 0;
+		>div{
+			display: inline-block;
+		}
+	}
+	.gain-inner{
+		.icon{
+			height: 15px;width: 13px;
+			margin-right: 5px;
+		}
+		span{
+			display: inline-block;
+			margin: 0 3px;
+		}
+		flex: 0 0 auto;
+		background: #edc891;
+	    border-radius: 3px;
+	    height: 23px;
+	    font-size: 12px;
+	    color: #fff;
+	    padding: 0 10px;
+	}
+	.answer{
+		border-top: 1px solid #f0f0f0;
+		padding: 10px 0;
 	}
 </style>

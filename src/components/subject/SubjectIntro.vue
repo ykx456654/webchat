@@ -55,6 +55,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner} from 'mint-ui'
 import { api } from '../../utils/api'
 export default {
+	name:'SubjectIntro',
 	components:{
 		xHeader:Header
 	},
@@ -106,7 +107,7 @@ export default {
 	}
 }
 </script>
-<style lang="less">
+<style lang="less" scoped>
 	.subject-header{
 		background-position: 50%;
 	    background-size: 100%;

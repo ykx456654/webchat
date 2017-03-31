@@ -19,20 +19,20 @@
 			</div>
 		</div>
 		<div class="">
-			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left" @click="link(0)">
+			<cellx is-link @onclick="link(0)">
+				<div class="cells flex align-items-center" slot="left" >
 					<img src="../../assets/images/icon_wdzbj.png">
 					<p>全部直播间</p>
 				</div>
 			</cellx>
-			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left" @click="link(1)">
+			<cellx is-link @onclick="link(1)">
+				<div class="cells flex align-items-center" slot="left" >
 					<img src="../../assets/images/wgldzbj.png">
 					<p>我关注的直播间</p>
 				</div>
 			</cellx>
-			<cellx is-link>
-				<div class="cells flex align-items-center" slot="left" @click="link(2)">
+			<cellx is-link @onclick="link(2)">
+				<div class="cells flex align-items-center" slot="left" >
 					<img src="../../assets/images/wgzdzbj.png">
 					<p>我浏览过的话题</p>
 				</div>
@@ -90,11 +90,11 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { api } from '../../utils/api.js'
 import cellx from '../common/cell-x'
 	export default {
+		name:'Me',
 		components:{
 			cellx
 		},
 		created () {
-
 			this.GETUSERINFO()
 			.then((msg)=>{
 				if (msg) {this.toast(msg)}

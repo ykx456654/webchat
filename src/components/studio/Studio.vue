@@ -55,6 +55,7 @@ import {Header,Spinner} from 'mint-ui'
 import { api } from '../../utils/api'
 import SubjectItem from './common/SubjectItem'
 	export default {
+		name:'Studio',
 		components:{
 			xHeader:Header,SubjectItem,Spinner
 		},
@@ -68,24 +69,28 @@ import SubjectItem from './common/SubjectItem'
 				this.studioTitle = '我的直播间'
 				this.studioId = this.myStudioID
 			}
-			this.getStudioInfo()
+
+			var p1 = this.getStudioInfo()
 			.then(res=>{
 				if (res.result != 0) {
 					this.toast(res.msg)
 				}else{
 					this.studio = res.rsps[0].body.studio
 					this.studioTitle = this.studio.studioTitle
-					setTimeout(()=>{
-						this.checkInfoSize()
-						this.hideLoad()
-					},100)
+					return true
 				}
 			})
-
-			this.getSubjects()
+			var p2 = this.getSubjects()
+			Promise.all([p1,p2])
+			.then(res=>{
+				this.checkInfoSize()
+				this.hideLoad()
+			})
+			.catch(e=>{})
 		},
 		data () {
 			return {
+				isLoadOnce:false,
 				studioId:0,
 				subjectsStart:0,
 				subjectsLimit:10,
@@ -109,17 +114,19 @@ import SubjectItem from './common/SubjectItem'
 			},
 			getSubjects () {
 				this.showLoading = true
-				api(this.uid,{cmd:'get_subject_list',srv:'studio_studio'},{studioId:this.studioId,start:this.subjectsStart,limit:this.subjectsLimit})
+				return api(this.uid,{cmd:'get_subject_list',srv:'studio_studio'},{studioId:this.studioId,start:this.subjectsStart,limit:this.subjectsLimit})
 				.then(res=>{
 					res = res.data
 					if (res.result != 0) {
 						this.toast(res.msg)
 						this.showLoading = false
 					}else{
+						this.isLoadOnce = true
 						this.showLoading = false
 						this.subjects = this.subjects.concat(res.rsps[0].body.subjects)
 						this.subejectsIsEnd = res.rsps[0].body.is_end
 						this.subjectsStart++
+						return true
 					}
 				})
 			},
@@ -152,7 +159,7 @@ import SubjectItem from './common/SubjectItem'
 		computed :{
 			...mapGetters(['myStudioID','uid']),
 			showSeatImg () {
-				if (this.subjects.length === 0) {
+				if (this.subjects.length === 0 && this.isLoadOnce) {
 					return true
 				}else{
 					return false

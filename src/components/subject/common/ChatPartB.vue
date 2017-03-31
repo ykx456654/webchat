@@ -1,5 +1,5 @@
-<template>
-	<div class="chat-b">
+<template> 
+	<div class="chat-b chat-part-b">
 		<div class="flex chat-b-item" v-for="m in normalMsg">
 			<div class="chat-content flex justify-center" :data-id="m">
 				地方飞得更高都很反感邯郸市的时候覅哈德hi分红个哈佛欧式都是丹佛斯达舒动的时候发货收到的时候发货收到的时候发货收到的时候发货收到的时候发货收到的时候发货收到

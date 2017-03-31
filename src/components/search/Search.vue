@@ -61,6 +61,7 @@ import { throttle } from '../../utils/func'
 import { api } from '../../utils/api'
 import ls from 'storejs'
 export default {
+    name:'Search',
     created () {
         this.hideLoad()
         this.getHotSearch()

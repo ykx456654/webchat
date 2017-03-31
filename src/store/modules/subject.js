@@ -10,6 +10,9 @@ export default {
 	getters:{
 		subject (state) {
 			return state.subject
+		},
+		id (state) {
+			return {subjectId:state.subjectId,studioId:state.studioId}
 		}
 	},
 	mutations: {
