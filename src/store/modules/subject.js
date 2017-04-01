@@ -179,6 +179,7 @@ export default {
 		},
 		loopSubject ({ commit, state, rootState}) {
 			const uid = rootState.user.uid 
+			var t = +new Date()
 			function run () {
 				axios.post('/api',{
 					guid:'web',
@@ -202,16 +203,20 @@ export default {
 				})
 				.then(res=>{
 					res = res.data
+
+					console.log(+new Date() - t)
+					t = +new Date()
+
 					setTimeout(()=>{
 						run()
 					},3000)
+					Promise.resolve()
 				})
-				.done()
 				.catch(e=>{
+					console.log(e)	
 					setTimeout(()=>{
 						run()
 					},1000)
-					console.log(e)	
 				})
 			}
 			run()
