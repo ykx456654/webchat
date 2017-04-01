@@ -7,6 +7,7 @@ import store from './store'
 import { Toast } from 'mint-ui'
 import { Lazyload } from 'mint-ui'
 import time from './utils/time.js'
+import prms from './utils/promise.js' 
 import system from './utils/checkSystem.js'
 import {checkUser,getUser} from './utils/auth.js'
 import {responseInterceptor} from './utils/interceptors.js'
@@ -19,6 +20,7 @@ Vue.use(Lazyload);
 Vue.config.productionTip = false
 Vue.prototype.toast = Toast
 time()
+prms()
 store.state.system = system()
 
 console.log(1)

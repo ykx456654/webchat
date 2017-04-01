@@ -1,10 +1,9 @@
 <template>
 	<div class="chat-a chat-part-a">
-		<loadmore 
-		:auto-fill="false"
-		:top-method="refresh"
-		:bottom-method="load"
-		:bottom-all-loaded="is_end" 
+		<loadmore
+		class="chat-a-loadmore" 
+		:autoFill="false"
+		:top-method="getHistory"
 		ref="loadmore"
 		@top-status-change="handTopStatus"
 		@bottom-status-change="handBottomStatus"
@@ -17,19 +16,19 @@
 			</div>
 
 			<transition-group class="msg-list" name="list" tag="ul">
-				<div class="live-start-time" key="1">
+				<div class="live-start-time" key="00000000">
 					直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始
 				</div>
-				<li v-for="(m,index) in advanceMsgList" :key="m"  v-bind:data-index="index">
-					<a-chat-item></a-chat-item>
+				<li v-for="(m,index) in advanceMsg.msgList" :key="index"  v-bind:data-index="index">
+					<a-chat-item :msg="m"></a-chat-item>
 				</li>
 			</transition-group>
-			<div class="flex mint-loadmore-bottom  align-items-center justify-center" slot="bottom">
+<!-- 			<div class="flex mint-loadmore-bottom  align-items-center justify-center" slot="bottom">
 				<span class="arrow" v-show="bottomStatus !== 'loading'" :class="{ 'rotate': bottomStatus === 'drop' }">
 					<i class="icon icon-drop-up"></i>
 				</span>
 				<spinner :size="15" v-show="bottomStatus == 'loading'"></spinner>
-			</div>
+			</div> -->
 		</loadmore>
 	</div>
 </template>
@@ -41,7 +40,8 @@ import AChatItem from './AChatItem'
 		components:{xHeader:Header,Loadmore,Spinner,AChatItem},
 		data () {
 			return {
-				is_end:false,
+				is_top_end:false,
+				is_bottom_end:false,
 				advanceMsgList: [1,2,3,4,5],
 				topStatus:'',
 				bottomStatus:''
@@ -54,24 +54,24 @@ import AChatItem from './AChatItem'
 			}
 		},
 		computed: {
-			isStart () {
-
-			}
+			...mapGetters(['advanceMsg'])
 		},
 		methods:{
-			refresh () {
-				setTimeout(()=>{
-					this.advanceMsgList = [1,2,34,5,6]
-					this.$refs.loadmore.onTopLoaded();
-				},1000)
+			...mapActions(['getHistoryAdvMsg','getAdvMsg']),
+			getHistory () {
+				this.getHistoryAdvMsg()
+				.then(res=>{
+					this.$refs.loadmore.onTopLoaded()
+				})
+				.done()
 			},
 			load () {
-				setTimeout(()=>{
-					for(var i = 0;i<5;i++){
-						this.advanceMsgList.push(i)
-					}
+				this.getAdvMsg()
+				.then(res=>{
 					this.$refs.loadmore.onBottomLoaded();
-				},1000)
+					this.is_bottom_end = res
+				})
+				.done()
 			},
 			handTopStatus (status) {
 				this.topStatus = status
@@ -86,6 +86,9 @@ import AChatItem from './AChatItem'
 <style lang="less" scoped>
 	.arrow{
 		transition: all .5s;
+	}
+	.chat-a-loadmore{
+		min-height: 100%;
 	}
 	.icon-drop-down{
 		background-image: url(../../../assets/icons/drop_down.png);

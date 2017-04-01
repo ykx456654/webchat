@@ -2,41 +2,41 @@
 	<div class="chat-a-item">
 		<div class="flex">
 			<div class="chat-speaker">
-				<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
+				<img :src="msg.headImg" v-if="msg.headImg !='' ">
+				<img src="../../../assets/images/default_head.png" v-else>
 				<i class="icon icon-dashang"></i>
 			</div>
 			<div class="chat-content">
 				<div class="chat-speaker-name ">
-					<span>jackmao</span>
+					<span>{{msg.name}}</span>
 					<span></span>
 				</div>
 				<div class="chat-speaker-content">
 					<!-- 文字 -->
-					<div class="content flex align-items-center">
+					<div class="content flex align-items-center" v-if="msg.msgType === 1">
 						<div class="triangle"></div>
 						<div class="triangle-border"></div>
 						<div class="word-msg">
-							<div class="msg">fdasfdsfdsafdsfsdafds</div>
+							<div class="msg">{{msg.textContent}}</div>
 						</div>
 					</div>
+					
 
+					<!-- 图片 -->
+					<div class="image" v-if="msg.msgType === 2">
+						<img src="">
+					</div>
 
 					<!-- 语音 -->
-					<div class="flex align-items-center voice"> 
-						<div class="content ">
+					<div class="flex align-items-center voice" v-if="msg.msgType === 3" > 
+						<div class="content" v-voice-width="{'vodDuration':msg.vodDuration,'msgType':msg.msgType}" @click="playVoice({vodUrl:msg.vodUrl,vodDuration:msg.vodDuration})">
 							<div class="triangle"></div>
 							<div class="triangle-border"></div>
 							<div class="voice-msg">
 								<i class="icon icon-voice"></i>
 							</div>
 						</div>
-						<span class="times">3s</span>
-					</div>
-
-
-					<!-- 图片 -->
-					<div class="image">
-						<img src="">
+						<span class="times">{{msg.vodDuration}}s</span>
 					</div>
 
 				</div>
@@ -59,8 +59,27 @@
 	</div>
 </template>
 <script>
+import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	export default{
+		props:{
+			msg:{
+				type:Object,
+				default:{}
+			}
+		},
+		methods: {
+			...mapMutations(['playVoice'])
+		},
+		filters: {
 
+		},
+		directives: {
+			voiceWidth (el,binding) {
+				/*计算语音宽度，最长60s，最短1s，*/
+				// console.log(binding)
+				el.style.width =.2 + binding.value*1.2/60 + 'rem';
+			}
+		}
 	}
 </script>
 <style lang="less" scoped>
@@ -142,7 +161,7 @@
 		}
 	}
 	.voice-msg{
-		.icon{
+		.icon-playing{
 			animation:  1.5s linear infinite blink;
 		}
 		.times{

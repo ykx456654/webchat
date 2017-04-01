@@ -153,7 +153,7 @@ export default new Router({
     {
       path:'/Subject',
       component:Subject,
-      name:'subject',
+      name:'Subject',
       meta:{hideTab:true,keepalive:true}
     },
     {
@@ -168,7 +168,7 @@ export default new Router({
     },
     {
       path:'/Discuss',
-      name:'discuss',
+      name:'Discuss',
       component:Discuss,
       meta:{hideTab:true,keepalive:true}
     }

@@ -30,6 +30,7 @@
 			<normal-input></normal-input>
 			<high-input v-if="false"></high-input>
 		</section>
+		<audio id="voice-player" class="voice-player"></audio>
 	</div>
 </template>
 <script>
@@ -45,30 +46,55 @@ import HighInput from './common/HighInput'
 		created () {
 			const query = this.$route.query
 			this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
-			this.getSubjectInfo()
-			.then(res=>{if (res) {this.hideLoad()}})
+			var p1 = this.getSubjectInfo()
+			var p2 = this.enterSubejct()
+			Promise.all([p1,p2])
+			.then(res=>{
+				return res.every(item => item == true)
+			})
+			.then(()=>{
+				this.isCached = true
+				this.hideLoad()
+			})
+			.then(()=>{
+				console.log(11122112)
+				this.loopSubject()
+			})
+			.catch(e=>{
+				console.log(e + 'from subject_enter')
+			})
 		},
 		mounted () {
-			this.hideLoad()
+			// this.hideLoad()
 		},
 		activated () {
-			this.hideLoad()
+			if (this.isCached) {
+				this.hideLoad()
+			}
 		},
 		deactivated () {
 
 		},
+		beforeRouteLeave (to, from ,next) {
+			if (to.name != 'Discuss') {
+				this.clearMsg()
+			}
+			// console.log(from)
+			// console.log(to)
+			next()
+		},
 		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB},
 		data () {
 			return {
-
+				isCached:false
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id'])
+			...mapGetters(['subject','id','uvNum'])
 		},
 		methods:{
-			...mapMutations(['showLoad','hideLoad','setSubjectInfo']),
-			...mapActions(['getSubjectInfo']),
+			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg']),
+			...mapActions(['getSubjectInfo','enterSubejct','loopSubject']),
 			checkLayout() {
 
 			},
@@ -84,7 +110,8 @@ import HighInput from './common/HighInput'
 			},
 			linkDiscuss () {
 				this.showLoad()
-				this.$router.push({path:'/Discuss'})
+				const query = this.$route.query
+				this.$router.push({path:'/Discuss',query})
 			}
 		}
 	}
@@ -143,6 +170,7 @@ import HighInput from './common/HighInput'
 	.studio-home{
 		position: absolute;
 		bottom: 30px;
+		z-index: 10;
 		right: 10px;
 		i{
 			background-image: url(../../assets/images/button_hdzbj.png);
@@ -192,5 +220,8 @@ import HighInput from './common/HighInput'
 		    margin-left: -15px;
 		    font-size: 12px;
 	    }
+	}
+	.voice-player{
+		display: none;
 	}
 </style>
