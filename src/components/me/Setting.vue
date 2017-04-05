@@ -7,18 +7,24 @@
 		</x-header>
 		<header class="header flex align-items-center justify-space-between">
 			<span>头像</span>
-			<img src="http://wx.qlogo.cn/mmopen/SaNfE90PbPL3gjlRc2SCMRzJqMmCpSPkEaTbr5u387bvFw169s7AlzSpU2kvYcW4uzrun7ktBWlgT79KOZ48pPLuewapQuFq/0">
+			<img :src="userInfo.headUrl" v-if="userInfo.headUrl != ''">
+			<img src="../../assets/images/default_head.png" v-else>
 		</header>
 		<cellx>
 			<div class="setting flex align-items-center" slot="left">
-				<span>姓名</span>
-				<input v-model="name" type="text">
+				<span slot="left">姓名</span>
+			</div>
+			<div slot="right">
+				<input v-model="name" @change="setName" type="text" >
 			</div>
 		</cellx>
 		<cellx>
 			<div class="setting flex align-items-center" slot="left">
 				<span>昵称</span>
-				<input type="text" v-model="nickName">
+				<!-- <input type="text" v-model="nickName"> -->
+			</div>
+			<div class="setting-item-right" slot="right">
+				<input type="text" @change="setNickName" v-model="nickName">
 			</div>
 		</cellx>
 		<cellx is-link @onclick="selStatus">
@@ -108,7 +114,7 @@
 	</div>
 </template>
 <script>
-import { Header,Spinner  } from 'mint-ui'
+import { Header,Spinner,MessageBox } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { XInput, Group,Popup } from 'vux'
 import { api } from '../../utils/api.js'
@@ -138,7 +144,7 @@ import cellx from '../common/cell-x'
 			}
 		},
 		components: {
-			xHeader:Header,cellx,XInput,Group,Popup,status,hospital,Spinner,normalList,department
+			xHeader:Header,cellx,XInput,Group,Popup,status,hospital,Spinner,normalList,department,MessageBox
 		},
 		data () {
 			return {
@@ -154,12 +160,26 @@ import cellx from '../common/cell-x'
 				list:[],	//选择学校、专业时的列表
 				loadingData:false,
 				prop:'',
-				type:''
+				type:'',
+				isTouch:false
 			}
 		},
 		methods: {
 			...mapMutations(['showLoad','hideLoad','hideTab','showTab','setUserInfo']),
 			...mapActions(['GETUSERINFO']),
+			tipTouch () {
+				return MessageBox({
+					title:"修改个人信息将导致实名认证失效",
+					message:'确认执行此操作？',
+					showCancelButton: true
+				})
+				.then(action=>{
+					// console.log(action)
+					if (action == 'confirm') {
+					 return	true 
+					}
+				})
+			},
 			selStatus () {
 				this.option = 1
 				this.popupTitle = '身份设置'
@@ -325,6 +345,12 @@ import cellx from '../common/cell-x'
 					}
 				})
 			},
+			setName () {
+				this.setProp('name',this.name)
+			},
+			setNickName () {
+				this.setProp('nickName',this.nickName)
+			},
 			hidePopup () {
 				this.showTab()
 				this.showPopup = false
@@ -385,7 +411,7 @@ import cellx from '../common/cell-x'
 		}
 	}
 </script>
-<style lang="less">
+<style lang="less" scoped>
 .header{
 	padding: 10px;
 	border-bottom: 1px solid #f0f0f0;
@@ -404,6 +430,7 @@ import cellx from '../common/cell-x'
 		color: #7e7e7e;
 		border: none;
 		margin-left: 15px;
+		text-align: right;
 	}
 	select{
 		appearance:none;

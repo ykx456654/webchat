@@ -1,11 +1,13 @@
 <template> 
 	<div class="chat-b chat-part-b">
-		<div class="flex chat-b-item" v-for="m in normalMsg">
-			<div class="chat-content flex justify-center" :data-id="m">
-				地方飞得更高都很反感邯郸市的时候覅哈德hi分红个哈佛欧式都是丹佛斯达舒动的时候发货收到的时候发货收到的时候发货收到的时候发货收到的时候发货收到的时候发货收到
+		<div class="flex chat-b-item justify-end" v-for="(m,index) in partBMsgList">
+			<div class="chat-content">
+				<i class="icon icon-wen fl" v-if="m.questionFlag"></i>
+				{{m.textContent}}
 			</div>
 			<div class="user-head">
-				<img src="../../../assets/images/default_head.png">
+				<img :src="m.headImg" v-if="m.headImg!=''">
+				<img src="../../../assets/images/default_head.png" v-else>
 			</div>	
 		</div>
 	</div>
@@ -17,6 +19,9 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 			return {
 				normalMsg:[1,2,3,4]
 			}
+		},
+		computed:{
+			...mapGetters(['partBMsgList'])
 		}
 	}
 </script>
@@ -33,6 +38,14 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	    padding: 3px;
 	    margin-right: 5px;
 	    word-break: break-all;
+	    text-align: left;
+	    .icon-wen{
+	    	width: 15px;
+	    	height: 15px;
+	    	margin-top: 2px;
+	    	margin-right: 2px;
+	    	float: left;
+	    }
 	}
 	.user-head{
 		width: 22px;

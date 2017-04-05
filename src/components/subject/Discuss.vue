@@ -26,18 +26,19 @@
 				<transition-group name="list" tag="ul">
 					<li class="discuss-item flex" v-for="(m , index) in normalMsg.msgList" :key="index">
 						<div class="discuss-item-left">
-							<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
+							<img src="../../assets/images/default_head.png" v-if="m.headImg==''">
+							<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
 						</div>
 						<div class="discuss-item-right">
-							<h5 class="name">fads</h5>
+							<h5 class="name" v-text="m.name"></h5>
 							<p>03-01 18:32</p>
 							<div class="discuss-content flex">
-								<i class="icon icon-wen"></i>
+								<i class="icon icon-wen" v-if="m.questionFlag"></i>
 								<div>
-									fafdsadfsa
+									{{m.textContent}}
 								</div>
 							</div>
-							<div class="answer">
+							<div class="answer" v-if="m.questionFlag">
 								<div class="flex align-items-center">
 									<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
 									<span>fdsafdsa</span>

@@ -5,28 +5,77 @@
 				<span class="icon" :class="{'icon-quized':isQuiz}"></span>
 				<span class="icon icon-wen"></span>
 			</div>
-			<textarea placeholder="输入讨论内容..." ></textarea>
+			<textarea placeholder="输入讨论内容..." v-model="content"></textarea>
 		</div>
 		<div>
-			<a class="btn btn-send">发送</a>
+			<a class="btn " :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
 		</div>
 	</div>
 </template>
 <script>
+import { Indicator } from 'mint-ui';
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	export default{
 		data () {
 			return {
-				isQuiz:false
+				isQuiz:false,
+				sendStatu:0,   //0未发送，1正在发送，2，发送成功
+				content:'',
+				width:0,
+				height:0,
+				vodDuration:0,
+				refQuestionId:0,
+				questionFlag:false,
+				answerFlag:false,
+				msgType:1,
+				type:2
 			}
 		},
 		methods:{
+			...mapActions(['saveMsg']),
 			quiz () {
 				this.isQuiz = !this.isQuiz
+			},
+			sendMsg () {
+				if (!this.canSend) return false
+				if (!this.content) {
+					this.toast('请选择发送内容')
+					return false
+				}
+				this.questionFlag = this.isQuiz
+				const data = {
+					type:this.type,
+					questionFlag:this.questionFlag,
+					answerFlag:this.answerFlag,
+					msgType:this.msgType,
+					content:this.content.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+					width:this.width,
+					height:this.height,
+					vodDuration:this.vodDuration,
+					refQuestionId:this.refQuestionId
+				}
+				this.sendStatu = 1
+				Indicator.open({
+					text:'发送中...',
+					spinnerType:'snake'
+				})
+				this.saveMsg(data)
+				.then(res=>{
+					this.content = ''
+					Indicator.close()
+					// console.log(res)
+				})
 			}
 		},
 		computed: {
-			...mapGetters(['system'])
+			...mapGetters(['system','uid']),
+			canSend () {
+				if (this.content != '') {
+					return true
+				}else{
+					return false
+				}
+			}
 		}
 	}
 </script>
@@ -76,8 +125,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		height: 17px;
 	}
 }
-.btn-send{
-	background-color: #d93639;
+.btn{
 	display: block;
 	color: #fff;
 	height: .3rem;
@@ -85,5 +133,11 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	border-radius: 3px;
 	margin-left: 5px;
 	line-height: .3rem;
+}
+.btn-send{
+	background-color: #d93639;
+}
+.no-send{
+	background-color: #9b9b9b
 }
 </style>

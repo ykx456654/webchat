@@ -1,6 +1,7 @@
 <template>
 	<div class="chat-b-item flex">
 		<div class="chat-content flex justify-center">
+			<i class="icon fl"></i>
 			地方飞得更高都很反感邯郸市的时候覅哈德hi分红个哈佛欧式都是丹佛斯达舒动的时候发货收到
 		</div>
 		<div class="user-head">
@@ -12,7 +13,7 @@
 	export default {
 		data () {
 			return {
-
+				
 			}
 		}
 	}

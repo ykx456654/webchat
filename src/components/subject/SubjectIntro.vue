@@ -63,11 +63,13 @@ export default {
 		this.hideLoad()
 		const query = this.$route.query
 		this.subjectId = Number(query.subjectId)
+		this.studioId = Number(query.studioId)
 		this.getSubjectInfo()
 	},
 	data () {
 		return {
 			subjectId:0,
+			studioId:0,
 			subject:{}
 		}
 	},
@@ -89,7 +91,8 @@ export default {
 			})
 		},
 		enter () {
-			alert('enter')
+			// alert('enter')
+			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId}})
 		},
 		focus () {
 			alert('关注')

@@ -86,8 +86,9 @@ import { api } from '../../utils/api'
 				this.$router.push({path:'/Studio',query:{studioId:id}})
 			},
 			linkSubject (studioId,subjectId) {
-				alert(1)
-				console.log(studioId,subjectId)
+				this.showLoad()
+				// console.log(studioId,subjectId)
+				this.$router.push({path:'/Subject',query:{studioId:studioId,subjectId:subjectId}})
 			},
 			focus (id) {
 				alert(id)
@@ -119,14 +120,15 @@ import { api } from '../../utils/api'
 		}
 	}
 </script>
-<style lang="less">
+<style lang="less" scoped>
 	.recommond-wrap{
 		padding-bottom: 55px;
 	}
 	.recommond{
 		border-bottom: 1px solid #f2f2f2;
 		section:nth-child(1){
-			flex:0 1 62px;
+			width: 62px;
+			box-sizing: border-box;
 		}
 		section:nth-child(2){
 			flex:1 1 auto;
@@ -138,6 +140,7 @@ import { api } from '../../utils/api'
 		}
 		.header{
 			padding: 10px 10px 10px 12px;
+			box-sizing: border-box;
 		}
 		.content-title{
 			height: 40px;

@@ -125,6 +125,11 @@ import AChatItem from './AChatItem'
 		color: #fff;
 		margin: 15px 0;
 	}
+	.msg-list{
+		li{
+			margin: 5px 0;
+		}
+	}
 	.list-enter-active, .list-leave-active {
 	  transition: all 1s;
 	}

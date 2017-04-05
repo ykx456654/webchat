@@ -13,9 +13,8 @@
 	    	<x-input  v-model="name" title="姓名" name="username" placeholder="请输入姓名" is-type="china-name"></x-input>
 	    	<selector v-model="sex" placeholder="请选择性别" title="性别" :options="sexOption" @on-change="setSex"></selector>
 	    	<selector v-model="education" placeholder="请选择学历" title="学历" :options="eduOption" @on-change="setEdu"></selector>
-	    	<datetime 
-	    	:min-year="1940" 
-	    	start-date="birth" 
+	    	<datetime   
+	    	:min-year="1940"
 	    	:max-year="2017" 
 	    	v-model="birth"
 	    	format="YYYY-MM-DD"
@@ -29,7 +28,7 @@
 					<span v-show="!loadingData" v-text="userInfo.hospital"></span>
 				</span>
 	    	</cell>
-	    	<cell title="科室" value="大丰大厦" is-link></cell>
+	    	<cell title="科室" @click.native="selectDepartment" value="大丰大厦" is-link></cell>
 	    	<selector placeholder="请输入职称" title="职称" :options="['主任医师','副主任医师','主治医师','住院医师','其他']" @on-change=""></selector>
 	    	<!-- <x-input title="邮箱" v-model="" placeholder="请输入邮箱" is-type="email"></x-input> -->
 	    	<x-input title="邀请码" placeholder="请输入邀请码（选填）"></x-input>
@@ -42,7 +41,8 @@
 						<img src="../../assets/images/back2.png">
 					</a>
 				</x-header>
-				<hospital :list="hlist" @load="loadList" @search="searchHospital" @selH="selHospital"></hospital>
+				<hospital :list="hlist" @load="loadList" @search="searchHospital" @selH="selHospital" v-show="option == 0"></hospital>
+				<x-department v-show="option == 1" @load="loadDepartments" @setD="setProp" :list="dlist"></x-department>
 			</div>
 		</popup>
 	</div>
@@ -52,10 +52,11 @@ import {Header,Spinner} from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {XInput, Group, Cell,Selector,Datetime,Popup} from 'vux'
 import hospital from './setPart/hospital';
+import department from './setPart/department'
 import { api } from '../../utils/api.js'
 	export default{
 		name:'Auth',
-		components:{xHeader:Header,XInput, Group, Cell, Selector, Datetime, hospital, Popup, Spinner},
+		components:{xHeader:Header,XInput, Group, Cell, Selector, Datetime, hospital, Popup, Spinner,xDepartment:department},
 		created (){
 			this.hideTab()
 			if (JSON.stringify(this.userInfo) == '{}') {
@@ -64,7 +65,7 @@ import { api } from '../../utils/api.js'
 					if (msg) {this.toast(msg)}
 					this.name = this.userInfo.name
 					this.sex = this.userInfo.sex
-					this.birth= this.userInfo.birth.replace(/[^\u0000-\u00FF]/g,'-').slice(0,-1)
+					this.birth= this.userInfo.birth
 					this.nickName = this.userInfo.nickName
 					this.major = this.userInfo.major
 					this.department = this.userInfo.department
@@ -77,7 +78,7 @@ import { api } from '../../utils/api.js'
 			}else{
 				this.name = this.userInfo.name
 				this.sex = this.userInfo.sex
-				this.birth= this.userInfo.birth.replace(/[^\u0000-\u00FF]/g,'-').slice(0,-1)
+				this.birth= this.userInfo.birth
 				this.nickName = this.userInfo.nickName
 				this.major = this.userInfo.major
 				this.department = this.userInfo.department
@@ -108,13 +109,16 @@ import { api } from '../../utils/api.js'
 				educationShow:false,
 				loadingData: false,
 				showPopup:false,
-				pickerValue:''
+				pickerValue:'',
+				option:0,
+				dlist:[]
 			}
 		},
 		methods:{
 			...mapMutations(['showLoad','hideLoad','setUserInfo','hideTab','showTab']),
 			...mapActions(['GETUSERINFO']),
 			selectHospital () {
+				this.option = 0
 				if (this.loadingData) { return false}
 				this.loadingData = true
 				this.loadHospitalList()
@@ -129,6 +133,14 @@ import { api } from '../../utils/api.js'
 						this.popupTitle = '医院设置'
 						this.popupHeight = '100%'
 					}
+				})
+			},
+			selectDepartment () {
+				this.option = 1
+				this.loadDepartments(1)
+				.then(()=>{
+					this.showPopup = true
+					this.popupHeight = '100%'
 				})
 			},
 			selHospital (id,name) {
@@ -197,6 +209,14 @@ import { api } from '../../utils/api.js'
 					}
 				})
 			},
+			loadDepartments (pid) {
+				pid = Number(pid)
+				return api(this.uid,{ srv: "user_user",cmd: "get_department_list"},{pid:pid})
+				.then(res=>{
+					res = res.data
+					this.dlist = res.rsps[0].body.departments
+				})
+			},
 			setProp (prop,value) {
 				// alert('设置用户数据  4.9' + value)
 				const uid = this.uid
@@ -209,6 +229,7 @@ import { api } from '../../utils/api.js'
 						var obj = {}
 						obj[prop] = value
 						this.setUserInfo(obj)
+						this.showPopup = false
 					}
 				})
 			},
@@ -222,7 +243,7 @@ import { api } from '../../utils/api.js'
 			},
 			setBirth (value) {
 				console.log(value)
-				// this.setProp('birth',value)
+				this.setProp('birth',value)
 			},
 			hidePopup () {
 				this.showPopup =false

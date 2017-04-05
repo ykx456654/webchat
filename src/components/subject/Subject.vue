@@ -16,27 +16,38 @@
 			<div class="discuss flex align-items-center justify-center" @click="linkDiscuss">
 				<div class="members flex align-items-center">
 					<img src="../../assets/icons/icon_rq.png">
-					<span>456</span>
+					<span v-text="subject.uvNum"></span>
 				</div>
 				<div class="flex align-items-center justify-center">讨论</div>
 			</div>
 			<div class="studio-home">
-				<i class="icon icon-studio-home"></i>
+				<i class="icon icon-studio-home" @click="linkStudio"></i>
 			</div>
 			<chat-part-b></chat-part-b>
 			<chat-part-a :subject-info="subject"></chat-part-a>	
 		</section>
 		<section>
-			<normal-input></normal-input>
-			<high-input v-if="false"></high-input>
+			<normal-input v-if="subject.subjectRole == 100"></normal-input>
+			<high-input v-else></high-input>
 		</section>
+		<!-- <button @click="stopLoop">stop</button> -->
 		<audio id="voice-player" class="voice-player"></audio>
+		<previewer :list="images" :option="options" ref="previewer"></previewer>
+		<popup v-model="popupVisible"  height="50%" is-transparent>
+			<div class="high-input-wrap">
+				
+			</div>
+		</popup >
+		<button @click="showPop">dsffds</button>
 	</div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner } from 'mint-ui'
+import { Previewer, Popup } from 'vux'
 import { api } from '../../utils/api'
+import bus from './common/eventBus'
+
 import ChatPartA from './common/ChatPartA'
 import ChatPartB from './common/ChatPartB'
 import NormalInput from './common/NormalInput'
@@ -57,7 +68,7 @@ import HighInput from './common/HighInput'
 				this.hideLoad()
 			})
 			.then(()=>{
-				console.log(11122112)
+				// console.log(11122112)
 				this.loopSubject()
 			})
 			.catch(e=>{
@@ -65,7 +76,9 @@ import HighInput from './common/HighInput'
 			})
 		},
 		mounted () {
-			// this.hideLoad()
+			bus.$on('show',index=>{
+				this.showPreviewer(index)
+			})
 		},
 		activated () {
 			if (this.isCached) {
@@ -78,25 +91,42 @@ import HighInput from './common/HighInput'
 		beforeRouteLeave (to, from ,next) {
 			if (to.name != 'Discuss') {
 				this.clearMsg()
+				this.$destroy()
 			}
 			// console.log(from)
 			// console.log(to)
 			next()
 		},
-		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB},
+		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup},
 		data () {
 			return {
-				isCached:false
+				isCached:false,
+				popupVisible:false,
+				options:{
+					getThumbBoundsFn (index) {
+						let thumbnail = document.querySelectorAll('.previewer-demo-img')[index]
+			          	// get window scroll Y
+			        	let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
+			          	// optionally get horizontal scroll
+			          	// get position of element relative to viewport
+			          	let rect = thumbnail.getBoundingClientRect()
+			          	// w = width
+			          	return {x: rect.left, y: rect.top + pageYScroll, w: rect.width}
+					} 
+				}
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id','uvNum'])
+			...mapGetters(['subject','id','uvNum','images'])
 		},
 		methods:{
 			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg']),
-			...mapActions(['getSubjectInfo','enterSubejct','loopSubject']),
+			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop']),
 			checkLayout() {
 
+			},
+			showPop (){
+				this.popupVisible = true
 			},
 			goBcak () {
 				this.$destroy()
@@ -105,13 +135,21 @@ import HighInput from './common/HighInput'
 			linkSubjectIntro () {
 				this.showLoad()
 				setTimeout(()=>{
-					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId}})
+					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId,studioId:this.id.studioId}})
 				},1000)
 			},
 			linkDiscuss () {
 				this.showLoad()
 				const query = this.$route.query
 				this.$router.push({path:'/Discuss',query})
+			},
+			linkStudio () {
+				this.showLoad()
+				const query = this.$route.query
+				this.$router.push({path:'/Studio',query})
+			},
+			showPreviewer (index) {
+				this.$refs.previewer.show(index)
 			}
 		}
 	}
@@ -186,7 +224,7 @@ import HighInput from './common/HighInput'
 	}
 	.chat-part-b{
 		position: absolute;
-		z-index: 5;
+		z-index: 10;
 		width: 1.15rem;
 		top: 0.45rem;
 		right: 0.05rem;
@@ -223,5 +261,9 @@ import HighInput from './common/HighInput'
 	}
 	.voice-player{
 		display: none;
+	}
+	.high-input-wrap{
+		background-color: #fff;
+		height: 300px;
 	}
 </style>

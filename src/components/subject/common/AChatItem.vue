@@ -1,6 +1,6 @@
 <template>
 	<div class="chat-a-item">
-		<div class="flex">
+		<div class="flex" v-if="msg.msgType < 3">
 			<div class="chat-speaker">
 				<img :src="msg.headImg" v-if="msg.headImg !='' ">
 				<img src="../../../assets/images/default_head.png" v-else>
@@ -23,8 +23,8 @@
 					
 
 					<!-- 图片 -->
-					<div class="image" v-if="msg.msgType === 2">
-						<img src="">
+					<div class="image" v-if="msg.msgType === 2" @click="showPreview">
+						<img :src="msg.imgUrl">
 					</div>
 
 					<!-- 语音 -->
@@ -42,6 +42,11 @@
 				</div>
 			</div>
 		</div>
+		<div  v-if="msg.msgType > 3">
+			<div class="tip-live-notice" >
+				<p v-text="msg.textContent"></p>
+			</div>
+		</div>
 <!-- 		<div class="tip-to-app">
 			<a>要开始直播，请使用医生站APP。</a>
 		</div> -->
@@ -56,10 +61,13 @@
 				</div>
 			</div>
 		</div> -->
+	
+
 	</div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
+import bus from './eventBus.js'
 	export default{
 		props:{
 			msg:{
@@ -68,7 +76,18 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 			}
 		},
 		methods: {
-			...mapMutations(['playVoice'])
+			...mapMutations(['playVoice']),
+			showPreview () {
+				const images = this.$store.getters.images
+				let index 
+				images.forEach((ite,idx)=>{
+					if (this.msg.id === ite.id) {
+						index = idx
+					}
+				})
+				// console.log(images)
+				bus.$emit('show',index)
+			}
 		},
 		filters: {
 
@@ -173,7 +192,24 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		50% { background-image: url(../../../assets/icons/yuying2.png) }
 		100% { background-image: url(../../../assets/icons/yuying1.png)}
 	}
-
+	.image{
+		margin-top: 10px;
+		img{
+		    max-width: 1.6rem;
+    		max-height: 3rem;
+    		border-radius: 5px;
+		}
+	}
+	.tip-live-notice{
+		margin: 15px 0 25px;
+		p{
+			display: inline-block;
+			padding: 2px 10px;
+			background-color: #cecece;
+			border-radius: 5px;
+			color: #fff;
+		}
+	}
 	.tip-to-app{
 		a{
 			color: #c1c1c1;
@@ -207,4 +243,5 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		border-top: 1px solid #f0f0f0;
 		padding: 10px 0;
 	}
+
 </style>
