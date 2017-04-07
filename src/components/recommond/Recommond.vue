@@ -24,6 +24,7 @@
 						</div>
 						<h4>{{r.subjectTitle}}</h4>
 						<p>{{ r.startTime | time }}</p>
+						<!-- <p>{{new Date(r.startTime*1000).Format('yyyy-MM-dd hh:ss')}}</p> -->
 					</div>
 				</section>
 				<div class="no-more" v-if="allLoaded">
@@ -106,12 +107,15 @@ import { api } from '../../utils/api'
 				}
 			},
 			time (t) {
-				var today = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
-				var t_today = +new Date(today)/1000
-				if (t > t_today) {
-					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
-				}else{
+				var today_end = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
+				var today_start = new Date().Format('yyyy/MM/dd') + ' 00:00:01'
+				var t_today_start = +new Date(today_start)/1000
+				var t_today_end = +new Date(today_end)/1000
+				// console.log(t-t_today_start,t_today_end-t)
+				if (t > t_today_start && t < t_today_end) {
 					return '今天  ' + new Date(t).Format('hh:ss')
+				}else{
+					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
 				}
 			}
 		},

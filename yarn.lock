@@ -4120,6 +4120,10 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "http://registry.npm.taobao.org/tweetnacl/download/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
+twemoji@^2.2.5:
+  version "2.2.5"
+  resolved "http://registry.npm.taobao.org/twemoji/download/twemoji-2.2.5.tgz#116907bff0c95b56b6414857c5d8588972a52956"
+
 type-is@~1.6.14:
   version "1.6.14"
   resolved "http://registry.npm.taobao.org/type-is/download/type-is-1.6.14.tgz#e219639c17ded1ca0789092dd54a03826b817cb2"
@@ -4227,6 +4231,10 @@ validator@^6.2.1:
 vary@~1.1.0:
   version "1.1.0"
   resolved "http://registry.npm.taobao.org/vary/download/vary-1.1.0.tgz#e1e5affbbd16ae768dd2674394b9ad3022653140"
+
+velocity-animate@^1.5.0:
+  version "1.5.0"
+  resolved "http://registry.npm.taobao.org/velocity-animate/download/velocity-animate-1.5.0.tgz#fc8771d8dfe1136ff02a707e10fbb0957c4b030f"
 
 vendors@^1.0.0:
   version "1.0.1"

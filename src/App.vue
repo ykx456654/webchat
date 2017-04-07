@@ -1,13 +1,13 @@
 <template>
-  <div id="app">
-    <keep-alive include="Subject,Discuss">
-      <router-view v-show="!show"></router-view>
-    </keep-alive>
-    <loading v-show="show"></loading>
-    <transition  name="fade-bottom">
-      <tab class="app-tab-bottom" v-show="tabS"></tab>
-    </transition>
-  </div>
+    <div id="app">
+        <keep-alive include="Subject">
+            <router-view v-show="!show"></router-view>
+        </keep-alive>
+        <loading v-show="show"></loading>
+        <transition  name="fade-bottom">
+            <tab class="app-tab-bottom" v-show="tabS"></tab>
+        </transition>
+    </div>
 </template>
 
 <script>

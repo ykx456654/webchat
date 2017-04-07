@@ -2,23 +2,23 @@
 	<div class="discuss">
 		<section class="discuss-top flex justify-space-between align-items-center">
 			<span class="mask"></span>
-			<div class="flex align-items-center">
-				<i class="icon"></i>
+			<div class="flex align-items-center" @click="seeQuestion">
+				<i class="icon" :class="{'icon-nike':onlyQuestion}"></i>
 				<span>只看问题</span>
 			</div>
 			<div class="flex align-items-center" @click="backSubject">
 				<span>返回直播话题</span>
 			</div>
 		</section>
-		<div class="no-msgs flex align-items-center justify-center" v-if="normalMsg.msgList == 0">
+		<div class="no-msgs flex align-items-center justify-center" v-if="normalMsg.msgList == 0 && isLoad">
 			<img src="../../assets/images/wdzbij_qst.png">
 		</div>
-		<div class="load-wrap">
+		<div class="load-wrap" id="load-wrap" v-show="normalMsg.msgList != 0">
 			<Loadmore
-			v-if="normalMsg.msgList != 0"
 			class="chat-b-content"
+			id="chat-b-content"
 			:autoFill="false"
-			:top-method="getHistory"
+			:top-method="getMsg"
 			ref="loadmore"
 			@top-status-change="handTopStatus"
 			@bottom-status-change="handBottomStatus"
@@ -31,12 +31,10 @@
 						</div>
 						<div class="discuss-item-right">
 							<h5 class="name" v-text="m.name"></h5>
-							<p>03-01 18:32</p>
-							<div class="discuss-content flex">
+							<p>{{new Date(m.msgTime*1000).Format('MM-dd hh:mm:ss')}}</p>
+							<div class="discuss-content">
 								<i class="icon icon-wen" v-if="m.questionFlag"></i>
-								<div>
-									{{m.textContent}}
-								</div>
+								{{m.textContent}}
 							</div>
 							<div class="answer" v-if="m.questionFlag">
 								<div class="flex align-items-center">
@@ -61,30 +59,29 @@
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import NormalInput from './common/NormalInput'
-import {Spinner,Loadmore } from 'mint-ui'
+import {Loadmore ,Indicator } from 'mint-ui'
+import bus from '../common/eventBus'
+import { throttle } from '../../utils/func'
 	export default {
 		name:'Discuss',
 		components:{
-			NormalInput,Spinner,Loadmore
+			NormalInput,Loadmore,Indicator
 		},
 		created () {
-			if (this.normalMsg.msgId==0) {
-				const query = this.$route.query
-				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
-				var p1 = this.getSubjectInfo()
-				var p2 = this.enterSubejct()
-				Promise.all([p1,p2])
-				.then(res=>{
-					return res.every(item => item == true)
-				})
-				.then(()=>{
-					this.isCached = true
-					this.hideLoad()
-				})
-				.catch(e=>{
-					console.log(e + 'from subject_enter')
-				})
-			}
+			this.init()
+		},
+		mounted () {
+			var $chatWrapper = $('#load-wrap')
+			var $chatLoader = $('#chat-b-content')
+			var _this = this
+			$chatWrapper.on('scroll',throttle(function(){
+				if ($chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop() < 50) {
+					_this.isBottom = true
+				}else{
+					_this.isBottom = false
+				}
+				// console.log(_this.isBottom)
+			},100,3000))
 		},
 		activated() {
 			this.hideLoad()
@@ -92,20 +89,29 @@ import {Spinner,Loadmore } from 'mint-ui'
 		data () {
 			return {
 				isCached:false,
-				is_top_end:false
+				is_top_end:false,
+				isLoad:false,
+				direction:false, //方向标识，true为拉取新消息，false拉取历史消息
+				limit:10,
+				onlyQuestion:false,
+				isBottom:true
 			}
 		},
 		computed: {
-			...mapGetters(['normalMsg'])
+			...mapGetters(['normalMsg','loopClock']),
+			msgLength () {
+				return this.normalMsg.msgList.length
+			}
 		},
 		methods:{
-			...mapMutations(['hideLoad','showLoad','setSubjectInfo']),
-			...mapActions(['enterSubejct','getSubjectInfo','getNormalHistoryMsg','getNormalMsg']),
+			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg']),
+			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject']),
 			backSubject () {
 				history.back()
 			},
-			getHistory () {
-				this.getNormalHistoryMsg()
+			getMsg () {
+				this.isBottom = false
+				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				.then(res=>{
 					this.$refs.loadmore.onTopLoaded()
 				})
@@ -114,11 +120,56 @@ import {Spinner,Loadmore } from 'mint-ui'
 			load () {
 
 			},
+			seeQuestion () {
+				Indicator.open({
+					text: '加载中...',
+  					spinnerType: 'fading-circle'
+				})
+				this.onlyQuestion = !this.onlyQuestion
+				this.clearMsg(2)
+				this.isLoad = false
+				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
+				.then(res=>{
+					this.isLoad = true
+					Indicator.close()
+				})
+				.catch(e=>{
+					alert(e)
+				})
+			},
+			init () {
+				const query = this.$route.query
+				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
+				var p1 = this.getSubjectInfo()
+				var p2 = this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
+				Promise.all([p1,p2])
+				.then(res=>{
+					return res.every(item => item == true)
+				})
+				.then(()=>{
+					this.isCached = true
+					this.isLoad = true
+					this.hideLoad()
+					this.loopSubject()
+				})
+				.catch(e=>{
+					console.log(e + 'from subject_enter')
+				})
+			},
 			handTopStatus (value) {
 
 			},
 			handBottomStatus (value) {
 
+			}
+		},
+		watch:{
+			msgLength (nv, ov) {
+				this.$nextTick(()=>{
+					if (this.isBottom) {
+						$('#load-wrap').scrollTop(100000)
+					}
+				})
 			}
 		}
 	}
@@ -134,7 +185,7 @@ import {Spinner,Loadmore } from 'mint-ui'
 	}
 	.no-msgs{
 		width: 100%;
-		height: 100%;
+		height: calc(~'100% - 1rem');
 		img{
 			width: 1.43rem;
     		height: 1.75rem;
@@ -212,9 +263,12 @@ import {Spinner,Loadmore } from 'mint-ui'
 				text-align: left;
 			}
 			.discuss-content{
+				text-align: left;
+				word-break: break-word;
 				i{
 					margin-right: 10px;
-					flex:0 0 auto;
+					margin-bottom: -5px;
+					float: left;
 				}
 				div{
 					text-align: left;

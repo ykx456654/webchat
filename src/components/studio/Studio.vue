@@ -18,8 +18,8 @@
 							&nbsp;
 							<span v-text="studio.fanNum"></span>
 						</div>
-						<div class=" align-items-center flex">
-							<a class="btn btn-focus">关注</a>
+						<div class=" align-items-center flex" v-if="studio.studioRole != 1">
+							<a @click="focus" class="btn btn-focus">关注</a>
 						</div>
 					</div>
 				</div>
@@ -125,7 +125,7 @@ import SubjectItem from './common/SubjectItem'
 						this.showLoading = false
 						this.subjects = this.subjects.concat(res.rsps[0].body.subjects)
 						this.subejectsIsEnd = res.rsps[0].body.is_end
-						this.subjectsStart++
+						this.subjectsStart+=this.subjectsLimit
 						return true
 					}
 				})
@@ -154,6 +154,24 @@ import SubjectItem from './common/SubjectItem'
 			},
 			lanchStudioInfo () {
 				this.isLanch = !this.isLanch
+			},
+			focus () { 
+				api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
+					studioId:this.studioId,isSubscribe:!this.studio.isFan
+				})
+				.then(res=>{
+					res = res.data
+					if (res.result != 0 ) {
+						this.toast(res.msg)
+					}else{
+						this.studio.isFan = !this.studio.isFan
+						if (this.studio.isFan) {
+							this.studio.fanNum--
+						}else{
+							this.studio.fanNum++
+						}
+					}
+				})
 			}
 		},
 		computed :{

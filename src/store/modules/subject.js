@@ -1,5 +1,6 @@
 import {api} from '../../utils/api'
 import axios from 'axios'
+import bus from '../../components/common/eventBus'
 export default {
 	state:{
 		subjectId:0,
@@ -7,18 +8,18 @@ export default {
 		subject:{},
 		subjectMsg:{
 			advanceMsg:{
-				msgId:'',
+				msgId:'init',
 				msgList:[]
 			},
 			normalMsg:{
-				msgId:'',
+				msgId:'init',
 				msgList:[]
 			}
 		},
 		updateKeys:[],
 		loopClock:null,
-		repeatAdvId:0,
-		repeatNrmId:0
+		repeatAdvId:[],
+		repeatNrmId:[]
 	},
 	getters:{
 		subject (state) {
@@ -26,6 +27,9 @@ export default {
 		},
 		id (state) {
 			return {subjectId:state.subjectId,studioId:state.studioId}
+		},
+		loopClock (state) {
+			return state.loopClock
 		},
 		uvNum (state) {
 			return state.subjectMsg.uvNum
@@ -51,7 +55,7 @@ export default {
 			advanceMsgs.forEach((item,index)=>{
 				if (item.msgType === 2) {
 					a.push({
-						w:item.imgWidth,
+						w:item.imgWidth != 0 ?item.imgWidth:'100%',
 						h:item.imgHeight,
 						src:item.imgUrl,
 						id:item.id
@@ -72,32 +76,49 @@ export default {
 		},
 		pushAdvMsg (state,{msgId,msgList}) {
 			// 轮询获取高级消息
-			const rId = state.repeatAdvId
+			var rIds = state.repeatAdvId
 			state.subjectMsg.advanceMsg.msgId = msgId
 			var list = state.subjectMsg.advanceMsg.msgList
-			for (var i = 0; i < msgList.length; i++) {
-				if (msgList[i].id != rId) {
-					list.push(msgList[i])
+			for (var i = 0; i < rIds.length; i++) {
+				for (var j = 0; j < msgList.length; j++) {
+					if (msgList[j].id == rIds[i]) {
+						if (i > 0) {i--}
+						rIds.splice(i,1)
+						msgList.splice(j,1)
+					}
 				}
 			}
+			state.subjectMsg.advanceMsg.msgList = list.concat(msgList)
+			// bus.$emit('Ascroll')
 		},
 		unshiftAdvMsg(state,{is_end,msgId,msgList}){
 			state.subjectMsg.advanceMsg.msgId = msgId
 			var list = state.subjectMsg.advanceMsg.msgList
-			for (var i = 0; i < msgList.length; i++) {
+			for(var i = msgList.length - 1; i >= 0; i-- ){
 				list.unshift(msgList[i])
 			}
 		},
 		pushNormalMsg (state,{msgId,msgList}) {
-			// 轮询获取历史消息
-			const rId = state.repeatNrmId
+			// 轮询获普通消息
+			var rIds = state.repeatNrmId
 			state.subjectMsg.normalMsg.msgId = msgId
 			var list = state.subjectMsg.normalMsg.msgList
-			for (var i = 0; i < msgList.length; i++) {
-				if (rId != msgList[i].id) {
-					console.log('1231312')
+			for (var i = 0; i < rIds.length; i++) {
+				for (var j = 0; j < msgList.length; j++) {
+					if (msgList[j].id == rIds[i]) {
+						if (i > 0) {i--}
+						rIds.splice(i,1)
+						msgList.splice(j,1)
+					}
 				}
-				list.push(msgList[i])
+			}
+			state.subjectMsg.normalMsg.msgList = list.concat(msgList)
+		},
+		unshiftNormalMsg (state,{is_end,msgId,msgList}) {
+			state.subjectMsg.normalMsg.msgId = msgId
+			var list = state.subjectMsg.normalMsg.msgList
+			for(var i = msgList.length - 1; i >= 0; i-- ){
+				list.unshift(msgList[i])
 			}
 		},
 		selfSendMsg (state,{id,msg}) {
@@ -105,26 +126,38 @@ export default {
 			// state.subjectMsg.normalMsg.msgId = msgId
 			// state.subjectMsg.normalMsg.msgList.push(msg)
 			if (msg.type === 1) {
-				state.advOnlyId = id
+				state.repeatAdvId.push(id) 
 				state.subjectMsg.advanceMsg.msgList.push(msg)
 			}
 			if (msg.type === 2) {
-				state.nrmOnlyId = id
+				state.repeatNrmId.push(id)
 				state.subjectMsg.normalMsg.msgList.push(msg)
 			}
 		},
-		unshiftNormalMsg (state,{is_end,msgId,msgList}) {
-
-		},
-		clearMsg (state) {
+		clearMsg (state,n) {
+			// 清除消息，1清除左侧消息，2清除右侧消息
 			clearTimeout(state.loopClock)
+			if (n == 1) {
+				state.subjectMsg.advanceMsg = {
+					msgId:'init',
+					msgList:[]
+				}
+				return false
+			}
+			if (n == 2) {
+				state.subjectMsg.normalMsg = {
+					msgId:'init',
+					msgList:[]
+				}
+				return false
+			}
 			state.subjectMsg = {
 				advanceMsg:{
-					msgId:0,
+					msgId:'init',
 					msgList:[]
 				},
 				normalMsg:{
-					msgId:0,
+					msgId:'init',
 					msgList:[]
 				}
 			}
@@ -159,11 +192,11 @@ export default {
 				}
 			})
 		},
-		getHistoryAdvMsg ({ commit, state, rootState}) {
-			/*获取高级历史消息,默认一次拉十条*/
+		getAdvMsg ({ commit, state, rootState},{direction,limit}) {
+			/*获取高级消息,默认一次拉十条*/
 			const uid = rootState.user.uid
 			const msgId = state.subjectMsg.advanceMsg.msgId
-			return api(uid,{cmd:'get_msg_list',srv:'studio_studio'},{msgId,limit:10,type:3,studioId:state.studioId,subjectId:state.subjectId})
+			return api(uid,{cmd:'get_advance_msg_list',srv:'studio_studio'},{msgId,direction,limit,studioId:state.studioId,subjectId:state.subjectId})
 			.then(res=>{
 				res = res.data
 				if (res.result !=0 ) {
@@ -171,34 +204,36 @@ export default {
 					commit('toast',res.msg)
 					Promise.reject(res.msg)
 				}else{
-					commit('unshiftAdvMsg',res.rsps[0].body)
+					if (direction) {
+						// 拉去新消息
+					}else{
+						// 拉取历史消息
+						commit('unshiftAdvMsg',res.rsps[0].body)
+					}
 					return res.rsps[0].body.is_end
 				}
 			})
 		},
-		getAdvMsg ({ commit, state, rootState}) {
-			/*获取高级消息,暂时没用到*/
-			
-		},
-		getNormalHistoryMsg ({ commit, state, rootState}) {
-			/*获取普通历史消息*/
+		getNormalMsg ({ commit, state, rootState},{direction,limit,onlyQuestion}) {
+			/*获取普通消息*/
 			const uid = rootState.user.uid
 			const msgId = state.subjectMsg.normalMsg.msgId
-			return api(uid,{cmd:'get_msg_list',srv:'studio_studio'},{msgId,start:0,limit:10,type:2,studioId:state.studioId,subjectId:state.subjectId})
+			return api(uid,{cmd:'get_normal_msg_list',srv:'studio_studio'},{limit,onlyQuestion,msgId,direction,studioId:state.studioId,subjectId:state.subjectId})
 			.then(res=>{
 				res = res.data
 				if (res.result != 0) {
 					commit('toast',res.msg)
 					Promise.reject(res.msg)
 				}else{
-					commit('unshiftNormalMsg',res.rsps[0].body)
+					if (direction) {
+						// 拉取新消息
+					}else{
+						// 拉取历史消息
+						commit('unshiftNormalMsg',res.rsps[0].body)
+					}
 					return res.rsps[0].body.is_end
 				}
 			})
-		},
-		getNormalMsg ({ commit, state, rootState}) {
-			/*获取普通消息,暂时没用到*/
-			
 		},
 		loopSubject ({ commit, state, rootState}) {
 			/*轮循获取消息*/
@@ -229,15 +264,15 @@ export default {
 					res = res.data
 					commit('pushAdvMsg',Object.assign({},res.rsps[0].body.advMsgList))
 					commit('pushNormalMsg',Object.assign({},res.rsps[0].body.nmrMsgList))
-					console.log(+new Date() - t)
-					t = +new Date()
+					// console.log(+new Date() - t)
+					// t = +new Date()
 					if (state.loopClock) {
 						clearTimeout(state.loopClock)
 					}
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},10000)
+					},3000)
 					Promise.resolve()
 				})
 				.catch(e=>{
@@ -248,7 +283,7 @@ export default {
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},10000)
+					},3000)
 				})
 			}
 			run()

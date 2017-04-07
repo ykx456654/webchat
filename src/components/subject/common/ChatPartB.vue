@@ -51,6 +51,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		width: 22px;
 		height: 22px;
 		border-radius: 11px;
+		overflow: hidden;
 		img{
 			width: 100%;
 		}

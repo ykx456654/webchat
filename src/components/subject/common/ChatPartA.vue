@@ -1,7 +1,8 @@
 <template>
-	<div class="chat-a chat-part-a">
+	<div class="chat-a chat-part-a" id="load-wrap">
 		<loadmore
-		class="chat-a-loadmore" 
+		class="chat-a-loadmore"
+		id="chat-a-content" 
 		:autoFill="false"
 		:top-method="getHistory"
 		ref="loadmore"
@@ -35,16 +36,38 @@
 <script>
 import {Header,Spinner,Loadmore } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
+import { throttle } from '../../../utils/func'
+// import bus from '../../common/eventBus'
 import AChatItem from './AChatItem'
+
 	export default{
 		components:{xHeader:Header,Loadmore,Spinner,AChatItem},
+		mounted () {
+			var $chatWrapper = $('#load-wrap')
+			var $chatLoader = $('#chat-a-content')
+			var _this = this
+			$chatWrapper.on('scroll',throttle(function(){
+				_this.isBottom = false
+				if ($chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop() < 50) {
+					_this.isBottom = true
+				}else{
+					_this.isBottom = false
+				}
+				// console.log(_this.isBottom)
+			},100,3000))
+		},
+		beforeDestroy () {
+			// bus
+		},
 		data () {
 			return {
 				is_top_end:false,
 				is_bottom_end:false,
-				advanceMsgList: [1,2,3,4,5],
+				limit:10,
+				direction:false,  //方向标识，true，拉取新消息，false，拉取历史消息
 				topStatus:'',
-				bottomStatus:''
+				bottomStatus:'',
+				isBottom:true
 			}
 		},
 		props:{
@@ -54,22 +77,18 @@ import AChatItem from './AChatItem'
 			}
 		},
 		computed: {
-			...mapGetters(['advanceMsg'])
+			...mapGetters(['advanceMsg']),
+			msgLength () {
+				return this.advanceMsg.msgList.length
+			}
 		},
 		methods:{
-			...mapActions(['getHistoryAdvMsg','getAdvMsg']),
+			...mapActions(['getAdvMsg']),
 			getHistory () {
-				this.getHistoryAdvMsg()
+				this.isBottom = false
+				this.getAdvMsg({limit:this.limit,direction:false})
 				.then(res=>{
 					this.$refs.loadmore.onTopLoaded()
-				})
-				.done()
-			},
-			load () {
-				this.getAdvMsg()
-				.then(res=>{
-					this.$refs.loadmore.onBottomLoaded();
-					this.is_bottom_end = res
 				})
 				.done()
 			},
@@ -79,6 +98,15 @@ import AChatItem from './AChatItem'
 			handBottomStatus (status) {
 				// console.log(status)
 				this.bottomStatus = status
+			}
+		},
+		watch:{
+			msgLength (nv,ov) {
+				this.$nextTick(()=>{
+					if (this.isBottom) {
+						$('#load-wrap').scrollTop(100000)
+					}
+				})
 			}
 		}
 	}

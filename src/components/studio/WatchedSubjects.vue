@@ -6,12 +6,13 @@
 			</router-link>
 		</x-header>
 		<Loadmore :autoFill="false"  :bottom-method="loadSubjects" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<ul>
-				<li>
+			<ul>	
+				<seat-img v-if="subjects.length == 0 && isLoad" msg="暂无浏览过的话题"></seat-img>
+				<li v-for="(m,i) in subjects" @click="linkSubject(m.studioId,m.subjectId)">
+					<watched-subject :subject="m"></watched-subject>
 					<div class="no-more" v-if="allLoaded && subjects.length != 0">
 						没有更多了
 					</div>
-					<seat-img v-if="subjects.length == 0" msg="暂无浏览过的话题"></seat-img>
 				</li>
 			</ul>
 		</Loadmore>
@@ -19,14 +20,14 @@
 </template>
 <script>
 import {Header,Loadmore } from 'mint-ui'
-import SubjectItem from './common/SubjectItem'
+import watchedSubject from './common/watchedSubject'
 import seatImg from '../common/seat-img'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { api } from '../../utils/api'
 	export default {
 		name:'WatchedSubjects',
 		components:{
-			xHeader:Header,Loadmore,SubjectItem,seatImg
+			xHeader:Header,Loadmore,seatImg,watchedSubject
 		},
 		created () {
 			this.hideLoad()
@@ -37,7 +38,8 @@ import { api } from '../../utils/api'
 				allLoaded:false,
 				subjects:[],
 				start:0,
-				limit:10
+				limit:10,
+				isLoad:false
 			}
 		},
 		methods: {
@@ -46,18 +48,22 @@ import { api } from '../../utils/api'
 				api(this.uid,{cmd:'get_scan_subject',srv:'studio_studio'},{start:this.start,limit:this.limit})
 				.then(res=>{
 					res = res.data
+					this.isLoad = true
 					if (this.subjects.length == 0) {
 						this.hideLoad()
 					}
 					if (res.result != 0) {
 						this.toast(res.msg)
 					}else{
-						// 
+						this.subjects = this.subjects.concat(res.rsps[0].body.subjects)
 						this.start+=this.limit
 						this.$refs.loadmore.onBottomLoaded();
 						this.allLoaded = res.rsps[0].body.is_end
 					}
 				})
+			},
+			linkSubject (studioId,subjectId) {
+				this.$router.push({path:'/Subject',query:{studioId,subjectId}})
 			}
 		},
 		computed: {

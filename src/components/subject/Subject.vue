@@ -4,6 +4,9 @@
 			<a slot="left" @click="goBcak()">
 				<i class="icon icon-arrow-back"></i>
 			</a>
+	<!-- 		<a slot="right" @click="">
+				设置
+			</a> -->
 		</x-header>
 		<section class="swiper-ppt" v-if="subject.subjectType != 1">
 			<img src="../../assets/images/pic__zbht.jpg">
@@ -31,14 +34,12 @@
 			<high-input v-else></high-input>
 		</section>
 		<!-- <button @click="stopLoop">stop</button> -->
-		<audio id="voice-player" class="voice-player"></audio>
 		<previewer :list="images" :option="options" ref="previewer"></previewer>
-		<popup v-model="popupVisible"  height="50%" is-transparent>
-			<div class="high-input-wrap">
-				
-			</div>
-		</popup >
-		<button @click="showPop">dsffds</button>
+		<popup v-model="showVoice"  is-transparent>
+			<record-voice></record-voice>
+		</popup>
+		<audio id="voice-player" class="voice-player"></audio>
+		<!-- <button @click="showPop">dsffds</button> -->
 	</div>
 </template>
 <script>
@@ -46,38 +47,30 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner } from 'mint-ui'
 import { Previewer, Popup } from 'vux'
 import { api } from '../../utils/api'
-import bus from './common/eventBus'
+import bus from '../common/eventBus'
 
 import ChatPartA from './common/ChatPartA'
 import ChatPartB from './common/ChatPartB'
 import NormalInput from './common/NormalInput'
 import HighInput from './common/HighInput'
+import RecordVoice from './common/RecordVoice'
 	export default {
 		name:'Subject',
+		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup,RecordVoice},
 		created () {
-			const query = this.$route.query
-			this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
-			var p1 = this.getSubjectInfo()
-			var p2 = this.enterSubejct()
-			Promise.all([p1,p2])
-			.then(res=>{
-				return res.every(item => item == true)
-			})
-			.then(()=>{
-				this.isCached = true
-				this.hideLoad()
-			})
-			.then(()=>{
-				// console.log(11122112)
-				this.loopSubject()
-			})
-			.catch(e=>{
-				console.log(e + 'from subject_enter')
-			})
+			// console.log(1)
+			this.init()
 		},
 		mounted () {
+			// console.log(bus._events)
 			bus.$on('show',index=>{
+				/*预览图片*/
+				// alert(1)
 				this.showPreviewer(index)
+			})
+
+			bus.$on('record',value=>{
+				this.record(value)
 			})
 		},
 		activated () {
@@ -91,17 +84,15 @@ import HighInput from './common/HighInput'
 		beforeRouteLeave (to, from ,next) {
 			if (to.name != 'Discuss') {
 				this.clearMsg()
-				this.$destroy()
+				// this.$destroy()
+				bus._events = {}
 			}
-			// console.log(from)
-			// console.log(to)
 			next()
 		},
-		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup},
 		data () {
 			return {
 				isCached:false,
-				popupVisible:false,
+				showVoice:false,
 				options:{
 					getThumbBoundsFn (index) {
 						let thumbnail = document.querySelectorAll('.previewer-demo-img')[index]
@@ -117,7 +108,7 @@ import HighInput from './common/HighInput'
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id','uvNum','images'])
+			...mapGetters(['subject','id','uvNum','images','uid','loopClock'])
 		},
 		methods:{
 			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg']),
@@ -125,18 +116,18 @@ import HighInput from './common/HighInput'
 			checkLayout() {
 
 			},
-			showPop (){
-				this.popupVisible = true
+			record (value){
+				this.showVoice = value 
 			},
 			goBcak () {
-				this.$destroy()
+				// this.$destroy()
 				history.back()
 			},
 			linkSubjectIntro () {
 				this.showLoad()
 				setTimeout(()=>{
 					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId,studioId:this.id.studioId}})
-				},1000)
+				},0)
 			},
 			linkDiscuss () {
 				this.showLoad()
@@ -149,7 +140,36 @@ import HighInput from './common/HighInput'
 				this.$router.push({path:'/Studio',query})
 			},
 			showPreviewer (index) {
-				this.$refs.previewer.show(index)
+				setTimeout(()=>{
+					// console.log(this.$refs.previewer)
+					try {
+						this.$refs.previewer.show(index)
+					}catch(e){
+						console.log(e)
+					}
+				},10)
+			},
+			init () {
+				const query = this.$route.query
+				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
+				var p1 = this.getSubjectInfo()
+				var p2 = this.enterSubejct()
+				// if (this.subject.) {}
+				Promise.all([p1,p2])
+				.then(res=>{
+					return res.every(item => item == true)
+				})
+				.then(()=>{
+					this.isCached = true
+					this.hideLoad()
+				})
+				.then(()=>{
+					// console.log(11122112)
+					this.loopSubject()
+				})
+				.catch(e=>{
+					console.log(e + 'from subject_enter')
+				})
 			}
 		}
 	}

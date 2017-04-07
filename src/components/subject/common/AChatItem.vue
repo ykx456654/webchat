@@ -1,6 +1,6 @@
 <template>
 	<div class="chat-a-item">
-		<div class="flex" v-if="msg.msgType < 3">
+		<div class="flex" v-if="msg.msgType <= 3">
 			<div class="chat-speaker">
 				<img :src="msg.headImg" v-if="msg.headImg !='' ">
 				<img src="../../../assets/images/default_head.png" v-else>
@@ -10,6 +10,7 @@
 				<div class="chat-speaker-name ">
 					<span>{{msg.name}}</span>
 					<span></span>
+					<!-- <span>{{new Date(msg.msgTime*1000).Format("yyyy-MM-dd hh:mm:ss")}}</span> -->
 				</div>
 				<div class="chat-speaker-content">
 					<!-- 文字 -->
@@ -20,7 +21,6 @@
 							<div class="msg">{{msg.textContent}}</div>
 						</div>
 					</div>
-					
 
 					<!-- 图片 -->
 					<div class="image" v-if="msg.msgType === 2" @click="showPreview">
@@ -67,7 +67,7 @@
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import bus from './eventBus.js'
+import bus from '../../common/eventBus.js'
 	export default{
 		props:{
 			msg:{
@@ -85,7 +85,6 @@ import bus from './eventBus.js'
 						index = idx
 					}
 				})
-				// console.log(images)
 				bus.$emit('show',index)
 			}
 		},
