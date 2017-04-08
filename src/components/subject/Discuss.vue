@@ -16,6 +16,7 @@
 		<div class="load-wrap" id="load-wrap" v-show="normalMsg.msgList != 0">
 			<Loadmore
 			class="chat-b-content"
+			
 			id="chat-b-content"
 			:autoFill="false"
 			:top-method="getMsg"
@@ -24,7 +25,7 @@
 			@bottom-status-change="handBottomStatus"
 			>
 				<transition-group name="list" tag="ul">
-					<li class="discuss-item flex" v-for="(m , index) in normalMsg.msgList" :key="index">
+					<li class="discuss-item flex" :class="{'selected':m.selected}" v-for="(m,index) in normalMsg.msgList" :key="index">
 						<div class="discuss-item-left">
 							<img src="../../assets/images/default_head.png" v-if="m.headImg==''">
 							<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
@@ -68,23 +69,50 @@ import { throttle } from '../../utils/func'
 			NormalInput,Loadmore,Indicator
 		},
 		created () {
-			this.init()
+			if (!this.loopClock) {
+				this.init()
+			}else{
+				this.hideLoad()
+				this.isLoad = true
+			}
 		},
 		mounted () {
 			var $chatWrapper = $('#load-wrap')
 			var $chatLoader = $('#chat-b-content')
 			var _this = this
 			$chatWrapper.on('scroll',throttle(function(){
-				if ($chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop() < 50) {
+				_this.isBottom = false
+				var flag = $chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop()
+				if (flag == 0) {
 					_this.isBottom = true
 				}else{
+					_this.setScroll({b:$chatWrapper.scrollTop()})
 					_this.isBottom = false
 				}
 				// console.log(_this.isBottom)
-			},100,3000))
+			},500,500))
 		},
 		activated() {
 			this.hideLoad()
+			let $chatWrapper = $('#load-wrap')
+			let b = this.scroll.b
+			let query = this.$route.query
+			// console.log('activated')
+			if (b != 'init' && !this.isBottom) {
+				this.$nextTick(()=>{
+					$('#load-wrap').scrollTop(b)
+				})
+			}
+			if (this.isBottom) {
+				$chatWrapper.scrollTop(100000)
+			}
+			if(typeof query.msgIndex != 'undefined'){
+				this.$nextTick(()=>{
+					const length = this.normalMsg.msgList.length
+					const index = parseInt(query.msgIndex)
+					this.normalMsg.msgList[length - 4 + index].selected = true
+				})
+			}	
 		},
 		data () {
 			return {
@@ -98,15 +126,18 @@ import { throttle } from '../../utils/func'
 			}
 		},
 		computed: {
-			...mapGetters(['normalMsg','loopClock']),
+			...mapGetters(['normalMsg','loopClock','scroll']),
 			msgLength () {
 				return this.normalMsg.msgList.length
 			}
 		},
 		methods:{
-			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg']),
-			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject']),
+			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg','setScroll']),
+			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject','getAdvMsg']),
 			backSubject () {
+				this.normalMsg.msgList.forEach(item=>{
+					item.selected = false
+				})
 				history.back()
 			},
 			getMsg () {
@@ -117,8 +148,11 @@ import { throttle } from '../../utils/func'
 				})
 				.done()
 			},
-			load () {
+			jumpMsg () {
+				const query = this.$router.query
+				if(query){
 
+				}
 			},
 			seeQuestion () {
 				Indicator.open({
@@ -127,7 +161,7 @@ import { throttle } from '../../utils/func'
 				})
 				this.onlyQuestion = !this.onlyQuestion
 				this.clearMsg(2)
-				this.isLoad = false
+				// this.isLoad = false
 				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				.then(res=>{
 					this.isLoad = true
@@ -142,7 +176,8 @@ import { throttle } from '../../utils/func'
 				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
 				var p1 = this.getSubjectInfo()
 				var p2 = this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
-				Promise.all([p1,p2])
+				var p3 =this.getAdvMsg({direction:this.direction,limit:this.limit})
+				Promise.all([p1,p2,p3])
 				.then(res=>{
 					return res.every(item => item == true)
 				})
@@ -166,8 +201,9 @@ import { throttle } from '../../utils/func'
 		watch:{
 			msgLength (nv, ov) {
 				this.$nextTick(()=>{
+					var box = $('#load-wrap')
 					if (this.isBottom) {
-						$('#load-wrap').scrollTop(100000)
+						box.scrollTop(100000)
 					}
 				})
 			}
@@ -238,6 +274,9 @@ import { throttle } from '../../utils/func'
 	.discuss-item{
 		background-color: #fff;
 		border-bottom: 1px solid #f7f7f7;
+		&.selected{
+			background-color: #e9f4ea;
+		}
 		.discuss-item-left{
 			padding: .1rem;
 			img{

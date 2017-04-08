@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
+// import store from '../store'
 
 
 Vue.use(Router)
@@ -154,7 +154,11 @@ export default new Router({
       path:'/Subject',
       component:Subject,
       name:'Subject',
-      meta:{hideTab:true,keepalive:true}
+      meta:{hideTab:true,keepalive:true},
+      beforeEnter: (to, from, next) => {
+        // store.state.base.keepAliveComponents = ['Subject','Discuss'] 
+        next()
+      }
     },
     {
       path:'/StudioList',

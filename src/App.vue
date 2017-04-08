@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <keep-alive include="Subject">
+        <keep-alive :include="keepAlives">
             <router-view v-show="!show"></router-view>
         </keep-alive>
         <loading v-show="show"></loading>
@@ -22,13 +22,16 @@ export default {
   components:{loading,tab},
   computed: {
     uid () {
-      return this.$store.getters.uid
+        return this.$store.getters.uid
     },
     show () {
-      return this.$store.state.base.loading
+        return this.$store.state.base.loading
     },
     tabS () {
-      return this.$store.state.base.tabShow
+        return this.$store.state.base.tabShow
+    },
+    keepAlives () {
+        return this.$store.state.base.keepAliveComponents.toString()
     }
   },
   methods: {

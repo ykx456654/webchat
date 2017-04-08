@@ -23,10 +23,10 @@ time()
 prms()
 store.state.system = system()
 
-console.log(1)
+
 router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.hideTab)) {
-        console.log('hidetab')
+        // console.log('hidetab')
         store.state.base.tabShow = false
     }else{
         store.state.base.tabShow = true

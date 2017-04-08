@@ -1,7 +1,7 @@
 <template> 
 	<div class="chat-b chat-part-b">
 		<div class="flex chat-b-item justify-end" v-for="(m,index) in partBMsgList">
-			<div class="chat-content">
+			<div class="chat-content" @click="linkDiscuss(index)">
 				<i class="icon icon-wen fl" v-if="m.questionFlag"></i>
 				{{m.textContent}}
 			</div>
@@ -17,11 +17,17 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	export default {
 		data () {
 			return {
-				normalMsg:[1,2,3,4]
+				
 			}
 		},
 		computed:{
 			...mapGetters(['partBMsgList'])
+		},
+		methods:{
+			linkDiscuss (index) {
+				const query = Object.assign({},this.$route.query,{msgIndex:index})
+				this.$router.push({path:'/Discuss',query})
+			}
 		}
 	}
 </script>

@@ -76,7 +76,6 @@ import bus from '../../common/eventBus.js'
 			}
 		},
 		methods: {
-			...mapMutations(['playVoice']),
 			showPreview () {
 				const images = this.$store.getters.images
 				let index 
@@ -86,6 +85,9 @@ import bus from '../../common/eventBus.js'
 					}
 				})
 				bus.$emit('show',index)
+			},
+			playVoice (msg) {
+				bus.$emit('playVoice',msg)
 			}
 		},
 		filters: {

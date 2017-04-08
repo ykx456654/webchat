@@ -24,12 +24,6 @@
 					<a-chat-item :msg="m"></a-chat-item>
 				</li>
 			</transition-group>
-<!-- 			<div class="flex mint-loadmore-bottom  align-items-center justify-center" slot="bottom">
-				<span class="arrow" v-show="bottomStatus !== 'loading'" :class="{ 'rotate': bottomStatus === 'drop' }">
-					<i class="icon icon-drop-up"></i>
-				</span>
-				<spinner :size="15" v-show="bottomStatus == 'loading'"></spinner>
-			</div> -->
 		</loadmore>
 	</div>
 </template>
@@ -43,21 +37,36 @@ import AChatItem from './AChatItem'
 	export default{
 		components:{xHeader:Header,Loadmore,Spinner,AChatItem},
 		mounted () {
-			var $chatWrapper = $('#load-wrap')
-			var $chatLoader = $('#chat-a-content')
-			var _this = this
+			let $chatWrapper = $('#load-wrap')
+			let $chatLoader = $('#chat-a-content')
+			let _this = this
 			$chatWrapper.on('scroll',throttle(function(){
 				_this.isBottom = false
-				if ($chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop() < 50) {
+				// console.log($chatWrapper.scrollTop())
+				// console.log($chatWrapper.height())
+				var flag = $chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop()
+				if (flag == 0) {
+					console.log(flag + ' flag')
 					_this.isBottom = true
 				}else{
+					_this.setScroll({a:$chatWrapper.scrollTop()})
 					_this.isBottom = false
 				}
 				// console.log(_this.isBottom)
-			},100,3000))
+			},100,500))
 		},
 		beforeDestroy () {
 			// bus
+		},
+		activated () {
+			let a = this.scroll.a
+			let $chatWrapper = $('#load-wrap')
+			if (a != 'init' && !this.isBottom) {
+				$chatWrapper.scrollTop(a)
+			}
+			if (this.isBottom) {
+				$chatWrapper.scrollTop(100000)
+			}
 		},
 		data () {
 			return {
@@ -77,12 +86,13 @@ import AChatItem from './AChatItem'
 			}
 		},
 		computed: {
-			...mapGetters(['advanceMsg']),
+			...mapGetters(['advanceMsg','scroll']),
 			msgLength () {
 				return this.advanceMsg.msgList.length
 			}
 		},
 		methods:{
+			...mapMutations(['setScroll']),
 			...mapActions(['getAdvMsg']),
 			getHistory () {
 				this.isBottom = false
@@ -103,8 +113,14 @@ import AChatItem from './AChatItem'
 		watch:{
 			msgLength (nv,ov) {
 				this.$nextTick(()=>{
+					let box = $('#load-wrap')
+					if (this.scroll.a == 'init') {
+						setTimeout(()=>{
+							box.scrollTop(100000)
+						},100)
+					}
 					if (this.isBottom) {
-						$('#load-wrap').scrollTop(100000)
+						box.scrollTop(100000)
 					}
 				})
 			}
@@ -159,7 +175,7 @@ import AChatItem from './AChatItem'
 		}
 	}
 	.list-enter-active, .list-leave-active {
-	  transition: all 1s;
+	  transition: all .8s;
 	}
 	.list-enter, .list-leave-active {
 	  opacity: 0;

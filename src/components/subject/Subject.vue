@@ -38,7 +38,7 @@
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		<audio id="voice-player" class="voice-player"></audio>
+		<audio id="voice-player" :scr="voiceUrl" class="voice-player"></audio>
 		<!-- <button @click="showPop">dsffds</button> -->
 	</div>
 </template>
@@ -59,18 +59,23 @@ import RecordVoice from './common/RecordVoice'
 		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup,RecordVoice},
 		created () {
 			// console.log(1)
-			this.init()
+			if (!this.loopClock) {
+				this.init()
+			}
 		},
 		mounted () {
 			// console.log(bus._events)
 			bus.$on('show',index=>{
 				/*预览图片*/
-				// alert(1)
 				this.showPreviewer(index)
 			})
 
 			bus.$on('record',value=>{
 				this.record(value)
+			})
+
+			bus.$on('playVoice', msg => {
+				this.playVoice(msg)
 			})
 		},
 		activated () {
@@ -81,11 +86,19 @@ import RecordVoice from './common/RecordVoice'
 		deactivated () {
 
 		},
+		beforeRouteEnter (to ,from ,next) {
+			next(vm => {
+				// console.log(vm)
+				vm.setAlive(['Subject','Discuss'])
+			})
+		},
 		beforeRouteLeave (to, from ,next) {
 			if (to.name != 'Discuss') {
 				this.clearMsg()
-				// this.$destroy()
+				this.setAlive(['noComponent'])
 				bus._events = {}
+			}else{
+				this.setAlive(['Subject','Discuss'])
 			}
 			next()
 		},
@@ -104,18 +117,19 @@ import RecordVoice from './common/RecordVoice'
 			          	// w = width
 			          	return {x: rect.left, y: rect.top + pageYScroll, w: rect.width}
 					} 
-				}
+				},
+				advMsgDirection:false,   //方向标识，true，拉取新消息，false，拉取历史消息
+				nrmMsgDirection:false,
+				limit:10,
+				voiceUrl:''
 			}
 		},
 		computed: {
 			...mapGetters(['subject','id','uvNum','images','uid','loopClock'])
 		},
 		methods:{
-			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg']),
-			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop']),
-			checkLayout() {
-
-			},
+			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive']),
+			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop','getAdvMsg','getNormalMsg']),
 			record (value){
 				this.showVoice = value 
 			},
@@ -153,9 +167,10 @@ import RecordVoice from './common/RecordVoice'
 				const query = this.$route.query
 				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
 				var p1 = this.getSubjectInfo()
-				var p2 = this.enterSubejct()
+				var p2 = this.getAdvMsg({direction:this.advMsgDirection,limit:this.limit})
+				var p3 = this.getNormalMsg({direction:this.nrmMsgDirection,limit:this.limit,onlyQuestion:false})
 				// if (this.subject.) {}
-				Promise.all([p1,p2])
+				Promise.all([p1,p2,p3])
 				.then(res=>{
 					return res.every(item => item == true)
 				})
@@ -164,12 +179,16 @@ import RecordVoice from './common/RecordVoice'
 					this.hideLoad()
 				})
 				.then(()=>{
-					// console.log(11122112)
 					this.loopSubject()
 				})
 				.catch(e=>{
 					console.log(e + 'from subject_enter')
 				})
+			},
+			playVoice (msg) {
+				// alert(msg)
+				this.voiceUrl = msg.vodUrl
+				// $('')
 			}
 		}
 	}

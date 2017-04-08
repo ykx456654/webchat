@@ -19,7 +19,9 @@ export default {
 		updateKeys:[],
 		loopClock:null,
 		repeatAdvId:[],
-		repeatNrmId:[]
+		repeatNrmId:[],
+		scrollTopA:'init',
+		scrollTopB:'init'
 	},
 	getters:{
 		subject (state) {
@@ -30,6 +32,9 @@ export default {
 		},
 		loopClock (state) {
 			return state.loopClock
+		},
+		scroll (state) {
+ 			return {a:state.scrollTopA,b:state.scrollTopB}
 		},
 		uvNum (state) {
 			return state.subjectMsg.uvNum
@@ -70,9 +75,13 @@ export default {
 			state.subjectId = Number(subjectId)
 			state.studioId = Number(studioId)
 		},
-		playVoice (state,{vodUrl,vodDuration}) {
-			// $()
-			alert(vodUrl)
+		setScroll (state,{a,b}) {
+			if (a) {
+				state.scrollTopA = a
+			}
+			if (b) {
+				state.scrollTopB = b
+			}
 		},
 		pushAdvMsg (state,{msgId,msgList}) {
 			// 轮询获取高级消息
@@ -82,14 +91,14 @@ export default {
 			for (var i = 0; i < rIds.length; i++) {
 				for (var j = 0; j < msgList.length; j++) {
 					if (msgList[j].id == rIds[i]) {
-						if (i > 0) {i--}
-						rIds.splice(i,1)
-						msgList.splice(j,1)
+						rIds.splice(i,1);
+						msgList.splice(j,1);
+						i--;
+						j--;
 					}
 				}
 			}
 			state.subjectMsg.advanceMsg.msgList = list.concat(msgList)
-			// bus.$emit('Ascroll')
 		},
 		unshiftAdvMsg(state,{is_end,msgId,msgList}){
 			state.subjectMsg.advanceMsg.msgId = msgId
@@ -100,15 +109,17 @@ export default {
 		},
 		pushNormalMsg (state,{msgId,msgList}) {
 			// 轮询获普通消息
-			var rIds = state.repeatNrmId
+			let rIds = state.repeatNrmId
 			state.subjectMsg.normalMsg.msgId = msgId
-			var list = state.subjectMsg.normalMsg.msgList
-			for (var i = 0; i < rIds.length; i++) {
-				for (var j = 0; j < msgList.length; j++) {
+			let list = state.subjectMsg.normalMsg.msgList
+			for (let i = 0; i < rIds.length; i++) {
+				for (let j = 0; j < msgList.length; j++) {
 					if (msgList[j].id == rIds[i]) {
-						if (i > 0) {i--}
-						rIds.splice(i,1)
-						msgList.splice(j,1)
+						msgList[j].selected = false
+						rIds.splice(i,1);
+						msgList.splice(j,1);
+						i--;
+						j--;
 					}
 				}
 			}
@@ -118,6 +129,7 @@ export default {
 			state.subjectMsg.normalMsg.msgId = msgId
 			var list = state.subjectMsg.normalMsg.msgList
 			for(var i = msgList.length - 1; i >= 0; i-- ){
+				msgList[i].selected = false
 				list.unshift(msgList[i])
 			}
 		},
@@ -131,6 +143,7 @@ export default {
 			}
 			if (msg.type === 2) {
 				state.repeatNrmId.push(id)
+				msg.selected = false
 				state.subjectMsg.normalMsg.msgList.push(msg)
 			}
 		},
@@ -161,6 +174,7 @@ export default {
 					msgList:[]
 				}
 			}
+			state.loopClock = null
 		}
 	},
 	actions: {
@@ -210,7 +224,7 @@ export default {
 						// 拉取历史消息
 						commit('unshiftAdvMsg',res.rsps[0].body)
 					}
-					return res.rsps[0].body.is_end
+					return true
 				}
 			})
 		},
@@ -231,7 +245,7 @@ export default {
 						// 拉取历史消息
 						commit('unshiftNormalMsg',res.rsps[0].body)
 					}
-					return res.rsps[0].body.is_end
+					return true
 				}
 			})
 		},
@@ -272,7 +286,7 @@ export default {
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},3000)
+					},30000)
 					Promise.resolve()
 				})
 				.catch(e=>{
@@ -283,7 +297,7 @@ export default {
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},3000)
+					},30000)
 				})
 			}
 			run()

@@ -1,7 +1,11 @@
 export default {
 	state:{
 		loading:true,
-		tabShow:true
+		tabShow:true,
+		keepAliveComponents:['Subject','Discuss']
+	},
+	getters :{
+	
 	},
 	mutations:{
 		showLoad (state) {
@@ -15,6 +19,9 @@ export default {
 		},
 		showTab (state) {
 			state.tabShow = true
+		},
+		setAlive (state,arr) {
+			state.keepAliveComponents = arr
 		}
 	}
 }
