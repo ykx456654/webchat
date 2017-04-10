@@ -19,7 +19,9 @@
 							<span v-text="studio.fanNum"></span>
 						</div>
 						<div class=" align-items-center flex" v-if="studio.studioRole != 1">
-							<a @click="focus" class="btn btn-focus">关注</a>
+							<a @click="focus" class="btn btn-focus" :class="{'btn-unfocus':!studio.isFan}">
+								{{!studio.isFan?'已关注':'关注'}}
+							</a>
 						</div>
 					</div>
 				</div>
@@ -167,8 +169,10 @@ import SubjectItem from './common/SubjectItem'
 						this.studio.isFan = !this.studio.isFan
 						if (this.studio.isFan) {
 							this.studio.fanNum--
+							this.toast('取消关注成功')
 						}else{
 							this.studio.fanNum++
+							this.toast('关注成功')
 						}
 					}
 				})
@@ -211,9 +215,9 @@ import SubjectItem from './common/SubjectItem'
 		background-repeat: no-repeat;
 		&.lanch{
 			@media screen and (min-width:375px) {
-				padding-bottom: 53.5%;
+				padding-bottom: 55.5%;
 			}
-			padding-bottom: 57.5%;
+			padding-bottom: 58.5%;
 		}
 	}
 	.user-info{
@@ -304,5 +308,8 @@ import SubjectItem from './common/SubjectItem'
 	    height: 16px;
 	    line-height: 16px;
 	    margin-left: 10px;
+	}
+	.btn-unfocus {
+		background-color: #999;
 	}
 </style>

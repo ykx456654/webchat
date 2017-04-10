@@ -16,6 +16,10 @@
 				</div>
 			</div>
 		</div>
+		<div class="fee flex justify-space-between" v-if="subject.fee != 0">
+			<p>票价</p>
+			<p class="red">￥{{(subject.fee/100).toFixed(2)}}</p>
+		</div>
 		<div class="all-intro" v-if="subject.masterIntro != ''">
 			<div class="intro">
 				<h5>话题介绍</h5>
@@ -29,20 +33,21 @@
 		<div class="studio-info">
 			<div class="flex justify-space-between align-items-center studio-owner">
 				<div class="flex align-items-center">
-					<img src="../../assets/images/icon_zbj_mr.png">
-					<span>jack的直播间</span>
+					<img :src="studio.studioImg" v-if="studio.studioImg!=''">
+					<img src="../../assets/images/icon_zbj_mr.png" v-else>
+					<span>{{studio.studioTitle}}</span>
 				</div>
 				<div class="flex align-items-center">
-					<a class="btn" @click="focus" v-if="subject.subjectRole == 100">关注</a>
+					<a class="btn" @click="focus" v-if="subject.subjectRole == 100 &&　!studio.isFan">关注</a>
 				</div>
 			</div>
 			<div class="flex studio-num align-items-center">
 				<div class="flex flex-direction-column just-space-around">
-					<p>24</p>
+					<p v-text="studio.subjectNum"></p>
 					<p>话题数</p>
 				</div>
 				<div class="flex flex-direction-column just-space-around">
-					<p>556</p>
+					<p v-text="studio.fanNum"></p>
 					<p>粉丝数</p>
 				</div>
 			</div>
@@ -70,7 +75,8 @@ export default {
 		return {
 			subjectId:0,
 			studioId:0,
-			subject:{}
+			subject:{},
+			studio:{}
 		}
 	},
 	methods : {
@@ -79,7 +85,7 @@ export default {
 			history.back()
 		},
 		getSubjectInfo () {
-			api(this.uid,{srv:'studio_studio',cmd:'get_subject_info'},{subjectId:this.subjectId})
+			api(this.uid,{srv:'studio_studio',cmd:'subject_introduce'},{studioId:this.studioId,subjectId:this.subjectId})
 			.then(res => {
 				res = res.data
 				if (res.result != 0) {
@@ -87,6 +93,7 @@ export default {
 				}else{
 					this.hideLoad()
 					this.subject = res.rsps[0].body.subject
+					this.studio = res.rsps[0].body.studio
 				}
 			})
 		},
@@ -95,7 +102,24 @@ export default {
 			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId}})
 		},
 		focus () {
-			alert('关注')
+			api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
+				studioId:this.studioId,isSubscribe:!this.studio.isFan
+			})
+			.then(res=>{
+				res = res.data
+				if (res.result != 0 ) {
+					this.toast(res.msg)
+				}else{
+					this.studio.isFan = !this.studio.isFan
+					if (this.studio.isFan) {
+						this.studio.fanNum--
+						this.toast('取消关注成功')
+					}else{
+						this.studio.fanNum++
+						this.toast('关注成功')
+					}
+				}
+			})
 		}
 	},
 	computed: {
@@ -152,6 +176,17 @@ export default {
 				color: #999;
 			}
 		}
+	}
+	.fee{
+		margin: 10px 0;
+		height: 50px;
+		line-height: 50px;
+		font-size: 17px;
+		padding: 0 15px;
+		background-color: #fff
+	}
+	.red{
+		color: #d93639
 	}
 	.all-intro{
 		background-color: #fff;

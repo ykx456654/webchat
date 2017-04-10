@@ -187,7 +187,7 @@ export default {
 					commit('toast',res.msg)
 					Promise.reject(res.msg)
 				}else{
-					state.subject = res.rsps[0].body.subject
+					state.subject = res.rsps[0].body
 					return true
 				}
 			})

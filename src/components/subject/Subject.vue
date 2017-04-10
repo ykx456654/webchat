@@ -22,7 +22,7 @@
 					<span v-text="subject.uvNum"></span>
 				</div>
 				<div class="flex align-items-center justify-center">讨论</div>
-			</div>
+			</div>	
 			<div class="studio-home">
 				<i class="icon icon-studio-home" @click="linkStudio"></i>
 			</div>
