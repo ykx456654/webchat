@@ -55,10 +55,9 @@
 import {mapMutations} from 'vuex'
 import {api} from '../../../utils/api.js'
 import { Header } from 'mint-ui';
-// import videojs from 'video.js'
-// require('videojs-contrib-hls')
 import zy from '../../../lib/zymedia/zy.media.js'
 export default {
+	name:"CourseDetailLive",
 	components:{xHeader:Header},
 	mounted () {
 		// console.log(1)

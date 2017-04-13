@@ -15,7 +15,8 @@
 					</div>
 					<div class="content-box" @click="linkSubject(r.studioId,r.subjectId)">
 						<div class="img-box">
-							<img class="page" src="../../assets/images/pic_ht_mr.png">	
+							<img class="page" src="../../assets/images/pic_ht_mr.png" v-if="r.subjectImg == ''">	
+							<img class="page" v-lazy="r.subjectImg" alt="" v-else>
 							<span class="tag status">{{ r.liveStatus | status}}</span>
 							<div class="bottom-tag flex">
 								<span class="price" v-if="r.fee != 0">{{(r.fee/100).toFixed(2)}}</span>

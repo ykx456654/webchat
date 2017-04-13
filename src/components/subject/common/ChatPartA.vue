@@ -21,7 +21,7 @@
 					直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始
 				</div>
 				<li v-for="(m,index) in advanceMsg.msgList" :key="index"  v-bind:data-index="index">
-					<a-chat-item :msg="m"></a-chat-item>
+					<a-chat-item :msg="m" :index="index"></a-chat-item>
 				</li>
 			</transition-group>
 		</loadmore>

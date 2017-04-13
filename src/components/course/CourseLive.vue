@@ -65,7 +65,7 @@ export default {
 		next()
 	},
 	mounted () {
-		// console.log(2)
+		
 		const uid = this.uid
 		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0})
 		.then(res=>{
@@ -97,7 +97,7 @@ export default {
 		},
 		link (id) {
 			this.showLoad()
-			this.$router.push({name:'CourseDetailLive',params:{vdoid:id}})
+			this.$router.push({name:'CourseDetailLive',params:{vdoid:id},force:true})
 		},
 		...mapMutations([
 			'showLoad','hideLoad'

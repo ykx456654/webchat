@@ -110,7 +110,6 @@ export default {
 				if (res.result != 0 ) {
 					this.toast(res.msg)
 				}else{
-					this.studio.isFan = !this.studio.isFan
 					if (this.studio.isFan) {
 						this.studio.fanNum--
 						this.toast('取消关注成功')
@@ -118,6 +117,7 @@ export default {
 						this.studio.fanNum++
 						this.toast('关注成功')
 					}
+					this.studio.isFan = !this.studio.isFan
 				}
 			})
 		}

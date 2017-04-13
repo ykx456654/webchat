@@ -2,7 +2,7 @@
 	<div class="chat-a-item">
 		<div class="flex" v-if="msg.msgType <= 3">
 			<div class="chat-speaker">
-				<img :src="msg.headImg" v-if="msg.headImg !='' ">
+				<img :src="msg.headImg" v-if="msg.headImg !='' && msg.headImg ">
 				<img src="../../../assets/images/default_head.png" v-else>
 				<i class="icon icon-dashang"></i>
 			</div>
@@ -12,10 +12,10 @@
 					<span></span>
 					<!-- <span>{{new Date(msg.msgTime*1000).Format("yyyy-MM-dd hh:mm:ss")}}</span> -->
 				</div>
-				<div class="chat-speaker-content">
+				<div class="chat-speaker-content" v-if="!msg.answerFlag">
 					<!-- 文字 -->
 					<div class="content flex align-items-center" v-if="msg.msgType === 1">
-						<div class="triangle"></div>
+						<div class="triangle bw" style="width:auto"></div>
 						<div class="triangle-border"></div>
 						<div class="word-msg">
 							<div class="msg">{{msg.textContent}}</div>
@@ -29,16 +29,43 @@
 
 					<!-- 语音 -->
 					<div class="flex align-items-center voice" v-if="msg.msgType === 3" > 
-						<div class="content" v-voice-width="{'vodDuration':msg.vodDuration,'msgType':msg.msgType}" @click="playVoice({vodUrl:msg.vodUrl,vodDuration:msg.vodDuration})">
+						<div class="content" 
+						v-voice-width="{'vodDuration':msg.vodDuration,'msgType':msg.msgType}" 
+						@click="play({vodUrl:msg.vodUrl,vodDuration:msg.vodDuration},1)">
 							<div class="triangle"></div>
 							<div class="triangle-border"></div>
 							<div class="voice-msg">
-								<i class="icon icon-voice"></i>
+								<i class="icon icon-voice" :class="{'icon-playing':msg.playing}"></i>
 							</div>
 						</div>
 						<span class="times">{{msg.vodDuration}}s</span>
 					</div>
+				</div>
 
+				<div class="content" v-if="msg.answerFlag">
+					<div class="triangle"></div>
+					<div class="triangle-border"></div>
+					<div>
+						<p class="text-left">
+							{{msg.refQuestionText}}
+						</p>
+						<div class="bd1"></div>
+						<div class="flex align-items-center" v-if="msg.ansList[0].ansType == 3">
+							<div class="answer-voice content"  
+								v-voice-width="{'vodDuration':msg.ansList[0].vodDuration,'msgType':msg.ansList[0].ansType}" 
+								@click="play({vodUrl:msg.ansList[0].vodUrl,vodDuration:msg.ansList[0].vodDuration},3)">
+								<div class="voice-msg">
+									<i class="icon icon-voice" :class="{'icon-playing':msg.ansList[0].playing}"></i>
+								</div>
+							</div>
+							<span class="times">{{msg.ansList[0].vodDuration}}s</span>
+						</div>
+						<div v-if="msg.ansList[0].ansType == 1">
+							<p>
+								{{msg.ansList[0].textContent}}
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -73,6 +100,15 @@ import bus from '../../common/eventBus.js'
 			msg:{
 				type:Object,
 				default:{}
+			},
+			index:{
+				type:Number,
+				default:0
+			}
+		},
+		data () {
+			return {
+				flag:true
 			}
 		},
 		methods: {
@@ -86,18 +122,28 @@ import bus from '../../common/eventBus.js'
 				})
 				bus.$emit('show',index)
 			},
-			playVoice (msg) {
-				bus.$emit('playVoice',msg)
+			play (msg,type) {
+				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
+				if(this.flag){
+					bus.$emit('playVoice',{msg,index:this.index,type})
+				}else{
+					bus.$emit('endVoice',{index:this.index,type:type+1})
+				}	
+				this.flag = !this.flag
 			}
 		},
 		filters: {
 
 		},
 		directives: {
-			voiceWidth (el,binding) {
-				/*计算语音宽度，最长60s，最短1s，*/
-				// console.log(binding)
-				el.style.width =.2 + binding.value*1.2/60 + 'rem';
+			voiceWidth: {
+				inserted (el,binding) {
+					/*计算语音宽度，最长60s，最短1s，*/
+					if(binding.value.msgType == 3 && binding.value.vodDuration){
+						// console.log(el)
+						el.style.width =.2 + Number(binding.value.vodDuration)*1.2/60 + 'rem'
+					}
+				}
 			}
 		}
 	}
@@ -147,12 +193,13 @@ import bus from '../../common/eventBus.js'
 	    word-break: break-all;
 	    position: relative;
 	    margin-top: 5px;
+		background-color: #f9f9f9;
 	}
 	.triangle{
 		width: 0;
 	    height: 0;
 	    border-top: 6px solid transparent;
-	    border-right: 7px solid #fff;
+	    border-right: 7px solid #f9f9f9;
 	    border-bottom: 6px solid transparent;
 	    position: absolute;
 	    z-index: 5;
@@ -186,6 +233,9 @@ import bus from '../../common/eventBus.js'
 		}
 		.times{
 			color: #666;
+		}
+		.icon-voice{
+			background-image: url(../../../assets/icons/yuying2.png);
 		}
 	}
 	@keyframes blink {
@@ -244,5 +294,14 @@ import bus from '../../common/eventBus.js'
 		border-top: 1px solid #f0f0f0;
 		padding: 10px 0;
 	}
-
+	.bd1{
+		height: 1px;
+		background-color: #e2e2e2;
+		margin: 10px 0 8px;
+	}
+	.answer-voice{
+		flex:1;
+		margin-right: 5px;
+		background-color: #f9f9f9;
+	}
 </style>

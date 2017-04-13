@@ -38,7 +38,9 @@
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		<audio id="voice-player" :scr="voiceUrl" class="voice-player"></audio>
+		<audio id="voice-player"   class="voice-player">
+			 <source :src="voiceUrl" type="audio/mpeg">
+		</audio>
 		<!-- <button @click="showPop">dsffds</button> -->
 	</div>
 </template>
@@ -77,6 +79,11 @@ import RecordVoice from './common/RecordVoice'
 			bus.$on('playVoice', msg => {
 				this.playVoice(msg)
 			})
+
+			bus.$on('endVoice',msg => {
+				this.endVoice(msg)
+			})
+
 		},
 		activated () {
 			if (this.isCached) {
@@ -121,14 +128,15 @@ import RecordVoice from './common/RecordVoice'
 				advMsgDirection:false,   //方向标识，true，拉取新消息，false，拉取历史消息
 				nrmMsgDirection:false,
 				limit:10,
-				voiceUrl:''
+				voiceUrl:'',
+				voicePlayer:null
 			}
 		},
 		computed: {
 			...mapGetters(['subject','id','uvNum','images','uid','loopClock'])
 		},
 		methods:{
-			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive']),
+			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive','setPlayingVoice']),
 			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop','getAdvMsg','getNormalMsg']),
 			record (value){
 				this.showVoice = value 
@@ -185,10 +193,28 @@ import RecordVoice from './common/RecordVoice'
 					console.log(e + 'from subject_enter')
 				})
 			},
-			playVoice (msg) {
+			playVoice (obj) {
 				// alert(msg)
-				this.voiceUrl = msg.vodUrl
-				// $('')
+				if(this.voicePlayer){
+					this.voicePlayer.pause()
+					this.voicePlayer = null
+				}
+				this.voicePlayer = new window.Audio()
+				this.voicePlayer.src = obj.msg.vodUrl 
+				this.voicePlayer.play()
+				this.setPlayingVoice({type:obj.type,i:obj.index})
+				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
+				this.voicePlayer.addEventListener('ended',()=>{
+					this.setPlayingVoice({type:obj.type+1,i:obj.index})
+				},false)
+			},
+			endVoice (obj) {
+				// 停止录音
+				if(this.voicePlayer){
+					this.voicePlayer.pause()
+					this.voicePlayer = null
+				}
+				this.setPlayingVoice({type:obj.type,i:obj.index})
 			}
 		}
 	}

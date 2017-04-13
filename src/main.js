@@ -9,7 +9,7 @@ import { Lazyload } from 'mint-ui'
 import time from './utils/time.js'
 import prms from './utils/promise.js' 
 import system from './utils/checkSystem.js'
-import {checkUser,getUser} from './utils/auth.js'
+import {checkUser,getUser,getJsTicket} from './utils/auth.js'
 import {responseInterceptor} from './utils/interceptors.js'
 import {getUrlParam,getCookie,setCookie} from './utils/func'
 import axios from 'axios'
@@ -48,8 +48,7 @@ router.beforeEach((to, from, next) => {
                 }else{
                     Toast(res.message)
                     setTimeout(()=>{
-                        // alert(1)
-                         // location.href = '../../login_room/build/index.html'
+
                     },1500)
                 }
             })
@@ -73,8 +72,38 @@ const app = new Vue({
 
 
 
+
 if (!/MicroMessenger/i.test(navigator.userAgent)) {
-	app.$mount('#app')
-}else{
     app.$mount('#app')
+}else{
+    const cookie = getCookie('uid')
+    getJsTicket(cookie)
+    .then(res=>{
+        if(res.result!=0){
+            Toast(res.msg)
+        }else{
+            const signParams = Object.assign({},res.rsps[0].body,{
+                debug: window.appId == 'wx9a4c6d9512f05f99',
+                jsApiList:['onMenuShareAppMessage', 'onMenuShareTimeline','hideOptionMenu','chooseWXPay'],
+            }) 
+            return signParams
+        }
+    })
+    .then(sign=>{
+        wx.config(sign)
+        wx.ready(function () {
+            var
+            params = {
+                title: '医学界-医生学习的加油站',
+                desc: '医生站 医生学习的加油站，服务医生改善医疗',
+                link: 'http://' + window.location.hostname,
+                imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
+            };
+            wx.onMenuShareAppMessage(params);
+            wx.onMenuShareAppMessage(params);
+        });
+        app.$mount('#app')
+    })
 }
+
+

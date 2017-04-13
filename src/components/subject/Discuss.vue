@@ -39,13 +39,22 @@
 							</div>
 							<div class="answer" v-if="m.questionFlag">
 								<div class="flex align-items-center">
-									<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg">
-									<span>fdsafdsa</span>
-									<span>fdsfs</span>
+									<img :src="m.ansList[0].headUrl" alt="" v-if="m.ansList[0].headUrl != ''">
+									<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
+									<span>{{m.ansList[0].name}}</span>
+									<!--<span>fdsfs</span>-->
 								</div>
 								<div>
-									<div>
-										fjisadofsdhiooisdhifsdh
+									<div v-if="m.ansList[0].ansType == 1">
+										{{m.ansList[0].textContent}}
+									</div>
+									<div class="flex align-items-center" v-if="m.ansList[0].ansType == 3">
+										<div class="answer-voice content"  v-voice-width="{'vodDuration':m.ansList[0].vodDuration,'msgType':m.ansList[0].ansType}" @click="playVoice({vodUrl:m.ansList[0].vodUrl,vodDuration:m.ansList[0].vodDuration})">
+											<div class="voice-msg">
+												<i class="icon icon-voice"></i>
+											</div>
+										</div>
+										<span class="times">{{m.ansList[0].vodDuration}}s</span>
 									</div>
 								</div>		
 							</div>
@@ -207,6 +216,12 @@ import { throttle } from '../../utils/func'
 					}
 				})
 			}
+		},
+		directives: {
+			voiceWidth (el,binding) {
+				/*计算语音宽度，最长60s，最短1s，*/
+				el.style.width =.2 + Number(binding.value.vodDuration)*1.2/60 + 'rem'
+			}
 		}
 	}
 </script>
@@ -339,6 +354,25 @@ import { throttle } from '../../utils/func'
 			}
 
 		}
+	}
+	.content{
+		font-size: .15rem;
+	    color: #4a4a4a;
+	    border: 1px solid #d8d8d8;
+	    line-height: .2rem;
+	    min-height: .2rem;
+	    background-color: #fff;
+	    padding: 0 .05rem;
+	    max-width: 2.4rem;
+	    border-radius: 5px;
+	    padding: .05rem .1rem;
+	    word-break: break-all;
+	    position: relative;
+	    margin-top: 5px;
+	}
+	.answer-voice{
+		// flex: 1;
+		margin-right: 5px;
 	}
 	.list-enter-active, .list-leave-active {
 	  transition: all 1s;

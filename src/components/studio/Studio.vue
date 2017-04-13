@@ -19,8 +19,8 @@
 							<span v-text="studio.fanNum"></span>
 						</div>
 						<div class=" align-items-center flex" v-if="studio.studioRole != 1">
-							<a @click="focus" class="btn btn-focus" :class="{'btn-unfocus':!studio.isFan}">
-								{{!studio.isFan?'已关注':'关注'}}
+							<a @click="focus" class="btn btn-focus" :class="{'btn-unfocus':studio.isFan}">
+								{{studio.isFan?'已关注':'关注'}}
 							</a>
 						</div>
 					</div>
@@ -166,7 +166,6 @@ import SubjectItem from './common/SubjectItem'
 					if (res.result != 0 ) {
 						this.toast(res.msg)
 					}else{
-						this.studio.isFan = !this.studio.isFan
 						if (this.studio.isFan) {
 							this.studio.fanNum--
 							this.toast('取消关注成功')
@@ -174,6 +173,7 @@ import SubjectItem from './common/SubjectItem'
 							this.studio.fanNum++
 							this.toast('关注成功')
 						}
+						this.studio.isFan = !this.studio.isFan
 					}
 				})
 			}

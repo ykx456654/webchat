@@ -5,8 +5,8 @@
 				<i class="icon icon-wen fl" v-if="m.questionFlag"></i>
 				{{m.textContent}}
 			</div>
-			<div class="user-head">
-				<img :src="m.headImg" v-if="m.headImg!=''">
+			<div class="user-head flex align-items-center">
+				<img :src="m.headImg" v-if="m.headImg!='' && m.headImg">
 				<img src="../../../assets/images/default_head.png" v-else>
 			</div>	
 		</div>

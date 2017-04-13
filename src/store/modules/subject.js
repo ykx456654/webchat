@@ -90,6 +90,12 @@ export default {
 			var list = state.subjectMsg.advanceMsg.msgList
 			for (var i = 0; i < rIds.length; i++) {
 				for (var j = 0; j < msgList.length; j++) {
+					if (msgList[j].msgType == 3) {
+						msgList[j].playing = false
+					}
+					if(msgList[i].answerFlag){
+						msgList[i].ansList[0].playing = false
+					}
 					if (msgList[j].id == rIds[i]) {
 						rIds.splice(i,1);
 						msgList.splice(j,1);
@@ -104,6 +110,12 @@ export default {
 			state.subjectMsg.advanceMsg.msgId = msgId
 			var list = state.subjectMsg.advanceMsg.msgList
 			for(var i = msgList.length - 1; i >= 0; i-- ){
+				if (msgList[i].msgType == 3) {
+					msgList[i].playing = false
+				}
+				if(msgList[i].answerFlag){
+					msgList[i].ansList[0].playing = false
+				}
 				list.unshift(msgList[i])
 			}
 		},
@@ -175,6 +187,37 @@ export default {
 				}
 			}
 			state.loopClock = null
+		},
+		setPlayingVoice (state,o) {
+			switch (o.type) {
+				case 1:
+					state.subjectMsg.advanceMsg.msgList.map((item,index)=>{
+						if(o.i == index){
+							item.playing = true
+						}else{
+							item.playing = false
+						}
+					})
+					break;
+				case 2:
+					state.subjectMsg.advanceMsg.msgList[o.i].playing = false
+					break;
+				case 3:
+					state.subjectMsg.advanceMsg.msgList.map((item,index)=>{
+						if(item.answerFlag){
+							if(o.i == index){
+								// console.log(item)
+								item.ansList[0].playing = true
+							}else{
+								item.ansList[0].playing = false
+							}
+						}
+					})
+					break;
+				case 4:
+					state.subjectMsg.advanceMsg.msgList[o.i].ansList[0].playing = false
+					break;
+			}
 		}
 	},
 	actions: {
@@ -286,7 +329,7 @@ export default {
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},30000)
+					},3000)
 					Promise.resolve()
 				})
 				.catch(e=>{
@@ -297,7 +340,7 @@ export default {
 					state.loopClock = 
 					setTimeout(()=>{
 						run()
-					},30000)
+					},3000)
 				})
 			}
 			run()
