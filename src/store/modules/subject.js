@@ -68,6 +68,12 @@ export default {
 				}
 			})
 			return a
+		},
+		isStart (state) {
+			return state.subject.startTime > +new Date()/1000
+		},
+		subjectRole (state) {
+			return state.subject.subjectRole
 		}
 	},
 	mutations: {
@@ -364,7 +370,9 @@ export default {
 							textContent:content,
 							msgType,
 							questionFlag,
-							headImg:''
+							msgTime:+new Date(),
+							name:rootState.user.userInfo.nickName,
+							headImg:rootState.user.userInfo.headUrl
 						}
 					})
 				}

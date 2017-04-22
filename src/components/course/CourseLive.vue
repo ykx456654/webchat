@@ -25,7 +25,7 @@
 						<div class="lecture-item lecture-doctor">
 							<span>{{one.proName}}</span><span>{{one.proTitle}}</span>
 						</div>
-						<div class="lecture-item lecture-time">{{new Date(one.startTime).Format('hh:mm')}}~{{new Date(one.endTime).Format('hh:mm')}}</div>
+						<div class="lecture-item lecture-time">{{new Date(one.startTime*1000).Format('hh:ss')}}~{{new Date(one.endTime*1000).Format('hh:ss')}}</div>
 						<button @click.self.stop="signUp(one.vdoid,index,vindex)" class="btn lecture-signup flex align-items-center" :class="{'has-sign':one.signup}"><span v-show="!one.signup">+ </span>{{one.signup?'已报名':'报名'}}</button>
 					</div>
 				</li>
@@ -65,7 +65,7 @@ export default {
 		next()
 	},
 	mounted () {
-		
+		// alert(1)
 		const uid = this.uid
 		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0})
 		.then(res=>{

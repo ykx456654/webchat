@@ -43,12 +43,12 @@ export default {
 </script>
 
 <style lang="less">
+@import './assets/less/video.css';
 @import url(./assets/less/reset.less);
 @import url(./assets/less/layout.less);
 @import url(./assets/less/mint.less);
 @import url(./assets/less/vux.less);
 @import url(./assets/less/set.less);
-@import url(./assets/less/video.less);
 video::-webkit-media-controls-panel,
 video::-webkit-media-controls-panel-container,
 video::-webkit-media-controls-start-playback-button {

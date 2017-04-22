@@ -4,7 +4,8 @@
 			<img class="me-bg" src="../../assets/images/wo_bg.jpg">
 			<div class="me-header">
 				<router-link to="/Setting">
-					<img src="http://wx.qlogo.cn/mmopen/SaNfE90PbPL3gjlRc2SCMRzJqMmCpSPkEaTbr5u387bvFw169s7AlzSpU2kvYcW4uzrun7ktBWlgT79KOZ48pPLuewapQuFq/0">
+					<img :src="userInfo.headUrl" v-if="userInfo.headUrl != ''">
+					<img src="../../assets/images/default_head.png" alt="">
 				</router-link>
 				<div class="me-info">
 				<p class="flex justify-center">

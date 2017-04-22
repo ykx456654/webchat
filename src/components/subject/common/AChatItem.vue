@@ -4,7 +4,7 @@
 			<div class="chat-speaker">
 				<img :src="msg.headImg" v-if="msg.headImg !='' && msg.headImg ">
 				<img src="../../../assets/images/default_head.png" v-else>
-				<i class="icon icon-dashang"></i>
+				<i class="icon icon-dashang" @click="gain"></i>
 			</div>
 			<div class="chat-content">
 				<div class="chat-speaker-name ">
@@ -74,9 +74,9 @@
 				<p v-text="msg.textContent"></p>
 			</div>
 		</div>
-<!-- 		<div class="tip-to-app">
+ 		<div class="tip-to-app" v-if="!isStart && subjectRole == 1">
 			<a>要开始直播，请使用医生站APP。</a>
-		</div> -->
+		</div> 
 <!-- 		<div class="gain">
 			<div>
 				<div class="gain-inner flex align-items-center justify-center">
@@ -111,6 +111,9 @@ import bus from '../../common/eventBus.js'
 				flag:true
 			}
 		},
+		computed :{
+			...mapGetters(['subjectRole','isStart'])
+		},
 		methods: {
 			showPreview () {
 				const images = this.$store.getters.images
@@ -130,6 +133,9 @@ import bus from '../../common/eventBus.js'
 					bus.$emit('endVoice',{index:this.index,type:type+1})
 				}	
 				this.flag = !this.flag
+			},
+			gain () {
+				bus.$emit('invoke')
 			}
 		},
 		filters: {

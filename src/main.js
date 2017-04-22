@@ -4,12 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import storage from 'storejs'
 import { Toast } from 'mint-ui'
 import { Lazyload } from 'mint-ui'
 import time from './utils/time.js'
 import prms from './utils/promise.js' 
 import system from './utils/checkSystem.js'
-import {checkUser,getUser,getJsTicket} from './utils/auth.js'
+import {checkUser,getUser,getJsTicket,getOpenId,getEncrypt} from './utils/auth.js'
 import {responseInterceptor} from './utils/interceptors.js'
 import {getUrlParam,getCookie,setCookie} from './utils/func'
 import axios from 'axios'
@@ -22,8 +23,7 @@ Vue.prototype.toast = Toast
 time()
 prms()
 store.state.system = system()
-
-
+// console.log(storage)
 router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.hideTab)) {
         // console.log('hidetab')
@@ -31,31 +31,53 @@ router.beforeEach((to, from, next) => {
     }else{
         store.state.base.tabShow = true
     }
-    const cookie = getCookie('uid')
-    if (!cookie) {
+    const encrypt = storage('encrypt')
+    if (!encrypt) {
         const code = getUrlParam('code')
         if (!code) {
-            console.log('to login')
-            // location.href = '../../login_room/build/index.html'
+            // console.log('to login')
+            // storage('uid','ISqVdBQQajP94TFRo3mVLQ9HUTUw5c/F2611v4jFPQzb2NphxllE/hdngcUYWRh0YJtYeWuvynMpQox7aEhewoZ+W5XQraUNMig7yBTv7wE=')
+            // location.href =  
+            // 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
+            // window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect' 
         }else{
-            // 通过code获取uid、openid
-            var p = getUser(code)
+            // 通过code获取openid
+            
+            const p = getOpenId(code)
             p.then(res=>{
-                if (res.success) {
-                    setCookie('uid',res.encrypt)
-                    store.state.user.uid = res.encrypt
-                    next()
-                }else{
-                    Toast(res.message)
-                    setTimeout(()=>{
-
-                    },1500)
+                let openid
+                if(res.result!=0){
+                    return Promise.reject(res.msg)
                 }
+                openid = res.rsps[0].body.openId
+                storage('openid',openid)
+                return getUser(openid)
+            })
+            .then(res=>{
+                if(res.result!=0){
+                    Toast(res.msg)
+                    if(res.result == -1){
+                        alert('去登录')
+                    }
+                }else{
+                    const data = res.rsps[0].body
+                    storage(data)
+                    store.state.user.uid = data.encrypt
+                    store.state.user.userId = data.uid
+                    store.state.user.aesid = data.aesid
+                    next()
+                }
+            })
+            .catch(e=>{
+                // console.log(e)
+                Toast(e)
             })
         }
     }else{
         // store.state.user.uid = cookie
-        store.state.user.uid = cookie
+        store.state.user.uid = encrypt
+        store.state.user.aesid = storage('aesid')
+        store.state.user.userId = storage('uid')
         next()
     }
 })
@@ -76,14 +98,14 @@ const app = new Vue({
 if (!/MicroMessenger/i.test(navigator.userAgent)) {
     app.$mount('#app')
 }else{
-    const cookie = getCookie('uid')
-    getJsTicket(cookie)
+    const encrypt = storage('encrypt')
+    getJsTicket(encrypt)
     .then(res=>{
         if(res.result!=0){
             Toast(res.msg)
         }else{
             const signParams = Object.assign({},res.rsps[0].body,{
-                debug: window.appId == 'wx9a4c6d9512f05f99',
+                debug: false,
                 jsApiList:['onMenuShareAppMessage', 'onMenuShareTimeline','hideOptionMenu','chooseWXPay'],
             }) 
             return signParams
@@ -102,6 +124,10 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
             wx.onMenuShareAppMessage(params);
             wx.onMenuShareAppMessage(params);
         });
+        app.$mount('#app')
+    })
+    .catch(e=>{
+        console.log(e)
         app.$mount('#app')
     })
 }

@@ -8,7 +8,7 @@
 		</x-header>
 		<div class="zy_media">
 			<video id="ss" :poster="vdo.coverpicUrl">
-		        <source :src="playurl" type="video/mp4">
+		        <source :src="playurl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true" type="video/mp4">
 		    </video>
 		</div>
 
@@ -140,6 +140,19 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		components:{xHeader:Header,TabContainer,TabContainerItem , Actionsheet ,Popup,Spinner,MessageBox},
 		mounted () {
 			this.getDetail()
+			.then(res=>{
+				wx.ready(()=>{
+					var	params = {
+						title: this.vdo.title,
+						desc: this.vdo.content,
+						link:location.origin + '/CourseDetailSave/' + this.vdoid,
+						imgUrl: 'http://' + window.location.hostname + '/images/zhibojian.png'
+					};
+					console.log(params)
+					wx.onMenuShareAppMessage(params);
+					wx.onMenuShareTimeline(params);
+				});
+			})
 		},
 		data () {
 			return {
@@ -166,8 +179,18 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				relativeVideoLimt:30,
 				relativeVideoIsEnd:0,
 				actions:[
-					{name:'回复评论',method:()=>{this.toast('需要接口')}},
-					{name:'举报评论',method:()=>{this.toast('需要接口')}}
+					{
+						name:'回复评论',
+						method:()=>{
+							this.toast('需要接口')
+						}
+					},
+					{
+						name:'举报评论',
+						method:()=>{
+							this.toast('需要接口')
+						}
+					}
 				]
 			}
 		},
@@ -177,7 +200,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			])
 		},
 		watch:{
-
 		},
 		methods:{
 			...mapMutations([
@@ -337,7 +359,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						}
 					})
 					.catch(e=>{console.log(e)})
-
 					return false
 				}else{
 					this.sheetVisible = true
@@ -370,7 +391,12 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			},
 			toRelative (id) {
 				this.player.media && this.player.media.pause()
-				this.$router.go({name:'CourseDetailSave',params:{vdoid:id},force: true})
+				// console.log(this.$router)
+				this.$router.push({name:'CourseDetailSave',params:{vdoid:id},force: true})
+				this.$nextTick(()=>{
+					location.reload()
+				})
+				// location.href = 
 				// this.showLoad()
 				// this.getDetail()
 				// .then(res=>{
@@ -487,7 +513,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				width: 60px;
 			}
 			>:last-child{
-				margin-left: 5px;
+				margin-left: 10px;
 			}
 			img{
 				width: 100%;
@@ -644,7 +670,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		}
 	}
 	.comment-textarea{
-		height: 300px;
 		padding: 10px;
 		background-color: #fff;
 		button{
@@ -669,7 +694,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 	}
 	.comment-send{
 		:first-child{
-
 		}
 	}
 	.relative-course{

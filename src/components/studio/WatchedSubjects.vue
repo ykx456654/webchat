@@ -43,7 +43,7 @@ import { api } from '../../utils/api'
 			}
 		},
 		methods: {
-			...mapMutations(['hideLoad']),
+			...mapMutations(['showLoad','hideLoad']),
 			loadSubjects () {
 				api(this.uid,{cmd:'get_scan_subject',srv:'studio_studio'},{start:this.start,limit:this.limit})
 				.then(res=>{
@@ -63,6 +63,7 @@ import { api } from '../../utils/api'
 				})
 			},
 			linkSubject (studioId,subjectId) {
+				this.showLoad()
 				this.$router.push({path:'/Subject',query:{studioId,subjectId}})
 			}
 		},

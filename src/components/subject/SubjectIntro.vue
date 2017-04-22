@@ -52,7 +52,9 @@
 				</div>
 			</div>
 		</div>
-		<a class="enter" @click="enter">进入直播间</a>
+		<a class="enter" @click="enter" :class="{'need-pay':!subject.payFlag && subject.fee > 0}">
+			{{!subject.payFlag && subject.fee > 0 ? '报名':'进入直播间'}}
+		</a>
 	</div>
 </template>
 <script>
@@ -70,6 +72,20 @@ export default {
 		this.subjectId = Number(query.subjectId)
 		this.studioId = Number(query.studioId)
 		this.getSubjectInfo()
+		.then(()=>{
+			wx.ready(() => {
+				var	params = {
+					title: this.subject.subjectTitle,
+					desc: this.subject.subjectIntro,
+					link:`${location.origin}/SubjectIntro?subjectId=${this.subjectId}&studioId=${this.studioId}`,
+					imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
+				};
+				console.log(params)
+				wx.onMenuShareAppMessage(params);
+				wx.onMenuShareTimeline(params);
+			});
+			Promise.resolve()
+		})
 	},
 	data () {
 		return {
@@ -80,12 +96,12 @@ export default {
 		}
 	},
 	methods : {
-		...mapMutations(['hideLoad']),
+		...mapMutations(['hideLoad','showLoad']),
 		goBcak () {
 			history.back()
 		},
 		getSubjectInfo () {
-			api(this.uid,{srv:'studio_studio',cmd:'subject_introduce'},{studioId:this.studioId,subjectId:this.subjectId})
+			return api(this.uid,{srv:'studio_studio',cmd:'subject_introduce'},{studioId:this.studioId,subjectId:this.subjectId})
 			.then(res => {
 				res = res.data
 				if (res.result != 0) {
@@ -98,7 +114,26 @@ export default {
 			})
 		},
 		enter () {
-			// alert('enter')
+			if(this.subject.fee > 0 && !this.subject.payFlag){
+
+				const data = {
+					studioId:this.studioId,
+					subjectId:this.subjectId,
+					appid:appId
+				}
+				api(this.uid,{cmd:'wechat_ticket_prepay_generate',srv:'studio_studio'},data)
+				.then(res=>{
+					res = res.data
+					if(res.result != 0){
+						this.toast(res.msg)
+					}else{
+
+					}
+				})
+
+				return false
+			}
+			this.showLoad()
 			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId}})
 		},
 		focus () {
@@ -133,6 +168,27 @@ export default {
 		}
 	}
 }
+
+
+function onBridgeReady(info,instance){
+	// alert(JSON.stringify(info))
+    WeixinJSBridge.invoke(
+       'getBrandWCPayRequest',info,
+       function(res){
+       	    // alert(JSON.stringify(res))     
+		    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+		    if (res.err_msg == "get_brand_wcpay_request:ok") {
+				instance.payOver(1,'支付成功')
+				setTimeout(function(){
+					window.location.href = "http://" + window.location.hostname+"/live_room/dist/index.html?webpay=1#!/?innerStudioID="+ self.innerStudioID +'&subjectID=' + self.topicId		
+				},1000)
+			}else{
+				instance.payOver(0,'支付失败')
+			}
+       }
+   ); 
+}
+
 </script>
 <style lang="less" scoped>
 	.subject-header{
@@ -265,5 +321,8 @@ export default {
 	    text-align: center;
 	    font-size: 17px;
 	    line-height: 45px;
+	}
+	.need-pay{
+		background-color: #f9962d;
 	}
 </style>

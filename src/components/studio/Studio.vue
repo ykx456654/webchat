@@ -87,6 +87,17 @@ import SubjectItem from './common/SubjectItem'
 			.then(res=>{
 				this.checkInfoSize()
 				this.hideLoad()
+				wx.ready(() => {
+					var	params = {
+						title: this.studioTitle,
+						desc: this.studio.studioIntro,
+						link:`${location.origin}/Studio?studioId=${this.studioId}`,
+						imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
+					};
+					console.log(params)
+					wx.onMenuShareAppMessage(params);
+					wx.onMenuShareTimeline(params);
+				});
 			})
 			.catch(e=>{})
 		},

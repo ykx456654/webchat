@@ -1,7 +1,7 @@
 <template>
 	<div class="recommond-wrap">
 		<loadmore :autoFill="false" :bottom-method="load" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<div class="recommond flex" v-for="r in recommondList">
+			<div class="recommond flex" v-for="(r,index) in recommondList">
 				<section>
 					<div class="header" @click="linkStudio(r.studioId)">
 						<img :src="r.studioImg" v-if="r.studioImg !== ''">
@@ -11,15 +11,15 @@
 				<section class="flex flex-direction-column">
 					<div class="content-title flex align-items-center justify-space-between">
 						<h4>{{r.studioTitle}}</h4>
-						<a class="btn" v-if="r.isFan" @click="focus(r.studioId)">关注</a>
+						<a class="btn" v-if="!r.isFan" @click="focus(r.studioId,index)">关注</a>
 					</div>
-					<div class="content-box" @click="linkSubject(r.studioId,r.subjectId)">
+					<div class="content-box" @click="linkSubject(r)">
 						<div class="img-box">
 							<img class="page" src="../../assets/images/pic_ht_mr.png" v-if="r.subjectImg == ''">	
 							<img class="page" v-lazy="r.subjectImg" alt="" v-else>
 							<span class="tag status">{{ r.liveStatus | status}}</span>
 							<div class="bottom-tag flex">
-								<span class="price" v-if="r.fee != 0">{{(r.fee/100).toFixed(2)}}</span>
+								<span class="price" v-if="r.fee != 0">￥{{(r.fee/100).toFixed(2)}}</span>
 								<span class="num">{{r.uvNum}}人次</span>
 							</div>
 						</div>
@@ -87,13 +87,28 @@ import { api } from '../../utils/api'
 				this.showLoad()
 				this.$router.push({path:'/Studio',query:{studioId:id}})
 			},
-			linkSubject (studioId,subjectId) {
+			linkSubject (r) {
 				this.showLoad()
 				// console.log(studioId,subjectId)
-				this.$router.push({path:'/Subject',query:{studioId:studioId,subjectId:subjectId}})
+				if(r.fee > 0){
+					this.$router.push({path:'/SubjectIntro',query:{studioId:r.studioId,subjectId:r.subjectId}})
+				}else{
+					this.$router.push({path:'/Subject',query:{studioId:r.studioId,subjectId:r.subjectId}})
+				}
 			},
-			focus (id) {
-				alert(id)
+			focus (id,index) {
+				api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
+					studioId:id,isSubscribe:true
+				})
+				.then(res=>{
+					res = res.data
+					if (res.result != 0 ) {
+						this.toast(res.msg)
+					}else{
+						this.toast('关注成功')
+						this.recommondList[index].isFan = true
+					}
+				})
 			}
 		},
 		filters: {
@@ -134,14 +149,14 @@ import { api } from '../../utils/api'
 		section:nth-child(1){
 			width: 62px;
 			box-sizing: border-box;
+			img{
+				width: 100%;
+				border-radius: 50%;
+			}
 		}
 		section:nth-child(2){
 			flex:1 1 auto;
 			width: calc(~"100% - 62px");
-		}
-		img{
-			width: 100%;
-			border-radius: 50%;
 		}
 		.header{
 			padding: 10px 10px 10px 12px;
@@ -175,7 +190,10 @@ import { api } from '../../utils/api'
 		position: relative;
 		.page{
 			width: 100%;
-			border-radius: 3px;
+			position: absolute;
+			transform: translate(-50%,-50%);
+			left: 50%;
+    		top: 50%;
 		}
 		h4{
 			font-size: 15px;
@@ -191,11 +209,13 @@ import { api } from '../../utils/api'
 		.img-box{
 			position: relative;
 			overflow: hidden;
+			padding-bottom: 41.6%;
+			border-radius: 3px;
 			.tag{
 				position: absolute;
 				background-color: rgba(0,0,0,0.6);
 				color: #fff;
-				border-radius: 11px;
+				border-radius:0 11px 11px 0;
 				height: 22px;
 				line-height: 22px;
 				padding: 0 6px;
@@ -209,9 +229,9 @@ import { api } from '../../utils/api'
 				position: absolute;
 				width: 100%;
 				overflow: hidden;
-				bottom:10px;
+				margin-left: 5px;
+				bottom:5px;
 				.price{
-					margin-left: 5px;
 					margin-right: 6px;
 					border-radius: 5px;
 					height: 20px;

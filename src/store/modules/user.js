@@ -3,7 +3,9 @@ import {api} from '../../utils/api'
 export default {
 	state : {
 		uid:0,
-		userInfo:{}
+		userInfo:{},
+		userId:0,
+		aesid:0
 	},
 	getters: {
 		uid: state => {

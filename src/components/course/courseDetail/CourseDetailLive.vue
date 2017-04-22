@@ -4,13 +4,13 @@
 			<router-link to="/CourseLive" slot="left">
 				<img src="../../../assets/images/back2.png">
 			</router-link>
-			<a class="btn course-detail-btn" slot="right">关注</a>
+			<!--<a class="btn course-detail-btn" slot="right">关注</a>-->
 		</x-header>
 <!-- 		<div class="video-pannel">
 			<video class="video-js vjs-custom-skin" id="video-play" playsinline></video>
 		</div> -->
-		<div class="zy_media">
-			<video id="ss" :poster="vdo.coverpicUrl" playsinline>
+		<div class="zy_media" :style="bindStyle">
+			<video id="ss" v-if="isStart" :poster="vdo.coverpicUrl" playsinline>
 		        <source :src="playurl"  type="application/x-mpegURL">
 		    </video>
 		</div>
@@ -77,6 +77,16 @@ export default {
 			}
 			this.hideLoad()
 			this.initVideoOption()
+			wx.ready(()=>{
+            	var	params = {
+                   	title: this.vdo.title,
+	            	desc: this.vdo.title.content,
+	            	link: 'http://' + window.location.hostname + '/CourseDetailLive/' + vdoid,
+	            	imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
+                };
+            	wx.onMenuShareAppMessage(params);
+            	wx.onMenuShareTimeline(params);
+        	});
 		})
 	},
 	data () {
@@ -96,13 +106,18 @@ export default {
 			const vdo = this.vdo
 			const height = window.innerWidth * 0.56
 			var _this = this
-			_this.player =  zy(document.getElementById('ss'),{
-				videoHeight:height,
-				audioHeight: 40,
-				error:function(){
-					_this.toast('视频错误')
-				}
-			}) 
+			if(this.isStart){
+				this.$nextTick(()=>{
+					_this.player =  zy(document.getElementById('ss'),{
+						videoHeight:height,
+						audioHeight: 40,
+						error:function(){
+							_this.toast('视频错误')
+						}
+					}) 
+				})
+			}
+
 		},
 		signIn () {
 			if (this.vdo.signup) {
@@ -148,6 +163,22 @@ export default {
 	computed: {
 		uid () {
 			return this.$store.getters.uid
+		},
+		isStart () {
+			return this.vdo.startTime < +new Date()/1000
+		},
+		isEnd () {
+			return this.vdo.endTime < +new Date()/1000
+		},
+		bindStyle () {
+			if(!this.isStart){
+				return {
+					backgroundImage:`url(${ this.vdo.coverpicUrl })`,
+					height:window.innerWidth * 0.56 + 'px'
+				}
+			}else{
+				return ''
+			}
 		}
 	},
 	beforeRouteLeave  (to ,from ,next) {
@@ -162,6 +193,14 @@ export default {
 </script>
 <style lang="less">
 @import '../../../lib/zymedia/zy.media.css';
+.course-detail-live{
+	padding-bottom: 55px;
+}
+.zy_media{
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-position: center;
+}
 .course-detail{background-color: #f2f2f2;}.video{margin-bottom: 5px;}
 .video{position: relative;width: 100%;margin-bottom: 0;padding-bottom:56.25%; height: 0}
 .poster{
@@ -264,5 +303,4 @@ export default {
 		font-size: 14px;
 	}
 }
-
 </style>

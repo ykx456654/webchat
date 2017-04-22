@@ -8,7 +8,7 @@
 				设置
 			</a> -->
 		</x-header>
-		<section class="swiper-ppt" v-if="subject.subjectType != 1">
+		<section class="swiper-ppt" :class="{'not-start':!isStart}" v-if="subject.subjectType != 1">
 			<img src="../../assets/images/pic__zbht.jpg">
 		</section>
 		<section class="chat" :class="{'no-ppt':subject.subjectType == 1}">
@@ -38,27 +38,34 @@
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		<audio id="voice-player"   class="voice-player">
-			 <source :src="voiceUrl" type="audio/mpeg">
-		</audio>
-		<!-- <button @click="showPop">dsffds</button> -->
+		<!--<video id="video"></video>-->
+		<!--<video id="video" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true">
+			<source :src="playurl"  type="application/x-mpegURL">
+		</video>-->
+		<div>
+			<x-dialog :hide-on-blur="true" v-model="gainShow">
+				<gain ref="gain"/>
+			</x-dialog>
+		</div>
 	</div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner } from 'mint-ui'
-import { Previewer, Popup } from 'vux'
+import { Previewer, Popup ,XDialog} from 'vux'
 import { api } from '../../utils/api'
 import bus from '../common/eventBus'
+// import zy from '../../lib/zymedia/zy.media.js'
 
 import ChatPartA from './common/ChatPartA'
 import ChatPartB from './common/ChatPartB'
 import NormalInput from './common/NormalInput'
 import HighInput from './common/HighInput'
 import RecordVoice from './common/RecordVoice'
+import Gain from './common/Gain'
 	export default {
 		name:'Subject',
-		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup,RecordVoice},
+		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup,RecordVoice,Gain,XDialog},
 		created () {
 			// console.log(1)
 			if (!this.loopClock) {
@@ -66,7 +73,6 @@ import RecordVoice from './common/RecordVoice'
 			}
 		},
 		mounted () {
-			// console.log(bus._events)
 			bus.$on('show',index=>{
 				/*预览图片*/
 				this.showPreviewer(index)
@@ -84,6 +90,14 @@ import RecordVoice from './common/RecordVoice'
 				this.endVoice(msg)
 			})
 
+			bus.$on('invoke', ()=>{
+				this.$refs.gain.clear()
+				this.gainShow = true
+			})
+			bus.$on('endInvoke', ()=>{
+				this.gainShow = false
+			}) 
+			
 		},
 		activated () {
 			if (this.isCached) {
@@ -129,15 +143,17 @@ import RecordVoice from './common/RecordVoice'
 				nrmMsgDirection:false,
 				limit:10,
 				voiceUrl:'',
-				voicePlayer:null
+				voicePlayer:null,
+				playurl:'',
+				gainShow:false
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id','uvNum','images','uid','loopClock'])
+			...mapGetters(['subject','id','uvNum','images','uid','loopClock','userInfo','isStart'])
 		},
 		methods:{
 			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive','setPlayingVoice']),
-			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop','getAdvMsg','getNormalMsg']),
+			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop','getAdvMsg','getNormalMsg','GETUSERINFO']),
 			record (value){
 				this.showVoice = value 
 			},
@@ -163,7 +179,6 @@ import RecordVoice from './common/RecordVoice'
 			},
 			showPreviewer (index) {
 				setTimeout(()=>{
-					// console.log(this.$refs.previewer)
 					try {
 						this.$refs.previewer.show(index)
 					}catch(e){
@@ -187,11 +202,33 @@ import RecordVoice from './common/RecordVoice'
 					this.hideLoad()
 				})
 				.then(()=>{
+					if(JSON.stringify(this.userInfo) == '{}'){
+						this.GETUSERINFO()
+					}
 					this.loopSubject()
+					wx.ready(() => {
+						var	params = {
+							title: this.subject.subjectTitle,
+							desc: this.subject.subjectIntro,
+							link:`${location.origin}/Subject?studioId=${this.id.studioId}&subjectId=${this.id.subjectId}`,
+							imgUrl: this.subject.subjectImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.subject.subjectImg
+						};
+						console.log(params)
+						wx.onMenuShareAppMessage(params);
+						wx.onMenuShareTimeline(params);
+					})
+					this.playLive()
 				})
 				.catch(e=>{
 					console.log(e + 'from subject_enter')
 				})
+			},
+			playLive () {
+				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
+				var player = new Audio()
+				// this.$nextTick()
+				// player.src = 'http://7xnvc7.com1.z0.glb.clouddn.com/yv1211_1490782401274.mp4'
+				// player.play()
 			},
 			playVoice (obj) {
 				// alert(msg)
@@ -204,7 +241,7 @@ import RecordVoice from './common/RecordVoice'
 				this.voicePlayer.play()
 				this.setPlayingVoice({type:obj.type,i:obj.index})
 				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
-				this.voicePlayer.addEventListener('ended',()=>{
+				this.voicePlayer.addEventListener('suspend',()=>{
 					this.setPlayingVoice({type:obj.type+1,i:obj.index})
 				},false)
 			},
@@ -330,5 +367,8 @@ import RecordVoice from './common/RecordVoice'
 	.high-input-wrap{
 		background-color: #fff;
 		height: 300px;
+	}
+	#video{
+
 	}
 </style>

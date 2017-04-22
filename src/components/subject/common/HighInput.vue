@@ -18,7 +18,7 @@
 <script>
 import bus from '../../common/eventBus'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import { Indicator } from 'mint-ui';
+import { Indicator,MessageBox  } from 'mint-ui';
 	export default {
 		data () {
 			return {
@@ -37,11 +37,39 @@ import { Indicator } from 'mint-ui';
 		methods:{
 			...mapActions(['saveMsg']),
 			recordVoice () {
-				bus.$emit('record',true)
+				MessageBox({
+					title:'提示',
+					message:'暂不提供语音功能，如果您想使用语音，请至医生站app的直播间',
+					confirmButtonText:'去下载',
+					showCancelButton:true,
+					showConfirmButton:true
+				}).then(action => {
+					if (action == 'confirm') {
+						location.href = 'https://www.yishengzhan.cn/download?channel=release_webysz';
+					}		 
+				})
+				.catch(e => {
+					console.log(e)
+				});
+				// bus.$emit('record',true)
 			},
 			sendImg () {
+				MessageBox({
+					title:'提示',
+					message:'暂不提供发送图片，如果您想发送图片，请至医生站app的直播间',
+					confirmButtonText:'去下载',
+					showCancelButton:true,
+					showConfirmButton:true
+				}).then(action => {
+					if (action == 'confirm') {
+						location.href = 'https://www.yishengzhan.cn/download?channel=release_webysz';
+					}		 
+				})
+				.catch(e => {
+					console.log(e)
+				});
 				// bus.$emit('Ascroll')
-				alert('发送图片')
+				// alert('发送图片')
 			},
 			sendMsg () {
 				if (!this.canSend) return false

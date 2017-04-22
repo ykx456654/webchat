@@ -15,7 +15,7 @@ export const api = function(uid,head,body) {
 		}]
 	}
 	return axios({
-		method:'post',
+		method:'post', 
 		url:'/api',
 		data:data
 	})

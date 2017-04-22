@@ -830,6 +830,10 @@ import { Toast } from 'mint-ui'
 				t.buffering.style.display = '';
 			});
 
+			t.media.addEventListener('ended', function(){
+				alert(1)
+			})
+
 			// Don't listen to 'loadeddata' and 'canplay', 
 			// some Android device can't fire 'canplay' or irregular working when use 'createEvent' to trigger 'canplay' (读者i800)
 

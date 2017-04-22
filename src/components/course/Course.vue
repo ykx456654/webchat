@@ -37,8 +37,8 @@
 
 		},
 		mounted () {
-			// console.log(3)
-			// this.toast('dfssd')
+			
+
 		},
 		data () {
 			return {

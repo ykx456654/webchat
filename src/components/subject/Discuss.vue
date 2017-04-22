@@ -10,13 +10,12 @@
 				<span>返回直播话题</span>
 			</div>
 		</section>
-		<div class="no-msgs flex align-items-center justify-center" v-if="normalMsg.msgList == 0 && isLoad">
+		<div class="no-msgs flex align-items-center justify-center" v-if="normalMsg.msgList.length == 0 && isLoad">
 			<img src="../../assets/images/wdzbij_qst.png">
 		</div>
-		<div class="load-wrap" id="load-wrap" v-show="normalMsg.msgList != 0">
+		<div class="load-wrap" id="load-wrap" v-show="normalMsg.msgList.length != 0">
 			<Loadmore
 			class="chat-b-content"
-			
 			id="chat-b-content"
 			:autoFill="false"
 			:top-method="getMsg"
@@ -28,7 +27,7 @@
 					<li class="discuss-item flex" :class="{'selected':m.selected}" v-for="(m,index) in normalMsg.msgList" :key="index">
 						<div class="discuss-item-left">
 							<img src="../../assets/images/default_head.png" v-if="m.headImg==''">
-							<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
+							<img :src="m.headImg" v-else>
 						</div>
 						<div class="discuss-item-right">
 							<h5 class="name" v-text="m.name"></h5>
@@ -37,9 +36,9 @@
 								<i class="icon icon-wen" v-if="m.questionFlag"></i>
 								{{m.textContent}}
 							</div>
-							<div class="answer" v-if="m.questionFlag">
+							<div class="answer" v-if="m.questionFlag && m.ansList[0]">
 								<div class="flex align-items-center">
-									<img :src="m.ansList[0].headUrl" alt="" v-if="m.ansList[0].headUrl != ''">
+									<img :src="m.ansList[0].headImg" alt="" v-if="m.ansList[0].headImg != ''">
 									<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
 									<span>{{m.ansList[0].name}}</span>
 									<!--<span>fdsfs</span>-->
@@ -135,14 +134,14 @@ import { throttle } from '../../utils/func'
 			}
 		},
 		computed: {
-			...mapGetters(['normalMsg','loopClock','scroll']),
+			...mapGetters(['normalMsg','loopClock','scroll','userInfo']),
 			msgLength () {
 				return this.normalMsg.msgList.length
 			}
 		},
 		methods:{
 			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg','setScroll']),
-			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject','getAdvMsg']),
+			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject','getAdvMsg','GETUSERINFO']),
 			backSubject () {
 				this.normalMsg.msgList.forEach(item=>{
 					item.selected = false
@@ -193,6 +192,9 @@ import { throttle } from '../../utils/func'
 				.then(()=>{
 					this.isCached = true
 					this.isLoad = true
+					if(JSON.stringify(this.userInfo) == '{}'){
+						this.GETUSERINFO()
+					}
 					this.hideLoad()
 					this.loopSubject()
 				})
@@ -379,6 +381,7 @@ import { throttle } from '../../utils/func'
 	}
 	.list-enter, .list-leave-active {
 	  opacity: 0;
+	  position: absolute;
 	  transform: translateY(30px);
 	}
 </style>
