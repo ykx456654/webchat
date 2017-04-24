@@ -115,11 +115,23 @@ import { throttle } from '../../utils/func'
 				$chatWrapper.scrollTop(100000)
 			}
 			if(typeof query.msgIndex != 'undefined'){
-				this.$nextTick(()=>{
-					const length = this.normalMsg.msgList.length
-					const index = parseInt(query.msgIndex)
-					this.normalMsg.msgList[length - 4 + index].selected = true
-				})
+				try{
+					this.$nextTick(()=>{
+						const length = this.normalMsg.msgList.length
+						const index = parseInt(query.msgIndex)
+						
+						// console.log(this.normalMsg.msgList)
+						if(this.normalMsg.msgList && this.normalMsg.msgList.length >= 4){
+							this.normalMsg.msgList[length - 4 + index].selected = true
+						}else{
+							// console.log(index)
+							console.log(this.normalMsg.msgList)
+							this.normalMsg.msgList[index].selected = true
+						}
+					})
+				}catch(e){
+					console.log(e)
+				}
 			}	
 		},
 		data () {
@@ -155,12 +167,6 @@ import { throttle } from '../../utils/func'
 					this.$refs.loadmore.onTopLoaded()
 				})
 				.done()
-			},
-			jumpMsg () {
-				const query = this.$router.query
-				if(query){
-
-				}
 			},
 			seeQuestion () {
 				Indicator.open({

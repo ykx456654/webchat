@@ -130,7 +130,8 @@ export default new Router({
     },
     {
       path:'/Setting',
-      component:Setting
+      component:Setting,
+      meta:{hideTab:true}
     },
     {
       path:'/Auth',

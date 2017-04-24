@@ -21,7 +21,10 @@ export default {
 		repeatAdvId:[],
 		repeatNrmId:[],
 		scrollTopA:'init',
-		scrollTopB:'init'
+		scrollTopB:'init',
+		currentImg:{},
+		actionList:[],
+		imgs:[]
 	},
 	getters:{
 		subject (state) {
@@ -74,6 +77,15 @@ export default {
 		},
 		subjectRole (state) {
 			return state.subject.subjectRole
+		},
+		currentImg (state) {
+			return state.currentImg
+		},
+		recordPlayInfo (state) {
+			return {
+				imgs:state.imgs,
+				actionList:state.actionList
+			}
 		}
 	},
 	mutations: {
@@ -147,6 +159,7 @@ export default {
 			state.subjectMsg.normalMsg.msgId = msgId
 			var list = state.subjectMsg.normalMsg.msgList
 			for(var i = msgList.length - 1; i >= 0; i-- ){
+				// console.log(msgList[i])
 				msgList[i].selected = false
 				list.unshift(msgList[i])
 			}
@@ -224,6 +237,9 @@ export default {
 					state.subjectMsg.advanceMsg.msgList[o.i].ansList[0].playing = false
 					break;
 			}
+		},
+		setCurrentImg (state,current) {
+			state.currentImg = current
 		}
 	},
 	actions: {
@@ -250,7 +266,11 @@ export default {
 					commit('toast',res.msg)
 					Promise.reject(res.msg)
 				}else{
-					state.subjectMsg = res.rsps[0].body
+					const data = res.rsps[0].body
+					state.subject = data.subject
+					state.imgs = data.imgs
+					state.currentImg = data.currentImg
+					state.actionList = data.actionList
 					return true
 				}
 			})
@@ -327,6 +347,7 @@ export default {
 					res = res.data
 					commit('pushAdvMsg',Object.assign({},res.rsps[0].body.advMsgList))
 					commit('pushNormalMsg',Object.assign({},res.rsps[0].body.nmrMsgList))
+					commit('setCurrentImg',res.rsps[0].body.currentImg)
 					// console.log(+new Date() - t)
 					// t = +new Date()
 					if (state.loopClock) {

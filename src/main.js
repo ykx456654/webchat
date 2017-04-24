@@ -23,6 +23,7 @@ Vue.prototype.toast = Toast
 time()
 prms()
 store.state.system = system()
+store.state.isWeChat = /MicroMessenger/i.test(navigator.userAgent)
 // console.log(storage)
 router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.hideTab)) {
@@ -37,9 +38,9 @@ router.beforeEach((to, from, next) => {
         if (!code) {
             // console.log('to login')
             // storage('uid','ISqVdBQQajP94TFRo3mVLQ9HUTUw5c/F2611v4jFPQzb2NphxllE/hdngcUYWRh0YJtYeWuvynMpQox7aEhewoZ+W5XQraUNMig7yBTv7wE=')
-            // location.href =  
-            // 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
-            // window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect' 
+            location.href =  
+            'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
+            window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect' 
         }else{
             // 通过code获取openid
             
@@ -57,7 +58,7 @@ router.beforeEach((to, from, next) => {
                 if(res.result!=0){
                     Toast(res.msg)
                     if(res.result == -1){
-                        alert('去登录')
+                        location.href = '../../testLogin/build/index.html'
                     }
                 }else{
                     const data = res.rsps[0].body

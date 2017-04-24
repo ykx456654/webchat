@@ -9,11 +9,15 @@ import subject from './modules/subject'
 
 export default new vuex.Store({
 	state:{
-		system:''
+		system:'',
+		isWeChat:false
 	},
 	getters : {
 		system (state) {
 			return state.system
+		},
+		isWeChat (state) {
+			return state.isWeChat
 		}
 	},
 	modules: {

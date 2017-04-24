@@ -42,7 +42,7 @@
 				switch(n){
 					case 0:return '预告';break;
 					case 1:return '正在直播';break;
-					case 2:return '回答中';break;
+					case 2:return '正在直播';break;
 					case 9:return '回顾';break;
 					default:return '预告';
 				}

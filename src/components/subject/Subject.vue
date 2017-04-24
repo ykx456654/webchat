@@ -9,7 +9,22 @@
 			</a> -->
 		</x-header>
 		<section class="swiper-ppt" :class="{'not-start':!isStart}" v-if="subject.subjectType != 1">
-			<img src="../../assets/images/pic__zbht.jpg">
+			<img src="../../assets/images/pic__zbht.jpg" v-if="liveStatus != 1 && recordPlayStatu == 1">
+			<!--<img src="" alt="">-->
+			<img :src="recordPPTImg.url" alt="">
+			<transition name="slide-fade">
+				<div class="control">
+					<range v-model="playCurrentTime"  :min="0" :max="100">
+						<div class="control-time" slot="start">0</div>
+						<div class="control-time" slot="end">100</div>
+					</range>
+				</div>
+			</transition>
+
+			<div id="recordStart" v-if="recordPlayStatu == 1 || recordPlayStatu == 4" class="control-btn"></div>
+		</section>
+		<section>
+
 		</section>
 		<section class="chat" :class="{'no-ppt':subject.subjectType == 1}">
 			<div class="subject-intro flex align-items-center justify-space-between" @click="linkSubjectIntro">
@@ -38,7 +53,9 @@
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		<!--<video id="video"></video>-->
+		<video id="video">
+			<source :src="playurl"  type="application/x-mpegURL">
+		</video>
 		<!--<video id="video" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true">
 			<source :src="playurl"  type="application/x-mpegURL">
 		</video>-->
@@ -51,9 +68,10 @@
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import {Header,Spinner } from 'mint-ui'
+import {Header,Spinner,Swipe, SwipeItem,Range  } from 'mint-ui'
 import { Previewer, Popup ,XDialog} from 'vux'
 import { api } from '../../utils/api'
+import { throttle } from '../../utils/func'
 import bus from '../common/eventBus'
 // import zy from '../../lib/zymedia/zy.media.js'
 
@@ -63,9 +81,41 @@ import NormalInput from './common/NormalInput'
 import HighInput from './common/HighInput'
 import RecordVoice from './common/RecordVoice'
 import Gain from './common/Gain'
+
+var setPPT = function (current, actionList) {
+	// console.log(actionList)
+	return actionList.reduce((previousValue, currentValue, currentIndex, array1)=>{
+		if(previousValue.actionTime >= current){
+			return Object.assign({},previousValue,{next:1})
+		}
+		if(previousValue.actionTime < current && currentValue.actionTime >= current ){
+			return Object.assign({},currentValue,{next:2})
+		}
+		if(current > currentValue.actionTime){
+			return Object.assign({},currentValue,{next:1})
+		}
+		return 
+	})
+	// next 取值1 pageFrom  取2 pageTo
+}
+
 	export default {
 		name:'Subject',
-		components:{xHeader:Header,ChatPartA,NormalInput,HighInput,ChatPartB,Previewer,Popup,RecordVoice,Gain,XDialog},
+		components:{
+			xHeader:Header,
+			ChatPartA,
+			NormalInput,
+			HighInput,
+			ChatPartB,
+			Previewer,
+			Popup,
+			RecordVoice,
+			Gain,
+			XDialog,
+			Swipe,
+			SwipeItem,
+			Range
+		},
 		created () {
 			// console.log(1)
 			if (!this.loopClock) {
@@ -119,6 +169,7 @@ import Gain from './common/Gain'
 				this.setAlive(['noComponent'])
 				bus._events = {}
 			}else{
+				this.coursePlayer = null
 				this.setAlive(['Subject','Discuss'])
 			}
 			next()
@@ -144,12 +195,29 @@ import Gain from './common/Gain'
 				limit:10,
 				voiceUrl:'',
 				voicePlayer:null,
+				coursePlayer:null,
 				playurl:'',
-				gainShow:false
+				gainShow:false,
+				canplay:false,
+				playCurrentTime:0,
+				recordPlayStatu:1,    //回看播放状态，1 未播放，2 已播放， 3 正在播放 ，4 暂停， 5，结束
+				defaultPPTIndex:0,
+				recordControl:{}
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id','uvNum','images','uid','loopClock','userInfo','isStart'])
+			...mapGetters(['subject','id','uvNum','images','uid','loopClock','userInfo','isStart','currentImg','recordPlayInfo','isWeChat','system']),
+			liveStatus () {
+				return this.subject.liveStatus
+			},
+			recordPPTImg () {
+				if(this.recordPlayInfo.imgs.length){
+					let index = this.defaultPPTIndex
+					return this.recordPlayInfo.imgs[index]
+				}else{
+					return ''
+				}
+			}
 		},
 		methods:{
 			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive','setPlayingVoice']),
@@ -189,7 +257,7 @@ import Gain from './common/Gain'
 			init () {
 				const query = this.$route.query
 				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
-				var p1 = this.getSubjectInfo()
+				var p1 = this.enterSubejct()
 				var p2 = this.getAdvMsg({direction:this.advMsgDirection,limit:this.limit})
 				var p3 = this.getNormalMsg({direction:this.nrmMsgDirection,limit:this.limit,onlyQuestion:false})
 				// if (this.subject.) {}
@@ -217,7 +285,6 @@ import Gain from './common/Gain'
 						wx.onMenuShareAppMessage(params);
 						wx.onMenuShareTimeline(params);
 					})
-					this.playLive()
 				})
 				.catch(e=>{
 					console.log(e + 'from subject_enter')
@@ -225,10 +292,57 @@ import Gain from './common/Gain'
 			},
 			playLive () {
 				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
-				var player = new Audio()
+				var player = $('#video')[0]
+				this.$nextTick(()=>{
+					player.src = 'http://9024.liveplay.myqcloud.com/live/9024_subject200161178.m3u8'
+					player.load()
+					player.play()
+				})
 				// this.$nextTick()
 				// player.src = 'http://7xnvc7.com1.z0.glb.clouddn.com/yv1211_1490782401274.mp4'
 				// player.play()
+			},
+			playRecord () {
+				if(this.coursePlayer){
+					return false
+				}
+				this.coursePlayer = new Audio()
+				let player = this.coursePlayer
+				let _this = this
+				player.src = this.subject.videoUrl
+				this.recordPlayStatu = 1
+				player.load()
+				// 开始播放
+				$('#recordStart').click(function(){
+					_this.recordPlayStatu = 2
+					player.play()
+					console.log(player.duration)
+				})
+
+				player.addEventListener('timeupdate',throttle(function(){
+					// 正在播放
+					// _this.playCurrentTime = player.currentTime
+					_this.recordPlayStatu = 3
+					let currentTime = parseInt(player.currentTime)
+					let value = setPPT(currentTime,_this.recordPlayInfo.actionList)
+					let valueAction = JSON.parse(value.actionData)
+					_this.playCurrentTime = (currentTime/this.duration).toFixed(2)*100
+					_this.defaultPPTIndex = value.next == 1 ? valueAction.pageFrom : valueAction.pageTo
+					// console.log(value.next)
+				},1000,1000))
+
+				player.addEventListener('pause',function(){
+					// 暂停
+					_this.recordPlayStatu = 4
+				})
+
+				player.addEventListener('ended',function(){
+					// 结束
+					_this.recordPlayStatu = 5
+				})
+			},
+			playRecordSwitch () {
+				this.canplay = !this.canplay
 			},
 			playVoice (obj) {
 				// alert(msg)
@@ -253,16 +367,58 @@ import Gain from './common/Gain'
 				}
 				this.setPlayingVoice({type:obj.type,i:obj.index})
 			}
+		},
+		watch:{
+			liveStatus (nv,ov) {
+				if(this.subject.subjectType > 1){
+					if(nv == 1 ){
+						this.playLive()
+					}
+					if(nv == 9 ){
+						this.playRecord()
+					}
+				}
+				// console.log(nv)
+				// console.log(ov)
+			}
 		}
 	}
+
+
 </script>
 <style lang="less" scoped>
 	.swiper-ppt{
 		height: 2.1rem;
 		width: 100%;
 		background-color: #111;
+		position: relative;
 		img{
 			width: 100%;
+		}
+		.control-btn{
+			position: absolute;
+			width: 50px;
+			height: 50px;
+			left: 50%;
+			top: 50%;
+			margin-left: -25px;
+			margin-top: -25px;
+			background-image: url(../../assets/images/play_btn.png);
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: 100%;
+		}
+		.control{
+			position: absolute;
+			z-index: 20;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			height: 30px;
+			background-color: rgba(0,0,0,0.5);
+			color: #fff;
+			padding: 0 10px;
+    		box-sizing: border-box;
 		}
 	}
 	.chat{
@@ -369,6 +525,16 @@ import Gain from './common/Gain'
 		height: 300px;
 	}
 	#video{
-
+		display: none;
+	}
+	.slide-fade-enter-active {
+	transition: all .3s ease;
+	}
+	.slide-fade-leave-active {
+	transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+	}
+	.slide-fade-enter, .slide-fade-leave-active {
+	transform: translateY(30px);
+	opacity: 0;
 	}
 </style>

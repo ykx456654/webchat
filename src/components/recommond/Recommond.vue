@@ -9,7 +9,7 @@
 					</div>
 				</section>
 				<section class="flex flex-direction-column">
-					<div class="content-title flex align-items-center justify-space-between">
+					<div @click="linkStudio(r.studioId)" class="content-title flex align-items-center justify-space-between">
 						<h4>{{r.studioTitle}}</h4>
 						<a class="btn" v-if="!r.isFan" @click="focus(r.studioId,index)">关注</a>
 					</div>
@@ -117,7 +117,7 @@ import { api } from '../../utils/api'
 				switch(n){
 					case 0:return '预告';break;
 					case 1:return '正在直播';break;
-					case 2:return '回答中';break;
+					case 2:return '正在直播';break;
 					case 9:return '回顾';break;
 					default:return '预告';
 				}

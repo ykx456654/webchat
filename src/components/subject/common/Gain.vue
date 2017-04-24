@@ -7,7 +7,7 @@
             <img class="head-img" src="http://img.yishengzhan.cn/user/head/96d4d23cddb44be7891d797ecf897c7b.jpg">
             <p class="name"> assadasd</p>
             <p class="tip">如果内容对您有用，欢迎打赏支持一下~</p>
-            <ul class="options clearfix">
+            <ul class="options flex flex justify-center">
                 <li @click="setPrice(m)" v-for="m in moneyList">{{m + '元'}}</li>
             </ul>
             <a class="switch" @click="other">其他金额</a>
@@ -49,15 +49,19 @@ import bus from '../../common/eventBus.js'
                 this.moneyType = 0
                 this.price = ''
             }
+        },
+        mounted () {
+            
         }
     }
 </script>
 <style lang="less" scoped>
     .gain-container{
         width: 300px;
-        position: relative;
+        // position: relative;
         border-radius: 10px;
         background-color: #fff;
+        box-sizing: border-box;
         .icon-close{
             top: 10px;
             right: 10px;
@@ -71,16 +75,18 @@ import bus from '../../common/eventBus.js'
         .money-list{
             padding-top: 110px;
             padding-bottom: 10px;
+            width: 300px;
+            overflow: hidden;
         }
         .money-list-bg{
             position: absolute;
             left: 50%;
             top: 0;
-            margin-left: -200px;
-            width: 400px;
+            margin-left: -150px;
+            width: 300px;
             height: 80px;
-            border-bottom-right-radius: 200px 80px;
-            border-bottom-left-radius: 200px 80px;
+            border-bottom-right-radius: 150px 50px;
+            border-bottom-left-radius: 150px 50px;
             // border-radius: 50%;
             background-image: url(../../../assets/icons/pic_ds_qb.png);
             background-size: contain;
@@ -107,19 +113,20 @@ import bus from '../../common/eventBus.js'
             box-sizing: border-box;
         }
         .options{
-            width: 100%;
-            padding: 15px;
+            // padding: 15px;
+            font-size: 0;
             box-sizing: border-box;
+            flex-wrap: wrap;
+            width: 300px;
             li{
                 color: #d93639;
                 border: 1px solid #d93639;
                 border-radius: 3px;
                 line-height: 40px;
                 width: 80px;
-                float: left;
-                margin: 5px;
                 height: 40px;
                 font-size: 16px;
+                margin: 5px;
                 box-sizing: border-box;
             }
         }
@@ -160,13 +167,17 @@ import bus from '../../common/eventBus.js'
     }
     .price-input{
         background-color: #fff;
-        width: 250px;
+        width: 260px;
         border: 1px solid #c8c8c8;
         border-radius: 3px;
         margin: .1rem auto 0;
         height: .4rem;
         font-size: 15px;
         padding: 0 .1rem;
+        span{
+            width: 120px;
+            display: inline-block;
+        }
         input{
             border: none;
             outline:none;

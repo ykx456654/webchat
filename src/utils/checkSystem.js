@@ -11,5 +11,4 @@ export default  function system (){
 	}else{
 		return 'pc'
 	}
-
 }
