@@ -36,7 +36,7 @@ export default {
   },
   methods: {
       ...mapMutations([
-        'showLoad','hideLoad','showTab','hideTab'
+        'showLoad','hideLoad','showTab','hideTab','tabChange'
       ]),
   }
 }

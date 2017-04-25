@@ -65,6 +65,21 @@ export default {
 	},
 	beforeRouteUpdate  (to, from , next) {
 		// console.log('sadasdas')
-	}
+	},
+	mounted () {
+		let position = location.hash.split('?')[0]
+		switch(position){
+			case '#/Recommond':
+			this.active = 2;
+			break;
+			case '#/CourseLive':
+			this.active = 1;
+			break;
+			case '#/me':
+			console.log(position)
+			this.active = 3;
+			break;
+		} 
+  	}
 }
 </script>

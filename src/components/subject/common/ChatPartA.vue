@@ -86,13 +86,13 @@ import AChatItem from './AChatItem'
 			}
 		},
 		computed: {
-			...mapGetters(['advanceMsg','scroll']),
+			...mapGetters(['advanceMsg','scroll','isStart']),
 			msgLength () {
 				return this.advanceMsg.msgList.length
 			}
 		},
 		methods:{
-			...mapMutations(['setScroll']),
+			...mapMutations(['setScroll','setLiveStatu']),
 			...mapActions(['getAdvMsg']),
 			getHistory () {
 				this.isBottom = false
@@ -123,6 +123,12 @@ import AChatItem from './AChatItem'
 						box.scrollTop(100000)
 					}
 				})
+				// console.log(this.advanceMsg.msgList[nv-1])
+				if(this.advanceMsg.msgList[nv-1].msgType == 201 && ov!=0){
+					// console.log(nv)
+					// console.log(ov)
+					this.setLiveStatu(1)
+				}	
 			}
 		}
 	}

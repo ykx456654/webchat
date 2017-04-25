@@ -1,7 +1,7 @@
 export default {
 	state:{
 		loading:true,
-		tabShow:true,
+		tabShow:false,
 		keepAliveComponents:['Subject','Discuss']
 	},
 	getters :{

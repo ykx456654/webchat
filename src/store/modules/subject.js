@@ -240,6 +240,9 @@ export default {
 		},
 		setCurrentImg (state,current) {
 			state.currentImg = current
+		},
+		setLiveStatu (state,n) {
+			state.subject.liveStatus = n
 		}
 	},
 	actions: {

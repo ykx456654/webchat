@@ -63,3 +63,46 @@ export const throttle = function(method,delay,duration){
     }
 }
 
+
+
+export const setPPT = function (current, actionList) {
+	// console.log(actionList)
+	return actionList.reduce((previousValue, currentValue, currentIndex, array1)=>{
+		if(previousValue.actionTime >= current){
+			return Object.assign({},previousValue,{next:1})
+		}
+		if(previousValue.actionTime < current && currentValue.actionTime >= current ){
+			return Object.assign({},currentValue,{next:2})
+		}
+		if(current > currentValue.actionTime){
+			return Object.assign({},currentValue,{next:1})
+		}
+		return 
+	})
+	// next 取值1 pageFrom  取2 pageTo
+}
+
+
+	// Get time format
+ export const timeFormat = function(time,showHour) {
+		// Video's duration is Infinity in GiONEE(金立) device
+		if (!isFinite(time) || time < 0) {
+			time = 0;
+		}
+		// Get hours
+		var _time = showHour ? [0] : [];
+		if (Math.floor(time / 3600) % 24) {
+			_time.push(Math.floor(time / 3600) % 24)
+		}
+		// Get minutes
+		_time.push(Math.floor(time / 60) % 60);
+		// Get seconds
+		_time.push(Math.floor(time % 60));
+		_time = _time.join(':');
+		// Fill '0'
+		
+		_time = _time.replace(/(:|^)([0-9])(?=:|$)/g, '$10$2')
+		
+
+		return _time
+	};
