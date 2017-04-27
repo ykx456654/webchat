@@ -9,11 +9,14 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "alloyfinger": "^0.1.6",
+    "alloytouch": "^0.2.4",
     "axios": "^0.15.3",
     "body-parser": "^1.17.1",
     "exif-js": "^2.1.1",
     "fastclick": "^1.0.6",
-    "hls.js": "^0.7.5",
+    "flex.css": "^1.1.6",
+    "hls.js": "^0.7.6",
     "less": "^2.7.2",
     "less-loader": "^3.0.0",
     "mediaelement": "^4.0.6",

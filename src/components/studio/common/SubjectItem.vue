@@ -1,11 +1,11 @@
 <template>
-	<div class="studio-item flex">
+	<div data-flex="box:first" class="studio-item flex">
 		<div class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
 			<img src="../../../assets/images/banner_zbj_small.png">
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
-		<div class="flex justify-space-between flex-direction-column">
+		<div class="studio-item-info flex justify-space-between flex-wrap flex-direction-column">
 			<div class="topic-item-title flex justify-space-between">
 				<p class="text-overflow">{{subject.subjectTitle}}</p>
 			</div>
@@ -55,30 +55,24 @@
 		padding: .1rem;
 	    box-sizing: border-box;
 	    border-bottom: 1px solid #f7f7f7;
-	    >div:nth-child(2){
-			width: 100%;
-			flex:2 1 auto;
+	    .studio-item-info{
+			flex:1 1 100%;
+			>div{
+				width: 100%;
+			}
 	    }
 	}
 	.topic-item-img{
-		-webkit-box-flex: 0;
-	    -ms-flex: 0 0 1.25rem;
-	    flex: 0 0 1.25rem;
-	    -ms-flex-positive: 0;
-	    flex-grow: 0;
-	    -ms-flex-negative: 0;
-	    flex-shrink: 0;
-	    -ms-flex-preferred-size: 1.25rem;
-	    flex-basis: 1.25rem;
 	    width: 1.25rem;
 	    height: .7rem;
+		flex: 1 0 1.25rem;
 	    overflow: hidden;
 	    margin-right: .1rem;
 	    border-radius: 3px;
 	    box-sizing: border-box;
 	    position: relative;
 	    img{
-	    	width: 100%;
+	    	width: 1.25rem;
 	    	display: block;
 	    }
 	    .icon-fee{

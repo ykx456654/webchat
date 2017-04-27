@@ -19,7 +19,7 @@
 					<div class="course-picture">
 						<img :src="one.proHeadurl">
 					</div>
-					<div class="course-live-detail flex just-space-around">
+					<div class="course-live-detail flex align-items-center">
 						<div class="lecture-item lecture-title text-overflow">{{one.title}}</div>
 						<div class="lecture-item lecture-hospital">{{one.proOrg}}</div>
 						<div class="lecture-item lecture-doctor">
@@ -45,10 +45,10 @@
 .course-live-lecture{position: relative;width: 100%;padding: 8px;background-color: #fff;border: 1px solid #f7f7f7;box-sizing: border-box;margin-top: 10px;&:nth-of-type(1){margin-top: 0}}
 .course-picture{width: 18.2%;height: 24.2%;}
 .course-picture img{width: 100%;min-height: 85px}
-.course-live-detail{margin-left: 2.1%;position: relative;width: 78%;flex-direction:column;transition: all .3s ease;}
+.course-live-detail{margin-left: 2.1%;position: relative;width: 78%;-webkit-flex-wrap: wrap;flex-flow:row wrap;transition: all .3s ease;}
 .arrow-bottom{transition: all .3s;tarnsform-origin:center}
 .lecture-title{font-weight: bold;font-size: 15px}
-.lecture-item{width: 100%;text-align: left;}
+.lecture-item{width: 100%;text-align: left;flex: 1 1 auto}
 .lecture-time{color: #999}
 .lecture-signup{position: absolute;right: 0;bottom: 0;background-color: #d93639;color: #fff;font-size: 14px;border-radius: 14px;padding: 4px 7px;}
 .lecture-signup span {width: 16px;height: 16px;display: block;line-height: 16px;}

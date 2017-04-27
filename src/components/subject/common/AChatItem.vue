@@ -60,7 +60,7 @@
 							</div>
 							<span class="times">{{msg.ansList[0].vodDuration}}s</span>
 						</div>
-						<div v-if="msg.ansList[0].ansType == 1">
+						<div class="text-left" v-if="msg.ansList[0].ansType == 1">
 							<p>
 								{{msg.ansList[0].textContent}}
 							</p>

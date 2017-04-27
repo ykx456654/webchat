@@ -7,7 +7,7 @@
 		</x-header>
 		<div class="header" :class="{'lanch':isLanch}">
 			<div class="user-info">
-				<div class="flex justify-center">
+				<div class="flex justify-center flex-wrap">
 					<img src="../../assets/images/default_head.png">
 				</div>
 				<div>
@@ -156,8 +156,10 @@ import SubjectItem from './common/SubjectItem'
 			},
 			link (s) {
 				if (s.fee > 0) {
+					this.showLoad()
 					this.$router.push({path:'/SubjectIntro',query:{subjectId:s.subjectId,studioId:s.studioId}})
 				}else{
+					this.showLoad()
 					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId}})
 				}
 				// console.log(s)
@@ -296,6 +298,9 @@ import SubjectItem from './common/SubjectItem'
 		img{
 			margin-top: 50px;
 			width: 45%;
+		}
+		p{
+			color: #999;
 		}
 	}
 	.click-more{

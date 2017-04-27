@@ -124,7 +124,7 @@ import AChatItem from './AChatItem'
 					}
 				})
 				// console.log(this.advanceMsg.msgList[nv-1])
-				if(this.advanceMsg.msgList[nv-1].msgType == 201 && ov!=0){
+				if(this.advanceMsg.msgList[nv-1].msgType == 201){
 					// console.log(nv)
 					// console.log(ov)
 					this.setLiveStatu(1)

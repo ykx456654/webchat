@@ -1,7 +1,7 @@
 <template>
-<div class="ppt-player">
-    <img class="ppt-item" src="../../../assets/images/pic__zbht.jpg" alt="" v-if="options.liveStatus == 9 && recordPlayStatu == 1">
-    <img class="ppt-item" @click="controlSwitch" :src="pptImg.url" alt="" v-else>
+<div class="ppt-player" :style="{backgroundImage:'url('+pptImg.url+')'}">
+    <img class="ppt-item" :src="options.poster"
+     v-if="(options.liveStatus == 9 && recordPlayStatu == 1) || options.liveStatus == 0">
     <div class="seeking" v-if="seeking">
         <spinner :size="30" type="snake"/>
     </div>
@@ -19,9 +19,10 @@
             </range>
         </div>
     </transition>
-    <video id="video" >
-		<source v-if="options.livePullUrl != ''" :src="options.livePullUrl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true"  type="application/x-mpegURL">
-	</video>
+    <video id="video" v-if="options.subjectType==2" playsinline>
+        <source :src="options.livePullUrl" type="application/x-mpegURL">
+    </video>
+    <audio id="audio"></audio>
     <div id="recordStart" class="control-btn" v-show="options.liveStatus==9 && (recordPlayStatu == 4 || recordPlayStatu == 1)"></div>
 </div>
 </template>
@@ -29,6 +30,9 @@
 import { Range ,Spinner } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { setPPT,throttle,timeFormat} from '../../../utils/func'
+import Hls from 'hls.js'
+// import zy from '../../../lib/zymedia/zy.media.js'
+import AlloyFinger from 'alloyfinger'
     export default {
         name:'ppt-player',
         props:{
@@ -55,7 +59,8 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
                 showControl:false,
                 canUpdateTimeLine:true,
                 timer:null,
-                seeking:false
+                seeking:false,
+                hls:null
             }
         },
         components:{Range,Spinner },
@@ -66,7 +71,7 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
 					let index = this.defaultPPTIndex
 					return this.recordPlayInfo.imgs[index]
 				}else{
-					return {url:''}
+					return {url:this.options.poster}
 				}
 			},
             pptImg () {
@@ -77,45 +82,67 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
                     // 录播， 返回recordIMG
                     return this.recordPPTImg
                 }else{
-                    return {url:''}
+                    return {url:'./static/images/pic__zbht.jpg'}
+                }
+            },
+            pptRatio () {
+                if(this.pptImg.url){
+                    return this.pptImg.height/this.pptImg.width
                 }
             },
             sourceEnd () {
                 let duration = parseInt(this.duration)
-                // console.log(duration/60/60)
-                let h = parseInt(duration/60/60) 
-                let m = parseInt((duration - h*60*60) / 60)
-                let s = parseInt(duration%60)
                 return timeFormat(duration,false)
             },
             sourceTime () {
                 let current = this.currentTime
-                let h = parseInt(current/60/60) 
-                let m = parseInt((current - h*60*60) / 60)
-                let s = parseInt(current%60)
                 return timeFormat(current,false)
             }
         },
         methods:{
             playLive () {
 				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
-				var player = $('#video')[0]
+                console.log('livePlay') 
                 var _this = this
-				this.$nextTick(()=>{
-					// player.src = 'http://9024.liveplay.myqcloud.com/live/9024_subject200161178.m3u8'
-                    if(this.options.livePushUrl != ''){
-                        player.load()
-					    player.play()
-                        player.addEventListener('abort',function(){
-                            _this.toast('断流了，重新刷新页面')
-                        })
+                if(this.options.livePullUrl != ''){
+                    try{
+                        if(this.options.subjectType == 2) {
+                            // 话题类型，1图文，2ppt+视频，3ppt+语音
+                            var video = document.getElementById('video')
+                            this.$nextTick(()=>{
+                                video.load()
+                                video.addEventListener('canplay',function(){
+                                    video.play()
+                                })
+                                new AlloyFinger(video,{
+                                    touchMove: function(e) {
+                                        // console.log(e)
+                                    }
+                                }) 
+                            })
+                        }else{
+                            if(Hls.isSupported()) {
+                                _this.coursePlayer = document.getElementById('video')
+                                _this.hls = new Hls();
+                                _this.hls.loadSource(_this.options.livePullUrl);
+                                _this.hls.attachMedia( _this.coursePlayer);
+                                _this.hls.on(Hls.Events.MANIFEST_PARSED,function() {
+                                    $('body').one('click',function(){
+                                        _this.coursePlayer.play()
+                                    })
+                                });
+                            }else{
+                                // this.toast('不支持')
+                            }
+                        }
+                    }catch(e){
+                        this.toast(e)
                     }
-				})
-				// this.$nextTick()
-				// player.src = 'http://7xnvc7.com1.z0.glb.clouddn.com/yv1211_1490782401274.mp4'
-				// player.play()
+
+                }
 			},
 			playRecord () {
+                console.log('recordplay')
 				if(this.coursePlayer){
 					return false
 				}
@@ -167,11 +194,13 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
 				})
 			},
             controlSwitch () {
-                this.showControl = true
-                // console.log(1)
-                this.timer =  setTimeout(()=>{
-                    this.showControl = false
-                },3000)
+                if(this.options.liveStatus!=1){
+                    this.showControl = true
+                    // console.log(1)
+                    this.timer =  setTimeout(()=>{
+                        this.showControl = false
+                    },3000)
+                }
             },
             dragging () {
                 this.showControl = true
@@ -186,6 +215,11 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
                 this.currentTime = timePoint
             }
         },
+        destroyed () {
+            this.coursePlayer && this.coursePlayer.pause()
+            this.hls = null 
+            this.coursePlayer = null
+        },
         watch: {
 
         }
@@ -194,6 +228,10 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
 <style lang="less">
     .ppt-player{
         width: 100%;
+        height: 100%;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     .ppt-item{
         width: 100%;
@@ -243,5 +281,12 @@ import { setPPT,throttle,timeFormat} from '../../../utils/func'
 	}
     #video{
         display: none;
+        position: absolute;
+        z-index: 1000;
+        background-color: #000;
+        width: 50px;
+        height: 88px;
+        right: 0;
+        top: 0;
     }
 </style>

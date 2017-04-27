@@ -14,7 +14,7 @@
 		        <source :src="playurl"  type="application/x-mpegURL">
 		    </video>
 		</div>
-		<div class="course-menu flex">
+		<div data-flex="dir:right" class="course-menu flex">
 			<div class="flex align-items-center" :class="{'active':vdo.signup}" @click="signIn">
 				<i class="sprite-icon sign-up"></i>
 				<span>{{vdo.signup?'已报名':'报名'}}</span>
@@ -36,7 +36,7 @@
 				<div class="header">
 					<img :src="vdo.proHeadUrl">
 				</div>
-				<div class="intro flex justify-space-between">
+				<div data-flex="dir:top main:justify" class="intro flex justify-space-between">
 					<p v-text="vdo.proName"></p>
 					<p v-text="vdo.proTitle"></p>
 					<p>{{vdo.org + ' ' + vdo.proDepartment}}</p>

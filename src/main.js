@@ -15,7 +15,6 @@ import {responseInterceptor} from './utils/interceptors.js'
 import {getUrlParam,getCookie,setCookie} from './utils/func'
 import axios from 'axios'
 
-
 axios.interceptors.response.use(responseInterceptor)
 Vue.use(Lazyload);
 Vue.config.productionTip = false
@@ -35,7 +34,7 @@ router.beforeEach((to, from, next) => {
     const encrypt = storage('encrypt')
     if (!encrypt) {
         const code = getUrlParam('code')
-        if (!code) {
+        if (!code && store.state.isWeChat) {
             // console.log('to login')
             // storage('uid','ISqVdBQQajP94TFRo3mVLQ9HUTUw5c/F2611v4jFPQzb2NphxllE/hdngcUYWRh0YJtYeWuvynMpQox7aEhewoZ+W5XQraUNMig7yBTv7wE=')
             location.href =  
@@ -43,14 +42,28 @@ router.beforeEach((to, from, next) => {
             window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect' 
         }else{
             // 通过code获取openid
-            
-            const p = getOpenId(code)
+            var p 
+            if(store.state.isWeChat){
+                 p = getOpenId(code)
+            }else{
+                p = (function(){
+                    let openid = to.query.openid
+                    // console.log(openid)
+                    let res = {result:0,rsps:[{body:{openId:openid}}]}
+                    // alert(JSON.stringify(res))
+                    return Promise.resolve(res) 
+                })()
+            }
+            // const p = getOpenId(code)
             p.then(res=>{
+                // alert(JSON.stringify(res))
                 let openid
                 if(res.result!=0){
                     return Promise.reject(res.msg)
                 }
+                
                 openid = res.rsps[0].body.openId
+                // alert(openid)
                 storage('openid',openid)
                 return getUser(openid)
             })
@@ -58,7 +71,7 @@ router.beforeEach((to, from, next) => {
                 if(res.result!=0){
                     Toast(res.msg)
                     if(res.result == -1){
-                        location.href = '../../testLogin/build/index.html'
+                        // location.href = '../../testLogin/build/index.html'
                     }
                 }else{
                     const data = res.rsps[0].body
@@ -70,7 +83,6 @@ router.beforeEach((to, from, next) => {
                 }
             })
             .catch(e=>{
-                // console.log(e)
                 Toast(e)
             })
         }
@@ -106,7 +118,7 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
             Toast(res.msg)
         }else{
             const signParams = Object.assign({},res.rsps[0].body,{
-                debug: false,
+                debug: location.hostname == 'test-web.yxj.org.cn',
                 jsApiList:['onMenuShareAppMessage', 'onMenuShareTimeline','hideOptionMenu','chooseWXPay'],
             }) 
             return signParams

@@ -44,6 +44,7 @@ export default {
 
 <style lang="less">
 @import './assets/less/video.css';
+@import '../node_modules/flex.css/dist/data-flex.css';
 @import url(./assets/less/reset.less);
 @import url(./assets/less/layout.less);
 @import url(./assets/less/mint.less);

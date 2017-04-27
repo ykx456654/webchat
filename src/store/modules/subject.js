@@ -78,8 +78,14 @@ export default {
 		subjectRole (state) {
 			return state.subject.subjectRole
 		},
-		currentImg (state) {
-			return state.currentImg
+		currentImg (state, getters, rootState) {
+			if(rootState.isWeChat){
+				return {
+					url:`./static/images/${rootState.system}.png`
+				}
+			}else{
+				return state.currentImg
+			}
 		},
 		recordPlayInfo (state) {
 			return {

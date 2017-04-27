@@ -68,9 +68,13 @@
 }
 .flex-direction-column {
   /*主轴方向垂直*/
-  flex-direction: column;
-  -moz-flex-direction: column;
-  -webkit-flex-direction: column;
+  -webkit-box-orient:vertical;
+  -webkit-box-direction:normal;
+  -moz-box-orient:vertical;
+  -moz-box-direction:normal;
+  flex-direction:column;
+  -webkit-flex-direction:column;
+  flex-flow: column nowrap;
 }
 .text-overflow {
   overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
@@ -86,4 +90,12 @@
   flex-direction: column-reverse;
   -moz-flex-direction: column-reverse;
   -webkit-flex-direction: column-reverse;
+}
+.flex-wrap{
+  -webkit-flex-wrap: wrap;
+  flex-flow:row wrap;
+  flex-wrap:wrap;
+}
+.text-left{
+  text-align: left;
 }

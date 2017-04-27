@@ -241,6 +241,7 @@ import { throttle } from '../../utils/func'
 	.load-wrap{
 		height: calc(~'100% - 1rem');
 		overflow: scroll;
+		 -webkit-overflow-scrolling: touch;
 	}
 	.no-msgs{
 		width: 100%;

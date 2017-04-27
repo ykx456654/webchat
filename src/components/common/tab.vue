@@ -17,7 +17,7 @@
 	</div>
 </template>
 <style lang="less" scoped>
-.footer{position: fixed;z-index: 999;width: 100%;background-color: #f2f2f2;box-shadow: 0 0 10px 0 rgba(150,140,140,0.6);bottom:0;padding: 10px 0 5px 0;transition: all .5s}
+.footer{position: fixed;z-index: 999;height: 55px;box-sizing:border-box;width: 100%;background-color: #f2f2f2;box-shadow: 0 0 10px 0 rgba(150,140,140,0.6);bottom:0;padding: 10px 0 5px 0;transition: all .5s}
 .tab-item{width: 33.33%; color: #888888;flex-direction:column;}.icon{width: 24px;height: 20px;background-repeat: no-repeat;background-position: center;background-size: 100%;margin-bottom: 2px;}
 .icon-course{background-image: url('../../assets/images/jz-grey.png')}.icon-course-active{background-image: url('../../assets/images/jz-red.png')}
 .icon-studio{background-image: url('../../assets/images/zb-grey.png')}.icon-studio-active{background-image: url('../../assets/images/zb-red.png')}

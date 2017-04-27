@@ -48,6 +48,14 @@ align-text@^0.1.1, align-text@^0.1.3:
     longest "^1.0.1"
     repeat-string "^1.5.2"
 
+alloyfinger@^0.1.6:
+  version "0.1.6"
+  resolved "http://registry.npm.taobao.org/alloyfinger/download/alloyfinger-0.1.6.tgz#c54027cd6b0ca71134d764f1afb137686daad8be"
+
+alloytouch@^0.2.4:
+  version "0.2.4"
+  resolved "http://registry.npm.taobao.org/alloytouch/download/alloytouch-0.2.4.tgz#28e1eaedb734c781b96dec33ff8e8eef06fb60d6"
+
 alphanum-sort@^1.0.1, alphanum-sort@^1.0.2:
   version "1.0.2"
   resolved "http://registry.npm.taobao.org/alphanum-sort/download/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
@@ -1788,6 +1796,10 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "http://registry.npm.taobao.org/flatten/download/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
+flex.css@^1.1.6:
+  version "1.1.6"
+  resolved "http://registry.npm.taobao.org/flex.css/download/flex.css-1.1.6.tgz#f1f5010913b6c0fcee0d844bffae365c8e0373b9"
+
 follow-redirects@1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/follow-redirects/download/follow-redirects-1.0.0.tgz#8e34298cbd2e176f254effec75a1c78cc849fd37"
@@ -1963,14 +1975,14 @@ glob@^7.0.5:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global@4.3.0, global@^4.3.0, global@~4.3.0:
+global@4.3.0:
   version "4.3.0"
   resolved "http://registry.npm.taobao.org/global/download/global-4.3.0.tgz#ef7ec4beead579b454f5ebd5e7f303db54f42a2b"
   dependencies:
     min-document "^2.6.1"
     process "~0.5.1"
 
-global@^4.3.1:
+global@^4.3.0, global@^4.3.1, global@~4.3.0:
   version "4.3.2"
   resolved "http://registry.npm.taobao.org/global/download/global-4.3.2.tgz#e76989268a6c74c38908b1305b10fc0e394e9d0f"
   dependencies:
@@ -2058,9 +2070,9 @@ he@1.1.x, he@^1.1.0:
   version "1.1.1"
   resolved "http://registry.npm.taobao.org/he/download/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
-hls.js@^0.7.5:
-  version "0.7.5"
-  resolved "http://registry.npm.taobao.org/hls.js/download/hls.js-0.7.5.tgz#3d5fe1f66d054a1acd8a4d5539bfd7625ecae6ba"
+hls.js@^0.7.6:
+  version "0.7.6"
+  resolved "http://registry.npm.taobao.org/hls.js/download/hls.js-0.7.6.tgz#69075c0e6cb4ec9b5ccd499eb05e5d65ee5b72ca"
 
 hmac-drbg@^1.0.0:
   version "1.0.0"

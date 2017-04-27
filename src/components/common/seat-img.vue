@@ -16,6 +16,8 @@
 </script>
 <style lang="less" scoped>
 	.seat-img{
-	
+		p{
+			color: #999;
+		}
 	}
 </style>

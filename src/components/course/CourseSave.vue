@@ -11,7 +11,7 @@
     </div>
     <div v-show="saveVideoList.length != 0">
         <div 
-        class="course-list"
+        class="course-list flex flex-wrap justify-space-between"
         v-infinite-scroll="loadMore"
         infinite-scroll-disabled="loading"
         infinite-scroll-distance="100">
@@ -202,11 +202,11 @@ export default {
     }
     .course-list {
         padding: 10px 10px 60px 10px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        width: 100%;
+        box-sizing: border-box;
         .course-item {
-            flex: 0 0 49%;
+            width: 49%;
+            flex: 0 1 49%;
             display: flex;
             flex-direction: column;
             margin-top: 10px;

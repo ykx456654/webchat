@@ -3,17 +3,17 @@
 		<loadmore :autoFill="false" :bottom-method="load" :bottom-all-loaded="allLoaded" ref="loadmore">
 			<div class="recommond flex" v-for="(r,index) in recommondList">
 				<section>
-					<div class="header" @click="linkStudio(r.studioId)">
+					<div class="header" @click.stop="linkStudio(r.studioId)">
 						<img :src="r.studioImg" v-if="r.studioImg !== ''">
 						<img src="../../assets/images/shared_icon.jpg" v-else>
 					</div>
 				</section>
-				<section class="flex flex-direction-column">
+				<section class="flex flex-direction-column flex-wrap">
 					<div @click="linkStudio(r.studioId)" class="content-title flex align-items-center justify-space-between">
 						<h4>{{r.studioTitle}}</h4>
-						<a class="btn" v-if="!r.isFan" @click="focus(r.studioId,index)">关注</a>
+						<a class="btn" v-if="!r.isFan" @click.stop="focus(r.studioId,index)">关注</a>
 					</div>
-					<div class="content-box" @click="linkSubject(r)">
+					<div class="content-box" @click.stop="linkSubject(r)">
 						<div class="img-box">
 							<img class="page" src="../../assets/images/pic_ht_mr.png" v-if="r.subjectImg == ''">	
 							<img class="page" v-lazy="r.subjectImg" alt="" v-else>
@@ -148,6 +148,7 @@ import { api } from '../../utils/api'
 		border-bottom: 1px solid #f2f2f2;
 		section:nth-child(1){
 			width: 62px;
+			flex: 1 0 62px;
 			box-sizing: border-box;
 			img{
 				width: 100%;
@@ -155,7 +156,7 @@ import { api } from '../../utils/api'
 			}
 		}
 		section:nth-child(2){
-			flex:1 1 auto;
+			flex:0 1 100%;
 			width: calc(~"100% - 62px");
 		}
 		.header{
@@ -188,6 +189,7 @@ import { api } from '../../utils/api'
 	.content-box{
 		padding-right: 12px;
 		position: relative;
+		width: 100%;
 		.page{
 			width: 100%;
 			position: absolute;

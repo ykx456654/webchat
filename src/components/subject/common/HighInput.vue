@@ -114,6 +114,12 @@ import { Indicator,MessageBox  } from 'mint-ui';
 .icon-plus{
 	margin: 0 0 0 0.11rem;
 }
+.input-box{
+	width: auto;
+	textarea{
+		overflow:hidden; resize:none;
+	}
+}
 .btn{
 	display: block;
 	color: #fff;

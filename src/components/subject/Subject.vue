@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-direction-column">
+	<div>
 		<x-header :title="subject.subjectTitle">
 			<a slot="left" @click="goBcak()">
 				<i class="icon icon-arrow-back"></i>
@@ -8,17 +8,14 @@
 				设置
 			</a> -->
 		</x-header>
-		<section class="swiper-ppt" :class="{'not-start':!isStart}" v-if="subject.subjectType != 1">
+		<section class="swiper-ppt" :class="{'not-start':!isStart}" :style="{'height':partSize.pptHeight}" v-if="subject.subjectType != 1">
 			<!--<img src="" alt="">-->
 			<ppt-player
 			:options="PPTPlayerOption"
 			ref="pptPlayer">
 			</ppt-player>
 		</section>
-		<section>
-
-		</section>
-		<section class="chat" :class="{'no-ppt':subject.subjectType == 1}">
+		<section class="chat" :class="{'no-ppt':subject.subjectType == 1}" :style="{'height':partSize.chatAHeigt}">
 			<div class="subject-intro flex align-items-center justify-space-between" @click="linkSubjectIntro">
 				<i class="icon icon-subject-intro"></i>
 				<span>话题介绍</span>
@@ -63,6 +60,7 @@ import { Previewer, Popup ,XDialog} from 'vux'
 import { api } from '../../utils/api'
 import { throttle,setPPT } from '../../utils/func'
 import bus from '../common/eventBus'
+import storage from 'storejs'
 // import zy from '../../lib/zymedia/zy.media.js'
 
 import ChatPartA from './common/ChatPartA'
@@ -123,6 +121,14 @@ import pptPlayer from './common/PPTPlayer'
 				this.gainShow = false
 			}) 
 			
+			if(this.isWeChat && this.subject.subjectType != 1){
+				const openid = storage('openid')
+				
+				// console.log(openid)
+				location.hash = location.hash + '&openid=' + openid
+				alert(location.hash)
+			}
+
 		},
 		activated () {
 			if (this.isCached) {
@@ -177,7 +183,7 @@ import pptPlayer from './common/PPTPlayer'
 			}
 		},
 		computed: {
-			...mapGetters(['subject','id','uvNum','images','uid','loopClock','userInfo','isStart','currentImg','isWeChat','system']),
+			...mapGetters(['subject','id','uvNum','images','uid','loopClock','userInfo','isStart','currentImg','isWeChat','system','isWeChat']),
 			liveStatus () {
 				return this.subject.liveStatus
 			},
@@ -186,7 +192,29 @@ import pptPlayer from './common/PPTPlayer'
 					liveStatus:this.liveStatus,
 					livePullUrl:this.subject.livePullUrl,
 					recordUrl:this.subject.videoUrl,
-					subjectType:this.subject.subjectType
+					subjectType:this.subject.subjectType,
+					poster:this.subject.subjectImg
+				}
+			},
+			partSize () {
+				let pptComponent = this.$refs.pptPlayer
+				if(pptComponent){
+					let ratio = pptComponent.pptRatio || 0.56
+				}else{
+					return {pptHeight:'',chatAHeigt:''}
+				}
+				let w = $(window).width()
+				let h = $(window).height()
+				let rem = w / 3.75
+				let h_rem = h / rem
+				let s = {
+					pptHeight: (w * ratio / rem).toFixed(2) + 'rem',
+					chatAHeigt: (h_rem - w * ratio / rem - 0.45 - 0.5 ).toFixed(2) + 'rem'
+				}
+				if(this.subject.subjectType != 1){
+					return s
+				}else{
+					return {pptHeight:'',chatAHeigt:''}
 				}
 			}
 		},
@@ -198,7 +226,11 @@ import pptPlayer from './common/PPTPlayer'
 			},
 			goBcak () {
 				// this.$destroy()
-				history.back()
+				if(this.isWeChat && this.subject.subjectType !== 1 && this.liveStatus == 1){
+					history.go(-2)
+				}else{
+					history.back()
+				}
 			},
 			linkSubjectIntro () {
 				this.showLoad()
@@ -358,6 +390,8 @@ import pptPlayer from './common/PPTPlayer'
 			font-size: 12px;
 			text-align: left;
 			margin-left: 8px;
+			display: block;
+			width: 60px;
 			flex:1 1 auto;
 		}
 	}
@@ -377,6 +411,7 @@ import pptPlayer from './common/PPTPlayer'
 		height: 100%;
 		overflow-y: scroll;
 		overflow-x:hidden;
+		-webkit-overflow-scrolling: touch;
 	}
 	.chat-part-b{
 		position: absolute;

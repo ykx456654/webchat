@@ -56,6 +56,7 @@ export const getOpenId = function (code) {
 }
 
 export const getUser = function (openid) {
+	// alert(openid)
 	return axios({
 		method:'post',
 		url:'/api',

@@ -7,8 +7,8 @@
 			<!-- <a class="btn course-detail-btn" slot="right">关注</a> -->
 		</x-header>
 		<div class="zy_media">
-			<video id="ss" :poster="vdo.coverpicUrl">
-		        <source :src="playurl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true" type="video/mp4">
+			<video id="ss" :poster="vdo.coverpicUrl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true" >
+		        <source :src="playurl" type="video/mp4">
 		    </video>
 		</div>
 
@@ -24,8 +24,8 @@
 						<div class="bg-fff">
 							<h5 v-text="vdo.title"></h5>
 							<div class="course-pro flex">
-								<div><img :src="vdo.proHeadUrl"></div>
-								<div class="flex flex-direction-column justify-space-between">
+								<div class="f-1"><img :src="vdo.proHeadUrl"></div>
+								<div class="f-2 flex flex-direction-column flex-wrap justify-space-between">
 									<p v-text="vdo.proName"></p>
 									<p v-text="vdo.proTitle"></p>
 									<p class="text-overflow" v-text="vdo.brief"></p>
@@ -50,18 +50,26 @@
 				</tab-container-item>
 				<tab-container-item id="course-detail-tab-2">
 					<!-- <div></div> -->
-					<div class="flex comment justify-space-between" @click="listComment($event)" v-if="commentList.length != 0">
-						<div class="comment-head">
-							<img src="../../../assets/images/default_head.png">
-						</div>
-						<div class="comment-item">
-							<p class="comment-name">jackMapo</p>
-							<p class="comment-time">5456</p>
-							<p class="comment-content">122fsdaf</p>
-						</div>
-						<div class="comment-zan c-z flex align-items-center">
-							<img class="c-z" src="../../../assets/images/zan_.png">
-							<span class="c-z" zan>赞</span>
+					<div  v-if="commentList.length != 0">
+						<div  class="flex comment justify-space-between" @click="listComment($event,c,i)" v-for="(c,i) in commentList" >
+							<div class="comment-head">
+								<img src="../../../assets/images/default_head.png" v-if="c.head_url==''">
+								<img :src="c.head_url" alt="" v-else>
+							</div>
+							<div class="comment-item">
+								<p class="comment-name">{{c.nick_name}}</p>
+								<p class="comment-time">{{c.time}}</p>
+								<p class="comment-content">{{c.content}}</p>
+								<div class="at-user" v-if="c.reply_user_id && c.rawPic.url ==''">
+									<span class="at-user-name">@{{c.reply_nick_name}}</span>
+									<span class="at-user-content"> : {{c.rawContent}}</span>
+									<!--<span><i class="icon icon-comment-img"></i>图片</span>-->
+								</div>
+							</div>
+							<div class="comment-zan c-z flex align-items-center">
+								<img class="c-z" src="../../../assets/images/zan_.png">
+								<span class="c-z" zan>赞</span>
+							</div>
 						</div>
 					</div>
 					<div v-else class="no-comment">
@@ -129,11 +137,11 @@
 </template>
 <script>
 // 'https://www.yishengzhan.cn/download?channel=release_webysz';
-import {mapMutations} from 'vuex'
-import { mapGetters } from 'vuex'
+import { mapGetters,mapActions,mapMutations } from 'vuex'
 import {api} from '../../../utils/api'
 import { Header ,TabContainer, TabContainerItem,Actionsheet,Spinner,MessageBox} from 'mint-ui';
 import { Popup } from 'vux'
+import storage from 'storejs'
 import zy from '../../../lib/zymedia/zy.media.js'
 	export default {
 		name:'CourseDetailSave',
@@ -178,30 +186,40 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				relativeVideoStart:0,
 				relativeVideoLimt:30,
 				relativeVideoIsEnd:0,
+				commentIndex:0,
 				actions:[
 					{
 						name:'回复评论',
 						method:()=>{
-							this.toast('需要接口')
+							// this.toast('需要接口')
+							this.isReply = true
+							this.sheetVisible = false
+							this.popupVisible = true
+							// this.sendComment()
 						}
 					},
 					{
 						name:'举报评论',
 						method:()=>{
-							this.toast('需要接口')
+							// this.toast('需要接口')
+							this.reportComment(this.replyCommentId)
 						}
 					}
-				]
+				],
+				isReply:false,
+				replyCommentUserId:0,
+				replyCommentId:0
 			}
 		},
 		computed : {
 			...mapGetters([
-				'uid'
+				'uid','userInfo'
 			])
 		},
 		watch:{
 		},
 		methods:{
+			...mapActions(['GETUSERINFO']),
 			...mapMutations([
 				'showLoad','hideLoad','showTab','hideTab'
 			]),
@@ -344,7 +362,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					break;
 				}
 			},
-			listComment (e) {
+			listComment (e,c,i) {
 				const uid = this.uid
 				const vdoid = this.vdoid
 				if (e.target._prevClass === 'c-z') {
@@ -361,20 +379,40 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					.catch(e=>{console.log(e)})
 					return false
 				}else{
-					this.sheetVisible = true
+					if(JSON.stringify(this.userInfo) == "{}"){
+						this.GETUSERINFO()
+						.then(()=>{
+							this.sheetVisible = true
+							this.replyCommentUserId = c.user_id
+							this.replyCommentId = c.comment_id
+							this.commentIndex = i
+							Promise.resolve()
+						})
+					}else{
+						this.sheetVisible = true
+						this.replyCommentUserId = c.user_id
+						this.replyCommentId = c.comment_id
+						this.commentIndex = i
+					}
 				}
 			},
 			cancelComment () {
 				this.popupVisible = false
 				this.comment = ''
 			},
-			sendComment (id) {
-				let data = {
-					type:2,content:this.comment,topic_id:this.vdo.vdoid
-				} 
-				if (id) {
-					data
+			sendComment () {
+
+				if(this.isReply){
+					this.replyComment(this.replyCommentUserId,this.replyCommentId,this.commentIndex)
+					return false
 				}
+
+				let data = {
+					type:2,
+					content:this.comment,
+					topic_id:this.vdo.vdoid,
+					user_id:storage('uid')
+				} 
 				api(this.uid,{srv: "article_article",cmd: "add_comment"},data)
 				.then(res => {
 					res = res.data
@@ -383,10 +421,60 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					}else{
 						this.toast('评论成功！')
 						this.popupVisible = false
+						return res.rsps[0].body.comment_id
 					}
+				})
+				.then(comment_id=>{
+
+					this.commentList.push({
+						time: new Date().Format("MM-dd hh:mm"),
+						content: this.comment,
+						nick_name: this.userInfo.nickName,
+						user_id:storage('uid'),
+						head_url:this.userInfo.headUrl,
+						comment_id
+					})
+					this.comment = ''
 				})
 				.catch(e=>{
 					console.log(e)
+				})
+			},
+			replyComment (reply_user_id,reply_comment_id,index) {
+				let data = {
+					type:2,
+					content:this.comment,
+					topic_id:this.vdo.vdoid,
+					user_id:storage('uid'),
+					reply_user_id,
+					reply_comment_id
+				} 
+				return api(this.uid,{srv: "article_article",cmd: "add_comment"},data)
+				.then(res => {
+					res = res.data
+					if (res.result != 0) {
+						this.toast(res.msg)
+					}else{
+						this.toast('评论成功！')
+						this.popupVisible = false
+						this.commentList[index].reply_nick_name = this.userInfo.nickName
+						this.commentList[index].rawContent = this.comment
+						this.commentList[index].reply_user_id = storage('uid')
+						this.comment = ''
+						return res.rsps[0].body.comment_id
+					}
+				})
+			},
+			reportComment (report_comment_id) {
+				this.popupVisible = true
+				api(this.uid,{srv:'article_article',cmd:'report_comment'},{report_comment_id})
+				.then(res=>{
+					res = res.data
+					if (res.result != 0) {
+						this.toast(res.msg)
+					}else{
+						this.toast('举报成功！')
+					}
 				})
 			},
 			toRelative (id) {
@@ -396,15 +484,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				this.$nextTick(()=>{
 					location.reload()
 				})
-				// location.href = 
-				// this.showLoad()
-				// this.getDetail()
-				// .then(res=>{
-				// 	this.$forceUpdate()
-				// 	this.hideLoad()
-				// 	$('#ss')[0].load()
-				// 	this.initSaveVdo()
-				// })
 			}
 		},
 		destroyed () {
@@ -509,18 +588,23 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			width: 100%;
 			margin: 5px 0 10px;
 			padding: 0 10px;
-			:first-child{
+			.f-1{
 				width: 60px;
+				flex: 1 0 60px;
 			}
-			>:last-child{
+			.f-2{
 				margin-left: 10px;
+				flex: 0 1 auto;
 			}
 			img{
 				width: 100%;
 			}
 			p{
-				width: 75%;
+				width: 100%;
 				font-size: 14px;
+				&.text-overflow{
+					width: 80%;
+				}
 			}
 		}
 		.course-detail-content{
@@ -626,6 +710,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 	.comment{
 		padding: 10px;
 		position: relative;
+		border-bottom: 1px solid #f7f7f7;
 		.comment-head{
 			width: 45px;
 			img{
@@ -635,16 +720,12 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		.comment-item{
 			text-align: left;
 			width: 85%;
-			:first-child{
+			>:first-child{
 				font-weight: bold;
 				color: #4a4a4a;
 			}
-			:nth-of-type(2){
+			>:nth-of-type(2){
 				color: #666;
-			}
-			:last-child{
-				color: #666;
-				margin-top: 10px;
 			}
 			p{
 				margin: 5px 0;
@@ -695,6 +776,17 @@ import zy from '../../../lib/zymedia/zy.media.js'
 	.comment-send{
 		:first-child{
 		}
+	}
+	.at-user{
+		padding: 5px;
+		background-color: #f2f2f2;
+		width: 100%;
+		font-size: 12px;
+		box-sizing: border-box;
+	}
+	.at-user-name{
+		color: #0a6cd6!important;
+		font-weight: normal!important;
 	}
 	.relative-course{
 		>img{

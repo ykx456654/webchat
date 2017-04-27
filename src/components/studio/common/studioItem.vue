@@ -1,12 +1,12 @@
 <template>
-	<div class="studio-item flex align-items-center">
+	<div data-flex="main:justify box:justify"  class="studio-item flex align-items-center">
 		<div>
 			<img :src="studio.studioImg" v-if="studio.studioImg != ''">
 			<img src="../../../assets/images/icon_zbj_mr.png" v-else>
 		</div>
-		<div class="flex flex-direction-column just-space-around">
-			<p v-text="studio.studioTitle"></p>
-			<p v-text="studio.subjectTitle"></p>
+		<div data-flex="dir:top" class="flex flex-direction-column just-space-around ">
+			<p class="text-left text-overflow" v-text="studio.studioTitle"></p>
+			<p class="text-left text-overflow" v-text="studio.subjectTitle"></p>
 		</div>
 		<div class="flex">
 			<p>{{studio.startTime | time}}</p>
