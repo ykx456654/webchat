@@ -130,6 +130,7 @@ import cellx from '../common/cell-x'
 					this.$router.push({path:'/StudioList',query:{type:1}})
 					break;
 					case 2:
+					this.showLoad()
 					this.$router.push({path:'/WatchedSubjects'})
 					break;
 				}

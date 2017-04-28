@@ -30,7 +30,6 @@ import { api } from '../../utils/api'
 			xHeader:Header,Loadmore,seatImg,watchedSubject
 		},
 		created () {
-			this.hideLoad()
 			this.loadSubjects()
 		},
 		data () {

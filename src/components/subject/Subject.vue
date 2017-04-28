@@ -9,8 +9,9 @@
 			</a> -->
 		</x-header>
 		<section class="swiper-ppt" :class="{'not-start':!isStart}" :style="{'height':partSize.pptHeight}" v-if="subject.subjectType != 1">
-			<!--<img src="" alt="">-->
+			<img :src="currentImg.url" alt="" v-if="currentImg.url == './static/images/logo_htjz.png'">
 			<ppt-player
+			v-else
 			:options="PPTPlayerOption"
 			ref="pptPlayer">
 			</ppt-player>
@@ -345,10 +346,11 @@ import pptPlayer from './common/PPTPlayer'
 	.swiper-ppt{
 		height: 2.1rem;
 		width: 100%;
-		background-color: #111;
+		background-color: #fff;
 		position: relative;
 		img{
-			width: 100%;
+			margin-top: 30px;
+			width: 25%;
 		}
 	}
 	.chat{

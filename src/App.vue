@@ -11,8 +11,8 @@
 </template>
 
 <script>
-var FastClick = require('fastclick');
-FastClick.attach(document.body);
+// var FastClick = require('fastclick');
+// FastClick.attach(document.body);
 import { mapMutations } from 'vuex'
 import loading from './components/common/loading'
 import tab from './components/common/tab'

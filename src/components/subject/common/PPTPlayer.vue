@@ -19,10 +19,9 @@
             </range>
         </div>
     </transition>
-    <video id="video" v-if="options.subjectType==2" playsinline>
-        <source :src="options.livePullUrl" type="application/x-mpegURL">
+    <div id="mediaSourcePlayer"></div>
+    <video id="video" v-if="options.subjectType==2" playsinline webkit-playsinline="true" playsinline="true">
     </video>
-    <audio id="audio"></audio>
     <div id="recordStart" class="control-btn" v-show="options.liveStatus==9 && (recordPlayStatu == 4 || recordPlayStatu == 1)"></div>
 </div>
 </template>
@@ -31,8 +30,11 @@ import { Range ,Spinner } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { setPPT,throttle,timeFormat} from '../../../utils/func'
 import Hls from 'hls.js'
-// import zy from '../../../lib/zymedia/zy.media.js'
-import AlloyFinger from 'alloyfinger'
+// import videojs from 'video.js'
+// window.videojs = videojs
+// require('videojs-contrib-hls') 
+// require('video.js/dist/video-js.css')
+// import Clapper from 'Clappr'
     export default {
         name:'ppt-player',
         props:{
@@ -63,7 +65,7 @@ import AlloyFinger from 'alloyfinger'
                 hls:null
             }
         },
-        components:{Range,Spinner },
+        components:{Range,Spinner},
         computed:{
             ...mapGetters(['recordPlayInfo','currentImg']),
     		recordPPTImg () {
@@ -104,42 +106,20 @@ import AlloyFinger from 'alloyfinger'
 				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
                 console.log('livePlay') 
                 var _this = this
-                if(this.options.livePullUrl != ''){
-                    try{
-                        if(this.options.subjectType == 2) {
-                            // 话题类型，1图文，2ppt+视频，3ppt+语音
-                            var video = document.getElementById('video')
-                            this.$nextTick(()=>{
-                                video.load()
-                                video.addEventListener('canplay',function(){
-                                    video.play()
-                                })
-                                new AlloyFinger(video,{
-                                    touchMove: function(e) {
-                                        // console.log(e)
-                                    }
-                                }) 
-                            })
-                        }else{
-                            if(Hls.isSupported()) {
-                                _this.coursePlayer = document.getElementById('video')
-                                _this.hls = new Hls();
-                                _this.hls.loadSource(_this.options.livePullUrl);
-                                _this.hls.attachMedia( _this.coursePlayer);
-                                _this.hls.on(Hls.Events.MANIFEST_PARSED,function() {
-                                    $('body').one('click',function(){
-                                        _this.coursePlayer.play()
-                                    })
-                                });
-                            }else{
-                                // this.toast('不支持')
-                            }
-                        }
-                    }catch(e){
-                        this.toast(e)
-                    }
-
+                var player
+                if(_this.options.subjectType == 2){
+                    player = document.getElementById('video')
+                }else{
+                    player = new Audio()
                 }
+                var hls = new Hls();
+                hls.loadSource(_this.options.livePullUrl);
+                    hls.attachMedia(player);
+                    hls.on(Hls.Events.MANIFEST_PARSED,function() {
+                        $('body').on('click',function(){
+                            player.play();
+                        })
+                });
 			},
 			playRecord () {
                 console.log('recordplay')

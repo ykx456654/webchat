@@ -84,7 +84,13 @@ export default {
 					url:`./static/images/${rootState.system}.png`
 				}
 			}else{
-				return state.currentImg
+				if(state.currentImg.url == ''){
+					return {
+						url: `./static/images/logo_htjz.png`
+					}
+				}else{
+					return state.currentImg
+				}
 			}
 		},
 		recordPlayInfo (state) {

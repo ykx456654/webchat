@@ -1,15 +1,15 @@
 <template>
-	<div class="high input flex align-items-center justify-center">
+	<div data-flex="main:justify box:justify" class="high input flex align-items-center">
 		<div @click="recordVoice">
 			<i class="icon icon-voice-input"></i>
 		</div>
-		<div class="input-box flex align-items-center">
+		<div data-flex="box:0"  class="input-box flex align-items-center">
 			<textarea v-model="content"></textarea>
 		</div>
-		<div>
+		<div data-flex="box:1">
 			<a class="btn " :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
 		</div>
-		<div>
+		<div data-flex="box: 0">
 			<i class="icon icon-plus" @click="sendImg"></i>
 		</div>
 		<!-- <input type="file" name=""> -->
@@ -22,7 +22,6 @@ import { Indicator,MessageBox  } from 'mint-ui';
 	export default {
 		data () {
 			return {
-				canSend:true,
 				content:'',
 				width:0,
 				height:0,
@@ -32,6 +31,15 @@ import { Indicator,MessageBox  } from 'mint-ui';
 				answerFlag:false,
 				msgType:1,
 				type:1
+			}
+		},
+		computed :{
+			canSend () {
+				if (this.content != '') {
+					return true
+				}else{
+					return false
+				}
 			}
 		},
 		methods:{
@@ -124,10 +132,11 @@ import { Indicator,MessageBox  } from 'mint-ui';
 	display: block;
 	color: #fff;
 	height: .3rem;
-	width: 40px;
+	width: 50px;
 	border-radius: 3px;
 	margin-left: 5px;
 	line-height: .3rem;
+	flex: 1 1 50px;
 }
 .btn-send{
 	background-color: #d93639;
