@@ -1,6 +1,6 @@
 <template>
 	<div class="setting">
-		<x-header title="个人设置"> 
+		<x-header title="个人设置">
 			<router-link to="/me" slot="left">
 				<i class="icon icon-arrow-back"></i>
 			</router-link>
@@ -100,7 +100,7 @@
 		<router-link to="/Auth" class="btn btn-auth" v-if="userInfo.authFlag == 0">去认证</router-link>
 		<popup  v-model="showPopup" :height="popupHeight">
 			<div class="popup-content">
-				<x-header :title="popupTitle"> 
+				<x-header :title="popupTitle">
 					<a @click="hidePopup" slot="left">
 						<i class="icon icon-arrow-back"></i>
 					</a>
@@ -176,7 +176,7 @@ import cellx from '../common/cell-x'
 				.then(action=>{
 					// console.log(action)
 					if (action == 'confirm') {
-					 return	true 
+					 return	true
 					}
 				})
 			},

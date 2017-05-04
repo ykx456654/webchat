@@ -4,7 +4,7 @@
 			<div class="chat-speaker">
 				<img :src="msg.headImg" v-if="msg.headImg !='' && msg.headImg ">
 				<img src="../../../assets/images/default_head.png" v-else>
-				<i class="icon icon-dashang" @click="gain"></i>
+				<i class="icon icon-dashang" @click="gain(msg)"></i>
 			</div>
 			<div class="chat-content">
 				<div class="chat-speaker-name ">
@@ -28,9 +28,9 @@
 					</div>
 
 					<!-- 语音 -->
-					<div class="flex align-items-center voice" v-if="msg.msgType === 3" > 
-						<div class="content" 
-						v-voice-width="{'vodDuration':msg.vodDuration,'msgType':msg.msgType}" 
+					<div class="flex align-items-center voice" v-if="msg.msgType === 3" >
+						<div class="content"
+						v-voice-width="{'vodDuration':msg.vodDuration,'msgType':msg.msgType}"
 						@click="play({vodUrl:msg.vodUrl,vodDuration:msg.vodDuration},1)">
 							<div class="triangle"></div>
 							<div class="triangle-border"></div>
@@ -51,8 +51,8 @@
 						</p>
 						<div class="bd1"></div>
 						<div class="flex align-items-center" v-if="msg.ansList[0].ansType == 3">
-							<div class="answer-voice content"  
-								v-voice-width="{'vodDuration':msg.ansList[0].vodDuration,'msgType':msg.ansList[0].ansType}" 
+							<div class="answer-voice content"
+								v-voice-width="{'vodDuration':msg.ansList[0].vodDuration,'msgType':msg.ansList[0].ansType}"
 								@click="play({vodUrl:msg.ansList[0].vodUrl,vodDuration:msg.ansList[0].vodDuration},3)">
 								<div class="voice-msg">
 									<i class="icon icon-voice" :class="{'icon-playing':msg.ansList[0].playing}"></i>
@@ -76,7 +76,7 @@
 		</div>
  		<div class="tip-to-app" v-if="!isStart && subjectRole == 1">
 			<a>要开始直播，请使用医生站APP。</a>
-		</div> 
+		</div>
 <!-- 		<div class="gain">
 			<div>
 				<div class="gain-inner flex align-items-center justify-center">
@@ -88,7 +88,7 @@
 				</div>
 			</div>
 		</div> -->
-	
+
 
 	</div>
 </template>
@@ -117,7 +117,7 @@ import bus from '../../common/eventBus.js'
 		methods: {
 			showPreview () {
 				const images = this.$store.getters.images
-				let index 
+				let index
 				images.forEach((ite,idx)=>{
 					if (this.msg.id === ite.id) {
 						index = idx
@@ -131,12 +131,12 @@ import bus from '../../common/eventBus.js'
 					bus.$emit('playVoice',{msg,index:this.index,type})
 				}else{
 					bus.$emit('endVoice',{index:this.index,type:type+1})
-				}	
+				}
 				this.flag = !this.flag
 			},
-			gain () {
-				bus.$emit('invoke')
-			}
+			gain (msg) {
+				bus.$emit('invoke',msg)
+			},
 		},
 		filters: {
 
@@ -235,20 +235,22 @@ import bus from '../../common/eventBus.js'
 	}
 	.voice-msg{
 		.icon-playing{
-			animation:  1.5s linear infinite blink;
+			animation:  blink 5s linear infinite;
+      @keyframes blink {
+        0% { background-image: url(../../../assets/icons/yuying1.png)}
+        50% { background-image: url(../../../assets/icons/yuying2.png) }
+        100% { background-image: url(../../../assets/icons/yuying1.png)}
+      }
 		}
 		.times{
 			color: #666;
 		}
 		.icon-voice{
 			background-image: url(../../../assets/icons/yuying2.png);
+
 		}
 	}
-	@keyframes blink {
-		0% { background-image: url(../../../assets/icons/yuying1.png)}
-		50% { background-image: url(../../../assets/icons/yuying2.png) }
-		100% { background-image: url(../../../assets/icons/yuying1.png)}
-	}
+
 	.image{
 		margin-top: 10px;
 		img{

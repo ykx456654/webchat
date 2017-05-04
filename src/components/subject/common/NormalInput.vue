@@ -11,7 +11,7 @@
 			<a class="btn " :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
 		</div>
 	</div>
-</template>
+</template>s
 <script>
 import { Indicator } from 'mint-ui';
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
@@ -93,8 +93,8 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		background-color: #fcfcfc;
 		height: 80%;
 		font-size: 15px;
-		color: #c2c2c2;
 		-webkit-appearance: none;
+    color:#333;
 	}
 }
 .input-box{

@@ -2,7 +2,8 @@
 	<div class="studio-item flex" data-flex="box:first">
 		<div class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
-			<img src="../../../assets/images/banner_zbj_small.png">
+      <img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
+			<img src="../../../assets/images/banner_zbj_small.png" v-else>
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
 		<div data-flex="dir:top" class="flex justify-space-between flex-direction-column">
@@ -16,8 +17,9 @@
 				<i class="icon icon-people"></i>
 				<span v-text="subject.uvNum"></span>
 			</div> -->
-			<div class="studio-owner flex" v-if="subject.studioTitle">
-				<img :src="subject.studioImg">
+			<div class="studio-owner flex">
+				<img :src="subject.studioImg" v-if="subject.studioImg != ''">
+        <img src="../../../assets/images/default_head.png" alt="" v-else>
 				<span v-text="subject.studioTitle"></span>
 			</div>
 		</div>
@@ -100,7 +102,7 @@
 		    line-height: 20px;
 		    width: 55px;
 		    border-radius: 0 10px 10px 0;
-		    left: 0;
+		    left: 1px;
 		    top: 0;
 	    }
 	}

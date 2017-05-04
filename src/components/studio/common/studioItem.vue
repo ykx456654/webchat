@@ -32,7 +32,9 @@
 				var today = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
 				var t_today = +new Date(today)/1000
 				if (t > t_today) {
-					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
+          var t_date= new Date(t*1000).Format('yyyy-MM-dd hh:ss');
+          var p_date = t_date.slice(5,16)
+					return p_date;
 				}else{
 					return '今天  ' + new Date(t).Format('hh:ss')
 				}

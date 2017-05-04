@@ -1,6 +1,6 @@
 <template>
-	<div class="cell flex align-items-center justify-space-between">
-		<div class="cell-box flex justify-space-between" @click="cellClick">
+	<div class="cell flex align-items-center justify-space-between"  @click="cellClick">
+		<div class="cell-box flex justify-space-between">
 			<div>
 				<slot name="left"></slot>
 			</div>

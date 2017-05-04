@@ -1,4 +1,4 @@
-<template> 
+<template>
 	<div class="chat-b chat-part-b">
 		<div class="flex chat-b-item justify-end" v-for="(m,index) in partBMsgList">
 			<div class="chat-content" @click="linkDiscuss(index)">
@@ -6,9 +6,9 @@
 				{{m.textContent}}
 			</div>
 			<div class="user-head flex align-items-center">
-				<img :src="m.headImg" v-if="m.headImg!='' && m.headImg">
+				<img :src="m.headImg" v-if="m.headImg !='' && m.headImg">
 				<img src="../../../assets/images/default_head.png" v-else>
-			</div>	
+			</div>
 		</div>
 	</div>
 </template>
@@ -17,7 +17,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	export default {
 		data () {
 			return {
-				
+
 			}
 		},
 		computed:{
@@ -38,7 +38,7 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 	    border-radius: 2px;
 	    overflow: hidden;
 	    max-height: 36px;
-	    max-width: 90px;
+	    width: 90px;
 	    font-size: 12px;
 	    line-height: 18px;
 	    padding: 3px;

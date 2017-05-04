@@ -2,7 +2,8 @@
 	<div data-flex="box:first" class="studio-item flex">
 		<div class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
-			<img src="../../../assets/images/banner_zbj_small.png">
+      <img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
+			<img src="../../../assets/images/banner_zbj_small.png" v-else>
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
 		<div class="studio-item-info flex justify-space-between flex-wrap flex-direction-column">
@@ -90,7 +91,7 @@
 		    line-height: 20px;
 		    width: 55px;
 		    border-radius: 0 10px 10px 0;
-		    left: 0;
+		    left: 1px;
 		    top: 0;
 	    }
 	}

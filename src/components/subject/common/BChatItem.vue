@@ -13,7 +13,7 @@
 	export default {
 		data () {
 			return {
-				
+
 			}
 		}
 	}
@@ -25,7 +25,7 @@
 	    border-radius: 2px;
 	    overflow: hidden;
 	    max-height: 36px;
-	    max-width: 90px;
+	    width: 90px;
 	    font-size: 12px;
 	    line-height: 18px;
 	    padding: 3px;

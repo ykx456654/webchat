@@ -10,10 +10,10 @@
 			<h4 v-text="subject.subjectTitle"></h4>
 			<div class="flex justify-space-between">
 				<div class="subject-time ">{{new Date(subject.startTime*1000).Format('yyyy-MM-dd hh:mm')}}</div>
-				<div class="subject-num flex align-items-center">
-					<i class="icon icon-peoples"></i>
-					<span v-text="subject.uvNum"></span>
-				</div>
+				<!--<div class="subject-num flex align-items-center">-->
+					<!--<i class="icon icon-peoples"></i>-->
+					<!--<span v-text="subject.uvNum"></span>-->
+				<!--</div>-->
 			</div>
 		</div>
 		<div class="fee flex justify-space-between" v-if="subject.fee != 0">
@@ -53,7 +53,7 @@
 			</div>
 		</div>
 		<a class="enter" @click="enter" :class="{'need-pay':!subject.payFlag && subject.fee > 0}">
-			{{!subject.payFlag && subject.fee > 0 ? '报名':'进入直播间'}}
+			{{!subject.payFlag && subject.fee > 0 ? '付费进入':'进入话题'}}
 		</a>
 	</div>
 </template>
@@ -61,6 +61,7 @@
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner} from 'mint-ui'
 import { api } from '../../utils/api'
+import storage from 'storejs'
 export default {
 	name:'SubjectIntro',
 	components:{
@@ -77,7 +78,7 @@ export default {
 				var	params = {
 					title: this.subject.subjectTitle,
 					desc: this.subject.subjectIntro,
-					link:`${location.origin}/SubjectIntro?subjectId=${this.subjectId}&studioId=${this.studioId}`,
+					link:location.href.replace(/&openid=+\w*/g,''),
 					imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
 				};
 				console.log(params)
@@ -114,6 +115,7 @@ export default {
 			})
 		},
 		enter () {
+			let openid = storage('openid')
 			if(this.subject.fee > 0 && !this.subject.payFlag){
 
 				const data = {
@@ -130,11 +132,11 @@ export default {
 
 					}
 				})
-
 				return false
 			}
+			// alert(openid)
 			this.showLoad()
-			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId}})
+			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId,openid}})
 		},
 		focus () {
 			api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
@@ -175,18 +177,18 @@ function onBridgeReady(info,instance){
     WeixinJSBridge.invoke(
        'getBrandWCPayRequest',info,
        function(res){
-       	    // alert(JSON.stringify(res))     
-		    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+       	    // alert(JSON.stringify(res))
+		    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
 		    if (res.err_msg == "get_brand_wcpay_request:ok") {
 				instance.payOver(1,'支付成功')
 				setTimeout(function(){
-					window.location.href = "http://" + window.location.hostname+"/live_room/dist/index.html?webpay=1#!/?innerStudioID="+ self.innerStudioID +'&subjectID=' + self.topicId		
+					window.location.href = "http://" + window.location.hostname+"/live_room/dist/index.html?webpay=1#!/?innerStudioID="+ self.innerStudioID +'&subjectID=' + self.topicId
 				},1000)
 			}else{
 				instance.payOver(0,'支付失败')
 			}
        }
-   ); 
+   );
 }
 
 </script>
@@ -250,7 +252,7 @@ function onBridgeReady(info,instance){
 		padding: 15px;
 		font-size: 14px;
 		.intro{
-			padding: 15px 0px 30px;
+			padding: 15px 0px 15px;
 			>p{
 				margin-top: 20px;
 				color: #333;
@@ -280,7 +282,7 @@ function onBridgeReady(info,instance){
 					margin-right: 15px;
 				}
 			}
-			border-bottom: 1px solid #e2e2e2;
+			border-bottom: 1px solid #f2f2f2;
 			padding: 0 15px;
 			.btn{
 				background-color: #d93639;
@@ -304,7 +306,7 @@ function onBridgeReady(info,instance){
 				}
 			}
 			>div:nth-child(1){
-				border-right: 1px solid #e2e2e2;
+				border-right: 1px solid #f2f2f2;
 			}
 		}
 	}

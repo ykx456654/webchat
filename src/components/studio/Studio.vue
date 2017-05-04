@@ -8,7 +8,8 @@
 		<div class="header" :class="{'lanch':isLanch}">
 			<div class="user-info">
 				<div class="flex justify-center flex-wrap">
-					<img src="../../assets/images/default_head.png">
+          <img :src="studio.studioImg" v-if="studio.studioImg != ''">
+					<img  src="../../assets/images/default_head.png" v-else>
 				</div>
 				<div>
 					<p class="studio-name" v-text="studio.studioTitle"></p>
@@ -26,11 +27,11 @@
 					</div>
 				</div>
 				<div class="ft12 flex info-wrap justify-center">
-					<p class="studio-intro-p flex justify-center">
+					<p class="studio-intro-p flex justify-center" @click="lanchStudioInfo">
 						<span class="studio-jj">简介：</span>
 						<span :class="{'lanch':isLanch,'text-overflow':!isLanch}" id="studio-intro" v-text="studio.studioIntro"></span>
 					</p>
-					<span class="lanch-info icon icon-arrow-down-white" :class="{'lanched':isLanch}" v-if="showLanchInfoArrow" @click="lanchStudioInfo"></span>
+					<span class="lanch-info icon icon-arrow-down-white" :class="{'lanched':isLanch}" v-if="showLanchInfoArrow"></span>
 				</div>
 			</div>
 		</div>
@@ -54,6 +55,7 @@
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner} from 'mint-ui'
+import storage from 'storejs'
 import { api } from '../../utils/api'
 import SubjectItem from './common/SubjectItem'
 	export default {
@@ -160,7 +162,8 @@ import SubjectItem from './common/SubjectItem'
 					this.$router.push({path:'/SubjectIntro',query:{subjectId:s.subjectId,studioId:s.studioId}})
 				}else{
 					this.showLoad()
-					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId}})
+					let openid = storage('openid')
+					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId,openid}})
 				}
 				// console.log(s)
 			},
@@ -170,7 +173,7 @@ import SubjectItem from './common/SubjectItem'
 			lanchStudioInfo () {
 				this.isLanch = !this.isLanch
 			},
-			focus () { 
+			focus () {
 				api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
 					studioId:this.studioId,isSubscribe:!this.studio.isFan
 				})

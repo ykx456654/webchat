@@ -79,18 +79,12 @@ export default {
 			return state.subject.subjectRole
 		},
 		currentImg (state, getters, rootState) {
-			if(rootState.isWeChat){
+			if(state.currentImg.url == ''){
 				return {
-					url:`./static/images/${rootState.system}.png`
+					url: `./static/images/logo_htjz.png`
 				}
 			}else{
-				if(state.currentImg.url == ''){
-					return {
-						url: `./static/images/logo_htjz.png`
-					}
-				}else{
-					return state.currentImg
-				}
+				return state.currentImg
 			}
 		},
 		recordPlayInfo (state) {
@@ -217,6 +211,7 @@ export default {
 					msgList:[]
 				}
 			}
+			state.subject = {}
 			state.loopClock = null
 		},
 		setPlayingVoice (state,o) {
@@ -363,6 +358,7 @@ export default {
 					commit('pushAdvMsg',Object.assign({},res.rsps[0].body.advMsgList))
 					commit('pushNormalMsg',Object.assign({},res.rsps[0].body.nmrMsgList))
 					commit('setCurrentImg',res.rsps[0].body.currentImg)
+					// console.log(res)
 					// console.log(+new Date() - t)
 					// t = +new Date()
 					if (state.loopClock) {
@@ -408,7 +404,8 @@ export default {
 							questionFlag,
 							msgTime:+new Date(),
 							name:rootState.user.userInfo.nickName,
-							headImg:rootState.user.userInfo.headUrl
+							headImg:rootState.user.userInfo.headUrl,
+							ansList:[]
 						}
 					})
 				}

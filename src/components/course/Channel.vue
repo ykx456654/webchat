@@ -7,13 +7,14 @@
 		</x-header>
 		<div  class="focuses" v-for="a in allChannels">
 			<h4 class="title" v-text="a.title"></h4>
-			<ul>	
+			<ul>
 				<li v-for="(f,i) in a.data">
 					<label class="focus-item" @click="foucs(f.catid,selected.indexOf(f.catid) > -1)">
 						{{f.name}}
 						<input style="display: none" type="checkbox" name="focus" :value="f.catid" v-model="selected">
 					</label>
 					<i class="icon" :class="{'checked':selected.indexOf(f.catid) > -1}"></i>
+
 				</li>
 			</ul>
 		</div>
@@ -131,7 +132,7 @@ import { api } from '../../utils/api.js'
 				height: 20px;
 				background-image: url(../../assets/images/plus1.png);
 				background-repeat: no-repeat;
-				background-size: 65%;
+				background-size: 58%;
 				&.checked{
 					background-image: url(../../assets/images/checked.png);
 					background-size: 90%;

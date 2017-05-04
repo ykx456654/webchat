@@ -55,7 +55,7 @@
 										</div>
 										<span class="times">{{m.ansList[0].vodDuration}}s</span>
 									</div>
-								</div>		
+								</div>
 							</div>
 						</div>
 					</li>
@@ -79,6 +79,7 @@ import { throttle } from '../../utils/func'
 		created () {
 			if (!this.loopClock) {
 				this.init()
+
 			}else{
 				this.hideLoad()
 				this.isLoad = true
@@ -119,20 +120,20 @@ import { throttle } from '../../utils/func'
 					this.$nextTick(()=>{
 						const length = this.normalMsg.msgList.length
 						const index = parseInt(query.msgIndex)
-						
 						// console.log(this.normalMsg.msgList)
 						if(this.normalMsg.msgList && this.normalMsg.msgList.length >= 4){
 							this.normalMsg.msgList[length - 4 + index].selected = true
 						}else{
 							// console.log(index)
-							console.log(this.normalMsg.msgList)
-							this.normalMsg.msgList[index].selected = true
+							// var arr = this.normalMsg.msgList
+							// console.log(this.normalMsg.msgList)
+							// this.normalMsg.msgList[index].selected = true
 						}
 					})
 				}catch(e){
 					console.log(e)
 				}
-			}	
+			}
 		},
 		data () {
 			return {
@@ -281,7 +282,7 @@ import { throttle } from '../../utils/func'
 			}
 		}
 		>div:nth-of-type(1){
-			border-radius: 0 14px 14px 0; 
+			border-radius: 0 14px 14px 0;
 			>span{
 				display: block;
 				height: 17px;
@@ -299,7 +300,34 @@ import { throttle } from '../../utils/func'
 		background-color: #fff;
 		border-bottom: 1px solid #f7f7f7;
 		&.selected{
-			background-color: #e9f4ea;
+			/*background-color: #e9f4ea;*/
+      animation:myfirst 2s;
+      -moz-animation:myfirst 2s; /* Firefox */
+      -webkit-animation:myfirst 2s; /* Safari and Chrome */
+      -o-animation:myfirst 2s; /* Opera */
+      @keyframes myfirst
+      {
+        from {background:#e2e2e2;}
+        to {background:#fff;}
+      }
+
+      @-moz-keyframes myfirst /* Firefox */
+      {
+        from {background:#e2e2e2;}
+        to {background:#fff;}
+      }
+
+      @-webkit-keyframes myfirst /* Safari and Chrome */
+      {
+        from {background:#e2e2e2;}
+        to {background:#fff;}
+      }
+
+      @-o-keyframes myfirst /* Opera */
+      {
+        from {background:#e2e2e2;}
+        to {background:#fff;}
+      }
 		}
 		.discuss-item-left{
 			padding: .1rem;

@@ -10,7 +10,7 @@
         <div class="channel-add" @click="toChannel">+</div>
     </div>
     <div v-show="saveVideoList.length != 0">
-        <div 
+        <div
         class="course-list flex flex-wrap justify-space-between"
         v-infinite-scroll="loadMore"
         infinite-scroll-disabled="loading"
@@ -238,9 +238,11 @@ export default {
                 justify-content: center;
                 h5 {
                     margin: 5px 4px;
+                   color:#010101;
                 }
                 p {
                     margin: 5px 4px;
+                    color:#666;
                 }
             }
         }

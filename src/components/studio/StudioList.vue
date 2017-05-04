@@ -36,14 +36,14 @@ import studioItem from './common/studioItem'
 				this.request = {cmd:'get_subscribe_studio',srv:'studio_studio'}
 			}else{
 				this.request = {cmd:'get_recommend_studio',srv:'studio_studio'}
-			}	
+			}
 			this.loadStudios()
 			.then(()=>{
 				window.scroll(0,0)
 			})
 		},
 		components:{
-			xHeader:Header,Loadmore,studioItem,seatImg 
+			xHeader:Header,Loadmore,studioItem,seatImg
 		},
 		data () {
 			return {
@@ -84,7 +84,7 @@ import studioItem from './common/studioItem'
 		computed: {
 			...mapGetters(['uid']),
 			headTitle () {
-				return this.type == 1 ? '我关注的直播间':'全部直播间'
+				return this.type == 1 ? '关注的直播间':'全部直播间'
 			}
 		}
 	}

@@ -33,7 +33,8 @@
 							</div>
 							<p class="course-detail-content" :class="{'active':lanchContent}" v-text="vdo.content"></p>
 							<div class="course-toggle" @click="lanch">
-								<span>展开</span>
+                <span v-if="lanchContent">收起</span>
+								<span v-else>展开</span>
 								<img :class="{'lanch':lanchContent}" src="../../../assets/images/arrow-bottom.png">
 							</div>
 						</div>
@@ -118,14 +119,14 @@
 					<i class="sprite-icon download-icon" @click="tabClick(3)"></i>
 					下载
 				</div>
-			</div>		
+			</div>
 		</transition>
 		<actionsheet v-model="sheetVisible"  :actions="actions"></actionsheet>
 		<popup v-model="popupVisible" is-transparent>
 			<div class="comment-textarea">
 				<div class="comment-send flex justify-space-between">
 					<button @click="cancelComment" class="btn">取消</button>
-					<button @click="sendComment" class="btn">发送</button>
+					<button @click="sendComment"  class="btn">发送</button>
 				</div>
 				<textarea v-model="comment" placeholder="我要评论.." maxlength="1000"></textarea>
 			</div>
@@ -264,7 +265,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			},
 			initSaveVdo () {
 				console.log('init video')
-				const height = window.innerWidth * 0.56  
+				const height = window.innerWidth * 0.56
 				const vdo = this.vdo
 				var self = this
 				if (this.classify.length == 0) {
@@ -279,7 +280,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					error:function(){
 						self.toast('视频错误')
 					}
-				}) 
+				})
 			},
 			getDetail () {
 				const params = this.$route.params
@@ -354,7 +355,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						}).then(action => {
 							if (action == 'confirm') {
 								location.href = 'https://www.yishengzhan.cn/download?channel=release_webysz';
-							}		 
+							}
 						})
 						.catch(e => {
 							console.log(e)
@@ -412,7 +413,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					content:this.comment,
 					topic_id:this.vdo.vdoid,
 					user_id:storage('uid')
-				} 
+				}
 				api(this.uid,{srv: "article_article",cmd: "add_comment"},data)
 				.then(res => {
 					res = res.data
@@ -422,6 +423,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						this.toast('评论成功！')
 						this.popupVisible = false
 						return res.rsps[0].body.comment_id
+
 					}
 				})
 				.then(comment_id=>{
@@ -448,12 +450,13 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					user_id:storage('uid'),
 					reply_user_id,
 					reply_comment_id
-				} 
+				}
 				return api(this.uid,{srv: "article_article",cmd: "add_comment"},data)
 				.then(res => {
 					res = res.data
 					if (res.result != 0) {
 						this.toast(res.msg)
+
 					}else{
 						this.toast('评论成功！')
 						this.popupVisible = false
@@ -488,7 +491,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		},
 		destroyed () {
 			// console.log(to)
-			this.player.media && this.player.media.pause()		
+			this.player.media && this.player.media.pause()
 			this.player = null
 			delete this.player
 			this.show = false
@@ -553,6 +556,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		border: 1px solid #f7f7f7;
 		>div{
 			width: 33.33%;
+      color: #000;
 			&.active{
 				color: #d93639;
 				border-bottom:2px solid #d93639;
@@ -612,9 +616,11 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			line-height: 22px;
 			height: 22px;
 			overflow: hidden;
+      font-size:14px;
 			&.active{
 				height: auto;
 				overflow: visible;
+        min-height: 44px;
 			}
 		}
 		.course-toggle{
@@ -695,8 +701,8 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				margin: 0;
 			}
 			>div{
+        font-size: 14px;
 				p:nth-child(1){
-					font-size: 14px;
 					flex: 1 0 auto;
 				}
 				p:nth-child(2){
@@ -704,7 +710,20 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					margin-right: 10px;
 					max-width: 110px;
 				}
+
 			}
+      >p{
+        i{
+          background: url(../../../assets/icons/pic_ll_zb.png) no-repeat;
+          display:inline-block;
+          width: 20px;
+          height:20px;
+          padding-right:7px;
+          background-size:68%;
+          vertical-align:middle;
+          margin-top: 7px;
+        }
+      }
 		}
 	}
 	.comment{

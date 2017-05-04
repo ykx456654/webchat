@@ -23,7 +23,7 @@
                     <li v-for="(h,i) in historySearch" @click="searchHistory(h)">
                         <i class="icon icon-time"></i>
                         {{h}}
-                        <i class="icon icon-del" @click.stop="delHistory(i)">×</i>
+                        <span class="delete-icon" @click.stop="delHistory(i)">×</span>
                     </li>
                 </ul>
             </div>
@@ -44,7 +44,7 @@
                         </section>
                     </li>
 <!--                     <div class="more">
-                        更多视频 
+                        更多视频
                     </div> -->
                 </ul>
             </div>
@@ -65,7 +65,7 @@ export default {
     created () {
         this.hideLoad()
         this.getHotSearch()
-        var history = ls.get('histroy') 
+        var history = ls.get('histroy')
         // console.log(history)
         this.historySearch = JSON.parse(history).slice(0,5)
     },
@@ -110,7 +110,7 @@ export default {
                 if (res.result != 0) {
                     this.toast(res.msg)
                 }else{
-                    this.hotSearch = res.rsps[0].body.hotList
+                    this.hotSearch = res.rsps[0].body.hotList.slice(0,8)
                 }
             })
         },
@@ -174,6 +174,7 @@ export default {
             line-height: 20px;
             font-size: 14px;
             padding: 0 5px;
+            outline: none;
         }
     }
     button {
@@ -185,6 +186,7 @@ export default {
         box-sizing: border-box;
         font-size: 12px;
         padding: 0;
+       outline: none;
     }
 }
 .search-part{
@@ -222,14 +224,22 @@ export default {
             border-bottom: 1px solid #e2e2e2;
             position: relative;
             padding-left: 24px;
+           color: #333;
             .icon{
                 position: absolute;
-                width: 24px;
-                height: 24px;
-                background-size: 90%;
-                background-repeat: no-repeat;
-                background-position: center;
+               left:0;
+               font-size:26px;
+               color:#999;
+               margin-right:15px;
             }
+          .delete-icon{
+            position: absolute;
+            right:0;
+            font-size:26px;
+            color:#999;
+            margin-right:15px;
+            font-weight: 300;
+          }
             .icon-time{
                 background-image: url(../../assets/images/time.png);
                 top: 10px;

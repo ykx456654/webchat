@@ -15,6 +15,7 @@
     "body-parser": "^1.17.1",
     "clappr": "^0.2.66",
     "clappr-zepto": "0.0.7",
+    "draggabilly": "^2.1.1",
     "exif-js": "^2.1.1",
     "fastclick": "^1.0.6",
     "flex.css": "^1.1.6",

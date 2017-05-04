@@ -4,8 +4,9 @@
         <div class="money-list" v-if="moneyType == 0">
             <div class="money-list-bg">
             </div>
-            <img class="head-img" src="http://img.yishengzhan.cn/user/head/96d4d23cddb44be7891d797ecf897c7b.jpg">
-            <p class="name"> assadasd</p>
+            <img class="head-img" :src="info.headImg" v-if="info.headImg">
+            <img class="head-img" src="../../../assets/images/default_head.png" alt="">
+            <p class="name" v-text="info.name"></p>
             <p class="tip">如果内容对您有用，欢迎打赏支持一下~</p>
             <ul class="options flex flex justify-center">
                 <li @click="setPrice(m)" v-for="m in moneyList">{{m + '元'}}</li>
@@ -16,22 +17,34 @@
             <h5>其他金额</h5>
             <div class="flex price-input align-items-center">
                  <span>金额（元）</span>
-                 <input type="number" name="" v-model="price" placeholder="可填写2-200">
+                 <input type="number" name="" v-model="price" placeholder="可填写1-200">
             </div>
-            <button class="gain-btn btn">打赏</button>
+            <button class="gain-btn btn" @click="setPrice(price)">打赏</button>
         </div>
     </div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import bus from '../../common/eventBus.js'
+import {api} from '../../../utils/api'
     export default {
+        props:{
+            info:{
+                type:Object,
+                default:()=>{
+                    return {}
+                }
+            }
+        },
         data () {
             return {
                 moneyType:0,
                 moneyList:[2,5,10,50,100,200],
                 price:''
             }
+        },
+        computed:{
+            ...mapGetters(['uid','id'])
         },
         methods:{
             other () {
@@ -41,8 +54,24 @@ import bus from '../../common/eventBus.js'
                 bus.$emit('endInvoke')
             },
             setPrice (m) {
-                this.price = m
-                alert(m)
+                this.price = m * 100
+                const data = {
+                    studioId:this.id.studioId,
+                    subjectId:this.id.subjectId,
+                    grantUid:this.info.uid,
+                    grantMoney:this.price,
+                    appid:window.appId
+                }
+                api(this.uid,{cmd:'wechat_grant_prepay_generate',srv:'studio_studio'},data)
+                .then(res=>{
+                    res = res.data
+                    if(res.result!=0){
+                        this.toast(res.msg)
+                    }else{
+
+                    }
+                })
+                // alert(m)
                 // bus.$emit('endInvoke')
             },
             clear () {
@@ -155,7 +184,7 @@ import bus from '../../common/eventBus.js'
         }
     }
     .gain-btn{
-        width: 2.7rem;
+        width: 2.5rem;
         height: .4rem;
         background: #d93639;
         color: #fff;

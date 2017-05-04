@@ -1,25 +1,27 @@
 <template>
 	<div class="watched-subjects">
-		<x-header title="我浏览过的话题">
+		<x-header title="看过的话题">
 			<router-link to="/me" slot="left">
 				<i class="icon icon-arrow-back"></i>
 			</router-link>
 		</x-header>
 		<Loadmore :autoFill="false"  :bottom-method="loadSubjects" :bottom-all-loaded="allLoaded" ref="loadmore">
-			<ul>	
+			<ul>
 				<seat-img v-if="subjects.length == 0 && isLoad" msg="暂无浏览过的话题"></seat-img>
 				<li v-for="(m,i) in subjects" @click="linkSubject(m.studioId,m.subjectId)">
 					<watched-subject :subject="m"></watched-subject>
-					<div class="no-more" v-if="allLoaded && subjects.length != 0">
-						没有更多了
-					</div>
+
 				</li>
+				<div class="no-more" v-if="allLoaded && subjects.length != 0">
+						没有更多了
+				</div>
 			</ul>
 		</Loadmore>
 	</div>
 </template>
 <script>
 import {Header,Loadmore } from 'mint-ui'
+import storage from 'storejs'
 import watchedSubject from './common/watchedSubject'
 import seatImg from '../common/seat-img'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
@@ -63,7 +65,8 @@ import { api } from '../../utils/api'
 			},
 			linkSubject (studioId,subjectId) {
 				this.showLoad()
-				this.$router.push({path:'/Subject',query:{studioId,subjectId}})
+				let openid = storage('openid')
+				this.$router.push({path:'/Subject',query:{studioId,subjectId,openid}})
 			}
 		},
 		computed: {
@@ -72,5 +75,5 @@ import { api } from '../../utils/api'
 	}
 </script>
 <style lang="less">
-	
+
 </style>

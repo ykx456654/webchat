@@ -71,7 +71,7 @@ router.beforeEach((to, from, next) => {
                 if(res.result!=0){
                     Toast(res.msg)
                     if(res.result == -1){
-                        // location.href = '../../testLogin/build/index.html'
+                        location.href = '../../testLogin/build/index.html'
                     }
                 }else{
                     const data = res.rsps[0].body

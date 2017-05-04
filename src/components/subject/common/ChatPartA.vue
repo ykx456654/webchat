@@ -2,7 +2,7 @@
 	<div class="chat-a chat-part-a" id="load-wrap">
 		<loadmore
 		class="chat-a-loadmore"
-		id="chat-a-content" 
+		id="chat-a-content"
 		:autoFill="false"
 		:top-method="getHistory"
 		ref="loadmore"
@@ -18,7 +18,8 @@
 
 			<transition-group class="msg-list" name="list" tag="ul">
 				<div class="live-start-time" key="00000000">
-					直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始
+					<!--直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始-->
+          			直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('MM月dd日 hh:ss')}}</span>开始
 				</div>
 				<li v-for="(m,index) in advanceMsg.msgList" :key="index"  v-bind:data-index="index">
 					<a-chat-item :msg="m" :index="index"></a-chat-item>
@@ -46,7 +47,7 @@ import AChatItem from './AChatItem'
 				// console.log($chatWrapper.height())
 				var flag = $chatLoader.height() - $chatWrapper.height() - $chatWrapper.scrollTop()
 				if (flag == 0) {
-					console.log(flag + ' flag')
+					// console.log(flag + ' flag')
 					_this.isBottom = true
 				}else{
 					_this.setScroll({a:$chatWrapper.scrollTop()})
@@ -128,7 +129,7 @@ import AChatItem from './AChatItem'
 					// console.log(nv)
 					// console.log(ov)
 					this.setLiveStatu(1)
-				}	
+				}
 			}
 		}
 	}

@@ -4,14 +4,15 @@
 			<a slot="left" @click="goBcak()">
 				<i class="icon icon-arrow-back"></i>
 			</a>
-	<!-- 		<a slot="right" @click="">
-				设置
-			</a> -->
+			<a class="relative" slot="right">
+				<a class="tip-to-app" href="https://www.yishengzhan.cn/download?channel=release_webysz">
+					医生站app
+				</a>
+			</a> 
 		</x-header>
+		<tip v-show="tipShow" @close="()=>{tipShow=false}" content="播放时默认全屏，推荐您使用医生站APP收看，功能更稳定，体验更好哦~"></tip>
 		<section class="swiper-ppt" :class="{'not-start':!isStart}" :style="{'height':partSize.pptHeight}" v-if="subject.subjectType != 1">
-			<img :src="currentImg.url" alt="" v-if="currentImg.url == './static/images/logo_htjz.png'">
 			<ppt-player
-			v-else
 			:options="PPTPlayerOption"
 			ref="pptPlayer">
 			</ppt-player>
@@ -27,12 +28,12 @@
 					<span v-text="subject.uvNum"></span>
 				</div>
 				<div class="flex align-items-center justify-center">讨论</div>
-			</div>	
+			</div>
 			<div class="studio-home">
 				<i class="icon icon-studio-home" @click="linkStudio"></i>
 			</div>
 			<chat-part-b></chat-part-b>
-			<chat-part-a :subject-info="subject"></chat-part-a>	
+			<chat-part-a :subject-info="subject"></chat-part-a>
 		</section>
 		<section>
 			<normal-input v-if="subject.subjectRole == 100"></normal-input>
@@ -43,13 +44,12 @@
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		
 		<!--<video id="video" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true">
 			<source :src="playurl"  type="application/x-mpegURL">
 		</video>-->
 		<div>
 			<x-dialog :hide-on-blur="true" v-model="gainShow">
-				<gain ref="gain"/>
+				<gain :info="gainInfo" ref="gain"/>
 			</x-dialog>
 		</div>
 	</div>
@@ -71,7 +71,7 @@ import HighInput from './common/HighInput'
 import RecordVoice from './common/RecordVoice'
 import Gain from './common/Gain'
 import pptPlayer from './common/PPTPlayer'
-
+import Tip from './common/Tip'
 	export default {
 		name:'Subject',
 		components:{
@@ -88,7 +88,8 @@ import pptPlayer from './common/PPTPlayer'
 			Swipe,
 			SwipeItem,
 			Range,
-			pptPlayer
+			pptPlayer,
+			Tip
 		},
 		created () {
 			// console.log(1)
@@ -114,21 +115,23 @@ import pptPlayer from './common/PPTPlayer'
 				this.endVoice(msg)
 			})
 
-			bus.$on('invoke', ()=>{
+			bus.$on('invoke', msg=>{
 				this.$refs.gain.clear()
+				this.gainInfo = msg
 				this.gainShow = true
+				// console.log(msg)
 			})
 			bus.$on('endInvoke', ()=>{
 				this.gainShow = false
-			}) 
-			
+			})
+
 			if(this.isWeChat && this.subject.subjectType != 1){
 				const openid = storage('openid')
-				
-				// console.log(openid)
-				location.hash = location.hash + '&openid=' + openid
-				alert(location.hash)
 			}
+
+			setTimeout(()=>{
+				this.tipShow = false
+			},5000)
 
 		},
 		activated () {
@@ -149,9 +152,13 @@ import pptPlayer from './common/PPTPlayer'
 			if (to.name != 'Discuss') {
 				this.clearMsg()
 				this.setAlive(['noComponent'])
+				// console.log(this.$refs.pptPlayer)
+				if(this.$refs.pptPlayer){
+					// alert(1)
+					this.$refs.pptPlayer.destoryPlayer()
+				}
 				bus._events = {}
 			}else{
-				this.coursePlayer = null
 				this.setAlive(['Subject','Discuss'])
 			}
 			next()
@@ -170,17 +177,18 @@ import pptPlayer from './common/PPTPlayer'
 			          	let rect = thumbnail.getBoundingClientRect()
 			          	// w = width
 			          	return {x: rect.left, y: rect.top + pageYScroll, w: rect.width}
-					} 
+					}
 				},
 				advMsgDirection:false,   //方向标识，true，拉取新消息，false，拉取历史消息
 				nrmMsgDirection:false,
 				limit:10,
 				voiceUrl:'',
 				voicePlayer:null,
-				coursePlayer:null,
 				playurl:'',
 				gainShow:false,
-				canplay:false
+				canplay:false,
+				tipShow:true,
+				gainInfo:{}
 			}
 		},
 		computed: {
@@ -223,12 +231,12 @@ import pptPlayer from './common/PPTPlayer'
 			...mapMutations(['showLoad','hideLoad','setSubjectInfo','clearMsg','setAlive','setPlayingVoice']),
 			...mapActions(['getSubjectInfo','enterSubejct','loopSubject','stopLoop','getAdvMsg','getNormalMsg','GETUSERINFO']),
 			record (value){
-				this.showVoice = value 
+				this.showVoice = value
 			},
 			goBcak () {
 				// this.$destroy()
 				if(this.isWeChat && this.subject.subjectType !== 1 && this.liveStatus == 1){
-					history.go(-2)
+					// history.go(-2)
 				}else{
 					history.back()
 				}
@@ -301,7 +309,7 @@ import pptPlayer from './common/PPTPlayer'
 					this.voicePlayer = null
 				}
 				this.voicePlayer = new window.Audio()
-				this.voicePlayer.src = obj.msg.vodUrl 
+				this.voicePlayer.src = obj.msg.vodUrl
 				this.voicePlayer.play()
 				this.setPlayingVoice({type:obj.type,i:obj.index})
 				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
@@ -334,8 +342,6 @@ import pptPlayer from './common/PPTPlayer'
 						})
 					}
 				}
-				// console.log(nv)
-				// console.log(ov)
 			}
 		}
 	}
@@ -383,7 +389,7 @@ import pptPlayer from './common/PPTPlayer'
 		i{
 			background-image: url(../../assets/images/pic_htjs.png);
 			background-repeat: no-repeat;
-			margin-left: 5px; 
+			margin-left: 5px;
 			width: 24px;
 			height: 24px;
 		}
@@ -462,5 +468,17 @@ import pptPlayer from './common/PPTPlayer'
 	#video{
 		display: none;
 	}
-
+	.relative{
+		position: relative;
+	}
+	.tip-to-app{
+		border: 1px solid #fff;
+		border-radius: 3px;
+		display: inline-block;
+		text-align: center;
+		color: #fff;
+		padding:5px 2px;
+		margin: 0;
+		font-size:12px;
+	}
 </style>

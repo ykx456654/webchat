@@ -5,7 +5,7 @@
 			<div class="me-header">
 				<router-link to="/Setting">
 					<img :src="userInfo.headUrl" v-if="userInfo.headUrl != ''">
-					<img src="../../assets/images/default_head.png" alt="">
+					<img src="../../assets/images/default_head.png" alt="" v-else>
 				</router-link>
 				<div class="me-info">
 				<p class="flex justify-center">
@@ -20,24 +20,28 @@
 			</div>
 		</div>
 		<div class="">
+      <cellx is-link @onclick="link(1)">
+        <div class="cells flex align-items-center" slot="left" >
+          <i class="focus"></i>
+          <p>关注的直播间</p>
+        </div>
+      </cellx>
+      <cellx is-link @onclick="link(2)">
+        <div class="cells flex align-items-center" slot="left" >
+          <!--<img src="../../assets/images/icon_wo_kgdht.png">-->
+          <i class="watch"></i>
+          <p>看过的话题</p>
+        </div>
+      </cellx>
 			<cellx is-link @onclick="link(0)">
 				<div class="cells flex align-items-center" slot="left" >
-					<img src="../../assets/images/icon_wdzbj.png">
+					<!--<img src="../../assets/images/icon_wo_zbj.png">-->
+          <i class="all"></i>
 					<p>全部直播间</p>
 				</div>
 			</cellx>
-			<cellx is-link @onclick="link(1)">
-				<div class="cells flex align-items-center" slot="left" >
-					<img src="../../assets/images/wgldzbj.png">
-					<p>我关注的直播间</p>
-				</div>
-			</cellx>
-			<cellx is-link @onclick="link(2)">
-				<div class="cells flex align-items-center" slot="left" >
-					<img src="../../assets/images/wgzdzbj.png">
-					<p>我浏览过的话题</p>
-				</div>
-			</cellx>
+
+
 		</div>
 	</div>
 </template>
@@ -70,13 +74,15 @@
 		}
 	}
 	.cells{
+    margin-left:15px;
 		img{
 			width: 28px;
 			height: 28px;
 		}
 		p{
 			font-size: 16px;
-			margin-left: 10px;
+			margin-left: 15px;
+
 		}
 	}
 	.me-info{
@@ -85,6 +91,31 @@
 			margin: 5px 10px;
 		}
 	}
+  .focus{
+    display:inline-block;
+    background: url(../../assets/images/icon_wo_gzdzbj.png) no-repeat;
+    width:20px;
+    height:20px;
+    background-size:90%;
+    vertical-align: middle;
+  }
+  .watch{
+    display:inline-block;
+    background: url(../../assets/images/icon_wo_kgdht.png) no-repeat;
+    width:20px;
+    height:20px;
+    background-size:100%;
+    vertical-align: middle;
+    margin-top:5px;
+  }
+  .all{
+    display:inline-block;
+    background: url(../../assets/images/icon_wo_zbj.png) no-repeat;
+    width:20px;
+    height:20px;
+    background-size:90%;
+    vertical-align: middle;
+  }
 </style>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'

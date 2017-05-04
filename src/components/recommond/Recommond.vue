@@ -15,16 +15,18 @@
 					</div>
 					<div class="content-box" @click.stop="linkSubject(r)">
 						<div class="img-box">
-							<img class="page" src="../../assets/images/pic_ht_mr.png" v-if="r.subjectImg == ''">	
+							<img class="page" src="../../assets/images/pic_ht_mr.png" v-if="r.subjectImg == ''">
 							<img class="page" v-lazy="r.subjectImg" alt="" v-else>
 							<span class="tag status">{{ r.liveStatus | status}}</span>
 							<div class="bottom-tag flex">
-								<span class="price" v-if="r.fee != 0">￥{{(r.fee/100).toFixed(2)}}</span>
-								<span class="num">{{r.uvNum}}人次</span>
+
+								<span class="num">{{r.pvNum}}人次</span>
 							</div>
 						</div>
 						<h4>{{r.subjectTitle}}</h4>
-						<p>{{ r.startTime | time }}</p>
+            <p>{{ r.startTime | time }}<span v-if="r.fee != 0"></span><span class="price" v-if="r.fee != 0">￥ {{(r.fee/100).toFixed(2)}}</span></p>
+
+            <!--<span class="price" v-if="r.fee != 0">￥{{(r.fee/100).toFixed(2)}}</span>-->
 						<!-- <p>{{new Date(r.startTime*1000).Format('yyyy-MM-dd hh:ss')}}</p> -->
 					</div>
 				</section>
@@ -37,6 +39,7 @@
 </template>
 <script>
 import { mapMutations,mapGetters } from 'vuex'
+import storage from 'storejs'
 import { Loadmore } from 'mint-ui';
 import { api } from '../../utils/api'
 	export default {
@@ -89,11 +92,12 @@ import { api } from '../../utils/api'
 			},
 			linkSubject (r) {
 				this.showLoad()
+				let openid = storage('openid')
 				// console.log(studioId,subjectId)
 				if(r.fee > 0){
 					this.$router.push({path:'/SubjectIntro',query:{studioId:r.studioId,subjectId:r.subjectId}})
 				}else{
-					this.$router.push({path:'/Subject',query:{studioId:r.studioId,subjectId:r.subjectId}})
+					this.$router.push({path:'/Subject',query:{studioId:r.studioId,subjectId:r.subjectId,openid}})
 				}
 			},
 			focus (id,index) {
@@ -147,17 +151,18 @@ import { api } from '../../utils/api'
 	.recommond{
 		border-bottom: 1px solid #f2f2f2;
 		section:nth-child(1){
-			width: 62px;
-			flex: 1 0 62px;
+			width: 52px;
+			flex: 1 0 52px;
 			box-sizing: border-box;
 			img{
-				width: 100%;
+				/*width: 100%;*/
 				border-radius: 50%;
+        width:30px;
 			}
 		}
 		section:nth-child(2){
 			flex:0 1 100%;
-			width: calc(~"100% - 62px");
+			width: calc(~"100% - 52px");
 		}
 		.header{
 			padding: 10px 10px 10px 12px;
@@ -166,9 +171,10 @@ import { api } from '../../utils/api'
 		.content-title{
 			height: 40px;
 			padding-right: 12px;
+      width:100%;
 			h4{
-				font-size: 15px;
-				// color: #666;
+				font-size: 13px;
+				color: #333;
 				margin: 0;
 				font-weight: normal;
 			}
@@ -183,13 +189,19 @@ import { api } from '../../utils/api'
 				border-radius: 11px;
 				height: 22px;
 				line-height:22px;
+        display:inline-block;
+        float:right;
+
 			}
 		}
 	}
 	.content-box{
-		padding-right: 12px;
-		position: relative;
+		margin-right: 12px;
+		/*position: relative;*/
 		width: 100%;
+    border:1px solid #f2f2f2;
+    border-radius: 10px;
+    margin-bottom: 15px;
 		.page{
 			width: 100%;
 			position: absolute;
@@ -200,19 +212,35 @@ import { api } from '../../utils/api'
 		h4{
 			font-size: 15px;
 			text-align: left;
-			margin: 5px 0;
+			margin: 12px 0;
+      padding-left:10px;
+      font-weight:500;
+      color:#333;
 		}
 		p{
 			text-align: left;
 			font-size: 14px;
 			color: #666;
-			margin-bottom: 10px;
+			margin-bottom: 12px;
+      padding-left:10px;
+      span:nth-of-type(1){
+        margin-left:10px;
+        height:14px;
+        border-left:1px solid #f2f2f2;
+        display:inline-block;
+      }
+      span:nth-of-type(2){
+        color:#D93639;
+        font-size:14px;
+      }
 		}
 		.img-box{
 			position: relative;
 			overflow: hidden;
-			padding-bottom: 41.6%;
+			/*padding-bottom: 41.6%;*/
 			border-radius: 3px;
+      width:100%;
+      height:125px;
 			.tag{
 				position: absolute;
 				background-color: rgba(0,0,0,0.6);
@@ -233,15 +261,6 @@ import { api } from '../../utils/api'
 				overflow: hidden;
 				margin-left: 5px;
 				bottom:5px;
-				.price{
-					margin-right: 6px;
-					border-radius: 5px;
-					height: 20px;
-					line-height: 20px;
-					padding:0 5px;
-					color: #fff;
-					background-color: rgba(0,0,0,0.6)
-				}
 				.num{
 					border-radius: 5px;
 					height: 20px;
