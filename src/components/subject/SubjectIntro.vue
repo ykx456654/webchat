@@ -1,6 +1,6 @@
 <template>
 	<div class="subject-intro">
-		<x-header :title="subject.subjectTitle">
+		<x-header>
 			<a slot="left" @click="goBcak()">
 				<i class="icon icon-arrow-back"></i>
 			</a>
@@ -26,19 +26,21 @@
 				<p>{{subject.subjectIntro}}</p>
 			</div>
 			<div class="intro" v-if="subject.masterIntro != ''">
-				<h5>嘉宾介绍</h5>
+				<h5>主讲人介绍</h5>
 				<p>{{subject.masterIntro}}</p>
 			</div>
 		</div>
 		<div class="studio-info">
-			<div class="flex justify-space-between align-items-center studio-owner">
+			<div class="flex justify-space-between align-items-center studio-owner" @click="toStudio">
 				<div class="flex align-items-center">
 					<img :src="studio.studioImg" v-if="studio.studioImg!=''">
 					<img src="../../assets/images/icon_zbj_mr.png" v-else>
 					<span>{{studio.studioTitle}}</span>
 				</div>
 				<div class="flex align-items-center">
-					<a class="btn" @click="focus" v-if="subject.subjectRole == 100 &&　!studio.isFan">关注</a>
+					<a class="btn" :class="{'focused':studio.isFan}" @click.stop="focus" v-if="subject.subjectRole == 100">
+						{{!studio.isFan?'关注':'已关注'}}
+					</a>
 				</div>
 			</div>
 			<div class="flex studio-num align-items-center">
@@ -59,7 +61,7 @@
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import {Header,Spinner} from 'mint-ui'
+import {Header,Spinner,MessageBox,Indicator } from 'mint-ui'
 import { api } from '../../utils/api'
 import storage from 'storejs'
 export default {
@@ -68,17 +70,17 @@ export default {
 		xHeader:Header
 	},
 	created () {
-		this.hideLoad()
 		const query = this.$route.query
 		this.subjectId = Number(query.subjectId)
 		this.studioId = Number(query.studioId)
 		this.getSubjectInfo()
 		.then(()=>{
+			this.hideLoad()
 			wx.ready(() => {
 				var	params = {
 					title: this.subject.subjectTitle,
 					desc: this.subject.subjectIntro,
-					link:location.href.replace(/&openid=+\w*/g,''),
+					link:location.href.replace(/code=+\w*/g,''),
 					imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
 				};
 				console.log(params)
@@ -88,12 +90,16 @@ export default {
 			Promise.resolve()
 		})
 	},
+	mounted () {
+
+	},
 	data () {
 		return {
 			subjectId:0,
 			studioId:0,
 			subject:{},
-			studio:{}
+			studio:{},
+			isPaying:false
 		}
 	},
 	methods : {
@@ -117,19 +123,34 @@ export default {
 		enter () {
 			let openid = storage('openid')
 			if(this.subject.fee > 0 && !this.subject.payFlag){
-
 				const data = {
 					studioId:this.studioId,
 					subjectId:this.subjectId,
 					appid:appId
 				}
+				if(this.isPaying) return
+				this.isPaying = true
 				api(this.uid,{cmd:'wechat_ticket_prepay_generate',srv:'studio_studio'},data)
 				.then(res=>{
+					this.isPaying = false
 					res = res.data
 					if(res.result != 0){
 						this.toast(res.msg)
 					}else{
-
+						let info = res.rsps[0].body
+						// this.toast(JSON.stringify(info))
+						var _this = this
+						if (typeof WeixinJSBridge == "undefined"){
+							if( document.addEventListener ){
+								document.addEventListener('WeixinJSBridgeReady', onBridgeReady(info,_this), false);
+							}else if (document.attachEvent){
+								document.attachEvent('WeixinJSBridgeReady', onBridgeReady(info,_this)); 
+								document.attachEvent('onWeixinJSBridgeReady', onBridgeReady(info,_this));
+							}
+						}else{
+							// alert(1)
+							onBridgeReady(info,_this);
+						}
 					}
 				})
 				return false
@@ -137,6 +158,11 @@ export default {
 			// alert(openid)
 			this.showLoad()
 			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId,openid}})
+		},
+		toStudio () {
+			// console.log('fsafasd')
+			this.showLoad()
+			this.$router.push({path:'/Studio',query:{studioId:this.studioId}})
 		},
 		focus () {
 			api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{
@@ -179,14 +205,56 @@ function onBridgeReady(info,instance){
        function(res){
        	    // alert(JSON.stringify(res))
 		    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+			var status
 		    if (res.err_msg == "get_brand_wcpay_request:ok") {
-				instance.payOver(1,'支付成功')
-				setTimeout(function(){
-					window.location.href = "http://" + window.location.hostname+"/live_room/dist/index.html?webpay=1#!/?innerStudioID="+ self.innerStudioID +'&subjectID=' + self.topicId
-				},1000)
+				instance.isPaying = true
+				status = 2
 			}else{
-				instance.payOver(0,'支付失败')
+				status = 4
+				if(res.err_msg == "get_brand_wcpay_request:cancel"){
+					status = 3
+					instance.toast({
+						message:'取消支付',
+						iconClass:'icon icon-pay-fail'
+					})
+				}else{
+					instance.toast({
+						message:'支付失败' + JSON.stringify(res),
+						iconClass:'icon icon-pay-fail'
+					})
+				}
 			}
+
+			api(instance.uid,{cmd:'confirm_ticket_order',srv:'studio_studio'},{sign:info.paySign,status:status})
+			.then(res=>{
+				res = res.data
+				if(res.result == 0){
+					if(status == 2){
+						instance.toast({
+							message:'支付成功',
+							iconClass:'icon icon-pay-success'
+						})
+						instance.payFlag = true
+						setTimeout(()=>{
+							instance.$router.push({path:'/Subject',query:{subjectId:instance.subjectId,studioId:instance.studioId}})
+						},0)
+					}
+				}else{
+					if(status == 2){
+						MessageBox({
+							message:'网络不稳定，如果您已支付过，请勿重新支付，您可以尝试重新进入页面或刷新页面。',
+							confirmButtonText:'我知道了',
+							showCancelButton:false
+						})
+						.then(action=>{
+							if(action == 'confirm'){
+								location.reload()
+							}
+						})
+					}
+				}
+			})
+
        }
    );
 }
@@ -289,6 +357,9 @@ function onBridgeReady(info,instance){
 				color: #fff;
 				padding: 3px 8px;
 				border-radius: 5px;
+				&.focused{
+					background-color: #999;
+				}
 			}
 		}
 		.studio-num{

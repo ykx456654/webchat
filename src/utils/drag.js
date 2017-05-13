@@ -21,26 +21,26 @@ Drag.prototype =  {
     }
 };
 function offset(curEle){
-            // console.log(curEle)
-            var totalLeft = null,totalTop = null,par = curEle.offsetParent;
-            //首先把自己本身的进行累加
-            totalLeft += curEle.offsetLeft;
-            totalTop += curEle.offsetTop;
-            // console.log(par)
-            //只要没有找到body，我们就把父级参照物的边框和偏移量累加
-            while(par){
-                     if(navigator.userAgent.indexOf("MSIE 8.0") === -1){
-                         //不是标准的ie8浏览器，才进行边框累加
-                         //累加父级参照物边框
-                         totalLeft += par.clientLeft;
-                         totalTop += par.clientTop;
-                     }
-                    //累加父级参照物本身的偏移
-                    totalLeft += par.offsetLeft;
-                    totalTop += par.offsetTop;
-                    par = par.offsetParent;
-            }
-            return {left:totalLeft,top:totalTop};
+    // console.log(curEle)
+    var totalLeft = null,totalTop = null,par = curEle.offsetParent;
+    //首先把自己本身的进行累加
+    totalLeft += curEle.offsetLeft;
+    totalTop += curEle.offsetTop;
+    // console.log(par)
+    //只要没有找到body，我们就把父级参照物的边框和偏移量累加
+    while(par){
+                if(navigator.userAgent.indexOf("MSIE 8.0") === -1){
+                    //不是标准的ie8浏览器，才进行边框累加
+                    //累加父级参照物边框
+                    totalLeft += par.clientLeft;
+                    totalTop += par.clientTop;
+                }
+            //累加父级参照物本身的偏移
+            totalLeft += par.offsetLeft;
+            totalTop += par.offsetTop;
+            par = par.offsetParent;
+    }
+    return {left:totalLeft,top:totalTop};
 }
 Drag.prototype.init = function () {
     this.dragEle = typeof this.opts.dragEle=='string' ? this.$(this.opts.dragEle) : this.opts.dragEle ;//获得外层元素
@@ -79,7 +79,7 @@ Drag.prototype.setEvent = function(){
 
         self.left = left;
         self.top = top;
-
+        return true
     };
 
     var moveHandler = function(e){
@@ -94,7 +94,7 @@ Drag.prototype.setEvent = function(){
 
         self.dragEle.style.cssText += '-webkit-transform: translate3d('+self.offsetX+'px,'+self.offsetY+'px,0);';
         self.dragEle.setAttribute('pos', left+',' + top);
-        // return true
+        return true
         
         console.log(2)
         //self.opts.ondrag.call(self, {left: left, top: top, offsetX: self.offsetX, type: 'move'});
@@ -118,7 +118,7 @@ Drag.prototype.setEvent = function(){
 
 
     this.dragEle.addEventListener('touchstart', startHandler);
-    this.dragEle.addEventListener('touchmove', throttle(moveHandler,10,30));
+    this.dragEle.addEventListener('touchmove', throttle(moveHandler,10,20));
     this.dragEle.addEventListener('touchend', endHandler)
 };
 

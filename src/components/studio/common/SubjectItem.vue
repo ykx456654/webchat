@@ -1,8 +1,8 @@
 <template>
 	<div data-flex="box:first" class="studio-item flex">
-		<div class="topic-item-img flex align-items-center justify-center">
+		<div  class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
-      <img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
+      		<img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
 			<img src="../../../assets/images/banner_zbj_small.png" v-else>
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
@@ -15,7 +15,7 @@
 			</div>
 			<div class="flex topic-item-num align-items-center">
 				<i class="icon icon-people"></i>
-				<span v-text="subject.uvNum"></span>
+				<span v-text="subject.pvNum"></span>
 			</div>
 			<div class="studio-owner" v-if="subject.studioTitle">
 				<img :src="subject.studioImg">
@@ -57,7 +57,7 @@
 	    box-sizing: border-box;
 	    border-bottom: 1px solid #f7f7f7;
 	    .studio-item-info{
-			flex:1 1 100%;
+			// flex:1 1 100%;
 			>div{
 				width: 100%;
 			}
@@ -66,7 +66,7 @@
 	.topic-item-img{
 	    width: 1.25rem;
 	    height: .7rem;
-		flex: 1 0 1.25rem;
+		// flex: 1 0 1.25rem;
 	    overflow: hidden;
 	    margin-right: .1rem;
 	    border-radius: 3px;
@@ -91,7 +91,7 @@
 		    line-height: 20px;
 		    width: 55px;
 		    border-radius: 0 10px 10px 0;
-		    left: 1px;
+		    left: 0px;
 		    top: 0;
 	    }
 	}

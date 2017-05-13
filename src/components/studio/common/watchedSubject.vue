@@ -1,7 +1,7 @@
 <template>
 	<div class="studio-item flex" data-flex="box:first">
 		<div class="topic-item-img flex align-items-center justify-center">
-			<p class="status">{{subject.liveStatus | status}}</p>
+			<!--<p class="status">{{subject.liveStatus | status}}</p>-->
       <img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
 			<img src="../../../assets/images/banner_zbj_small.png" v-else>
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
@@ -58,7 +58,7 @@
 				if (t > t_today_start && t < t_today_end) {
 					return '今天  ' + new Date(t).Format('hh:ss')
 				}else{
-					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
+					return new Date(t*1000).Format('MM-dd hh:ss')
 				}
 			}
 		}

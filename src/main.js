@@ -5,8 +5,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import storage from 'storejs'
-import { Toast } from 'mint-ui'
-import { Lazyload } from 'mint-ui'
+import { Lazyload,Toast } from 'mint-ui'
 import time from './utils/time.js'
 import prms from './utils/promise.js' 
 import system from './utils/checkSystem.js'
@@ -39,7 +38,7 @@ router.beforeEach((to, from, next) => {
             // storage('uid','ISqVdBQQajP94TFRo3mVLQ9HUTUw5c/F2611v4jFPQzb2NphxllE/hdngcUYWRh0YJtYeWuvynMpQox7aEhewoZ+W5XQraUNMig7yBTv7wE=')
             location.href =  
             'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
-            window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect' 
+            window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect' 
         }else{
             // 通过code获取openid
             var p 
@@ -47,9 +46,9 @@ router.beforeEach((to, from, next) => {
                  p = getOpenId(code)
             }else{
                 p = (function(){
-                    let openid = to.query.openid
+                    let o = to.query.openid
                     // console.log(openid)
-                    let res = {result:0,rsps:[{body:{openId:openid}}]}
+                    let res = {result:0,rsps:[{body:{openId:o}}]}
                     // alert(JSON.stringify(res))
                     return Promise.resolve(res) 
                 })()
@@ -71,6 +70,7 @@ router.beforeEach((to, from, next) => {
                 if(res.result!=0){
                     Toast(res.msg)
                     if(res.result == -1){
+                        storage('from',location.href.replace(/code=+\w*/g,''))
                         location.href = '../../testLogin/build/index.html'
                     }
                 }else{
@@ -118,7 +118,7 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
             Toast(res.msg)
         }else{
             const signParams = Object.assign({},res.rsps[0].body,{
-                debug: location.hostname == 'test-web.yxj.org.cn',
+                debug: false,
                 jsApiList:['onMenuShareAppMessage', 'onMenuShareTimeline','hideOptionMenu','chooseWXPay'],
             }) 
             return signParams
@@ -129,9 +129,9 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
         wx.ready(function () {
             var
             params = {
-                title: '医学界-医生学习的加油站',
+                title: '医生站-医生学习的加油站',
                 desc: '医生站 医生学习的加油站，服务医生改善医疗',
-                link: 'http://' + window.location.hostname,
+                link: 'http://' + window.location.href,
                 imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
             };
             wx.onMenuShareAppMessage(params);

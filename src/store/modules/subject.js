@@ -9,11 +9,13 @@ export default {
 		subjectMsg:{
 			advanceMsg:{
 				msgId:'init',
-				msgList:[]
+				msgList:[],
+				is_end:false
 			},
 			normalMsg:{
 				msgId:'init',
-				msgList:[]
+				msgList:[],
+				is_end:false
 			}
 		},
 		updateKeys:[],
@@ -23,8 +25,10 @@ export default {
 		scrollTopA:'init',
 		scrollTopB:'init',
 		currentImg:{},
+		firstImg:'',
 		actionList:[],
-		imgs:[]
+		imgs:[],
+		isPlayLive:false   //播放器是否正在播放
 	},
 	getters:{
 		subject (state) {
@@ -73,7 +77,7 @@ export default {
 			return a
 		},
 		isStart (state) {
-			return state.subject.startTime > +new Date()/1000
+			return state.subject.liveStatus > 0
 		},
 		subjectRole (state) {
 			return state.subject.subjectRole
@@ -81,11 +85,14 @@ export default {
 		currentImg (state, getters, rootState) {
 			if(state.currentImg.url == ''){
 				return {
-					url: `./static/images/logo_htjz.png`
+					url: state.subject.subjectImg
 				}
 			}else{
 				return state.currentImg
 			}
+		},
+		firstImg (state) {
+			return {url:state.firstImg,actionTime:0}
 		},
 		recordPlayInfo (state) {
 			return {
@@ -117,6 +124,15 @@ export default {
 					if (msgList[j].msgType == 3) {
 						msgList[j].playing = false
 					}
+					if(msgList[j].msgType == 201){
+						state.subject.liveStatus = 1
+					}
+					if(msgList[j].msgType == 202){
+						state.subject.liveStatus = 2
+					}
+					if(msgList[j].msgType == 203){
+						state.subject.liveStatus = 9
+					}
 					if(msgList[i].answerFlag){
 						msgList[i].ansList[0].playing = false
 					}
@@ -131,6 +147,7 @@ export default {
 			state.subjectMsg.advanceMsg.msgList = list.concat(msgList)
 		},
 		unshiftAdvMsg(state,{is_end,msgId,msgList}){
+			state.subjectMsg.advanceMsg.is_end = is_end
 			state.subjectMsg.advanceMsg.msgId = msgId
 			var list = state.subjectMsg.advanceMsg.msgList
 			for(var i = msgList.length - 1; i >= 0; i-- ){
@@ -186,39 +203,44 @@ export default {
 		},
 		clearMsg (state,n) {
 			// 清除消息，1清除左侧消息，2清除右侧消息
-			clearTimeout(state.loopClock)
 			if (n == 1) {
 				state.subjectMsg.advanceMsg = {
 					msgId:'init',
-					msgList:[]
+					msgList:[],
+					is_end:false
 				}
 				return false
 			}
 			if (n == 2) {
 				state.subjectMsg.normalMsg = {
 					msgId:'init',
-					msgList:[]
+					msgList:[],
+					is_end:false
 				}
 				return false
 			}
 			state.subjectMsg = {
 				advanceMsg:{
 					msgId:'init',
-					msgList:[]
+					msgList:[],
+					is_end:false
 				},
 				normalMsg:{
 					msgId:'init',
-					msgList:[]
+					msgList:[],
+					is_end:false
 				}
 			}
+			clearTimeout(state.loopClock)
 			state.subject = {}
 			state.loopClock = null
 		},
 		setPlayingVoice (state,o) {
 			switch (o.type) {
 				case 1:
-					state.subjectMsg.advanceMsg.msgList.map((item,index)=>{
+					state.subjectMsg.advanceMsg.msgList.forEach((item,index)=>{
 						if(o.i == index){
+							console.log(o)
 							item.playing = true
 						}else{
 							item.playing = false
@@ -229,19 +251,42 @@ export default {
 					state.subjectMsg.advanceMsg.msgList[o.i].playing = false
 					break;
 				case 3:
-					state.subjectMsg.advanceMsg.msgList.map((item,index)=>{
+					state.subjectMsg.advanceMsg.msgList.forEach((item,index)=>{
 						if(item.answerFlag){
 							if(o.i == index){
 								// console.log(item)
 								item.ansList[0].playing = true
 							}else{
-								item.ansList[0].playing = false
+								if(item.ansList){
+									item.ansList[0].playing = false
+								}
 							}
 						}
 					})
 					break;
 				case 4:
+					// console.log(+new Date())
 					state.subjectMsg.advanceMsg.msgList[o.i].ansList[0].playing = false
+					break;
+				case 5:
+					// 讨论区语音播放
+					state.subjectMsg.normalMsg.msgList.forEach((item,index)=>{
+						if(item.questionFlag){
+							if(o.i == index){
+								if(item.ansList[0]){
+									// console.log(+new Date())
+									item.ansList[0].playing = true
+								}
+							}else{
+								if(item.ansList[0]){
+									item.ansList[0].playing = false
+								}
+							}
+						}
+					})
+					break;
+				case 6:
+					state.subjectMsg.normalMsg.msgList[o.i].ansList[0].playing = false
 					break;
 			}
 		},
@@ -250,6 +295,9 @@ export default {
 		},
 		setLiveStatu (state,n) {
 			state.subject.liveStatus = n
+		},
+		setIsPlayLive (state,flag) {
+			state.isPlayLive = flag
 		}
 	},
 	actions: {
@@ -267,13 +315,17 @@ export default {
 				}
 			})
 		},
-		enterSubejct ({ commit, state, rootState }) {
+		enterSubejct ({ commit, state, rootState },instance) {
 			const uid = rootState.user.uid
 			return api(uid,{cmd:'enter_subject',srv:'studio_studio'},{studioId:state.studioId,subjectId:state.subjectId})
 			.then(res=>{
 				res = res.data
 				if (res.result != 0) {
 					commit('toast',res.msg)
+					if(res.result == -10){
+						// 未付费状态，去话题介绍页
+						instance.$router.push({path:'/SubjectIntro',query:{studioId:state.studioId,subjectId:state.subjectId}})
+					}
 					Promise.reject(res.msg)
 				}else{
 					const data = res.rsps[0].body
@@ -281,6 +333,9 @@ export default {
 					state.imgs = data.imgs
 					state.currentImg = data.currentImg
 					state.actionList = data.actionList
+					if(data.firstImg){
+						state.firstImg = data.firstImg
+					}
 					return true
 				}
 			})
@@ -357,7 +412,19 @@ export default {
 					res = res.data
 					commit('pushAdvMsg',Object.assign({},res.rsps[0].body.advMsgList))
 					commit('pushNormalMsg',Object.assign({},res.rsps[0].body.nmrMsgList))
-					commit('setCurrentImg',res.rsps[0].body.currentImg)
+					if(state.isPlayLive){
+						// 只有用户收到开始才会播放ppt
+						if(state.currentImg.url){
+							var time = rootState.system == 'ios' ? 20000:30000
+							// console.log(time)
+							setTimeout(()=>{
+								commit('setCurrentImg',res.rsps[0].body.currentImg)
+							},time)
+						}else{
+							commit('setCurrentImg',res.rsps[0].body.currentImg)
+						}
+					}
+
 					// console.log(res)
 					// console.log(+new Date() - t)
 					// t = +new Date()
@@ -371,7 +438,7 @@ export default {
 					Promise.resolve()
 				})
 				.catch(e=>{
-					console.log(e)
+					// console.log(e)
 					if (state.loopClock) {
 						clearTimeout(state.loopClock)
 					}	
@@ -402,7 +469,7 @@ export default {
 							textContent:content,
 							msgType,
 							questionFlag,
-							msgTime:+new Date(),
+							msgTime:+new Date()/1000,
 							name:rootState.user.userInfo.nickName,
 							headImg:rootState.user.userInfo.headUrl,
 							ansList:[]

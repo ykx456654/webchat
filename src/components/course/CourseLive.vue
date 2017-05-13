@@ -52,7 +52,7 @@
 .lecture-time{color: #999}
 .lecture-signup{position: absolute;right: 0;bottom: 0;background-color: #d93639;color: #fff;font-size: 14px;border-radius: 14px;padding: 4px 7px;}
 .lecture-signup span {width: 16px;height: 16px;display: block;line-height: 16px;}
-.lecture-signup.has-sign{background-color: #ccc;}
+.lecture-signup.has-sign{background-color: #ccc;outline: none;}
 </style>
 <script>
 import { Swipe, SwipeItem } from 'mint-ui';

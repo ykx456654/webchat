@@ -17,7 +17,13 @@
 	</div>
 </template>
 <style lang="less" scoped>
-.footer{position: fixed;z-index: 999;height: 55px;box-sizing:border-box;width: 100%;background-color: #f2f2f2;box-shadow: 0 0 10px 0 rgba(150,140,140,0.6);bottom:0;padding: 10px 0 5px 0;transition: all .5s}
+.tab{width: 100%;}
+.footer{
+	position: fixed;z-index: 999;height: 55px;box-sizing:border-box;width: 100%;
+	background-color: #f2f2f2;box-shadow: 0 0 10px 0 rgba(150,140,140,0.6);bottom:0;padding: 10px 0 5px 0;transition: all .5s;
+	left: 50%;
+	margin-left: -50%;
+	}
 .tab-item{width: 33.33%; color: #888888;flex-direction:column;}.icon{width: 24px;height: 20px;background-repeat: no-repeat;background-position: center;background-size: 100%;margin-bottom: 2px;}
 .icon-course{background-image: url('../../assets/images/jz-grey.png')}.icon-course-active{background-image: url('../../assets/images/jz-red.png')}
 .icon-studio{background-image: url('../../assets/images/zb-grey.png')}.icon-studio-active{background-image: url('../../assets/images/zb-red.png')}
@@ -67,19 +73,26 @@ export default {
 		// console.log('sadasdas')
 	},
 	mounted () {
-		let position = location.hash.split('?')[0]
-		switch(position){
-			case '#/Recommond':
-			this.active = 2;
-			break;
-			case '#/CourseLive':
-			this.active = 1;
-			break;
-			case '#/me':
-			console.log(position)
-			this.active = 3;
-			break;
-		} 
-  	}
+
+  	},
+	watch:{
+		$route (nv ,ov) {
+			let position = nv.path
+			switch(position){
+				case '/Recommond':
+				// console.log(position)
+				this.active = 2;
+				break;
+				case '/CourseLive':
+				// console.log(position)
+				this.active = 1;
+				break;
+				case '/me':
+				// console.log(position)
+				this.active = 3;
+				break;
+			} 
+		}
+	}
 }
 </script>

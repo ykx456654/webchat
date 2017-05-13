@@ -8,9 +8,9 @@
 				<a class="tip-to-app" href="https://www.yishengzhan.cn/download?channel=release_webysz">
 					医生站app
 				</a>
-			</a> 
+			</a>
 		</x-header>
-		<tip v-show="tipShow" @close="()=>{tipShow=false}" content="播放时默认全屏，推荐您使用医生站APP收看，功能更稳定，体验更好哦~"></tip>
+		<tip v-show="tipShow && subject.subjectType != 1" @close="()=>{tipShow=false}" content="如播放时默认全屏，推荐您使用医生站APP收看，功能更稳定，体验更好哦~"></tip>
 		<section class="swiper-ppt" :class="{'not-start':!isStart}" :style="{'height':partSize.pptHeight}" v-if="subject.subjectType != 1">
 			<ppt-player
 			:options="PPTPlayerOption"
@@ -25,7 +25,7 @@
 			<div class="discuss flex align-items-center justify-center" @click="linkDiscuss">
 				<div class="members flex align-items-center">
 					<img src="../../assets/icons/icon_rq.png">
-					<span v-text="subject.uvNum"></span>
+					<span v-text="subject.pvNum"></span>
 				</div>
 				<div class="flex align-items-center justify-center">讨论</div>
 			</div>
@@ -39,19 +39,11 @@
 			<normal-input v-if="subject.subjectRole == 100"></normal-input>
 			<high-input v-else></high-input>
 		</section>
-		<!-- <button @click="stopLoop">stop</button> -->
 		<previewer :list="images" :option="options" ref="previewer"></previewer>
 		<popup v-model="showVoice"  is-transparent>
 			<record-voice></record-voice>
 		</popup>
-		<!--<video id="video" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true">
-			<source :src="playurl"  type="application/x-mpegURL">
-		</video>-->
-		<div>
-			<x-dialog :hide-on-blur="true" v-model="gainShow">
-				<gain :info="gainInfo" ref="gain"/>
-			</x-dialog>
-		</div>
+		<gain v-show="gainShow" :info="gainInfo" ref="gain"/>
 	</div>
 </template>
 <script>
@@ -144,22 +136,19 @@ import Tip from './common/Tip'
 		},
 		beforeRouteEnter (to ,from ,next) {
 			next(vm => {
-				// console.log(vm)
-				vm.setAlive(['Subject','Discuss'])
+				// vm.setAlive(['Subject'])
 			})
 		},
 		beforeRouteLeave (to, from ,next) {
-			if (to.name != 'Discuss') {
-				this.clearMsg()
-				this.setAlive(['noComponent'])
-				// console.log(this.$refs.pptPlayer)
-				if(this.$refs.pptPlayer){
-					// alert(1)
-					this.$refs.pptPlayer.destoryPlayer()
-				}
-				bus._events = {}
-			}else{
-				this.setAlive(['Subject','Discuss'])
+			this.clearMsg()
+			this.showLoad()
+			if(this.$refs.pptPlayer){
+				this.$refs.pptPlayer.destoryPlayer()
+			}
+			bus._events = {}
+			if(this.voicePlayer){
+				this.voicePlayer.pause()
+				this.voicePlayer = null
 			}
 			next()
 		},
@@ -202,7 +191,8 @@ import Tip from './common/Tip'
 					livePullUrl:this.subject.livePullUrl,
 					recordUrl:this.subject.videoUrl,
 					subjectType:this.subject.subjectType,
-					poster:this.subject.subjectImg
+					poster:this.subject.subjectImg,
+					videoStatus:this.subject.videoStatus
 				}
 			},
 			partSize () {
@@ -234,12 +224,8 @@ import Tip from './common/Tip'
 				this.showVoice = value
 			},
 			goBcak () {
-				// this.$destroy()
-				if(this.isWeChat && this.subject.subjectType !== 1 && this.liveStatus == 1){
-					// history.go(-2)
-				}else{
-					history.back()
-				}
+				this.showLoad()
+				history.back()
 			},
 			linkSubjectIntro () {
 				this.showLoad()
@@ -269,7 +255,7 @@ import Tip from './common/Tip'
 			init () {
 				const query = this.$route.query
 				this.setSubjectInfo({subjectId:query.subjectId,studioId:query.studioId})
-				var p1 = this.enterSubejct()
+				var p1 = this.enterSubejct(this)
 				var p2 = this.getAdvMsg({direction:this.advMsgDirection,limit:this.limit})
 				var p3 = this.getNormalMsg({direction:this.nrmMsgDirection,limit:this.limit,onlyQuestion:false})
 				// if (this.subject.) {}
@@ -290,7 +276,7 @@ import Tip from './common/Tip'
 						var	params = {
 							title: this.subject.subjectTitle,
 							desc: this.subject.subjectIntro,
-							link:`${location.origin}/Subject?studioId=${this.id.studioId}&subjectId=${this.id.subjectId}`,
+							link:`${location.href.replace(/code=+\w*/g,'')}`,
 							imgUrl: this.subject.subjectImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.subject.subjectImg
 						};
 						console.log(params)
@@ -304,6 +290,7 @@ import Tip from './common/Tip'
 			},
 			playVoice (obj) {
 				// alert(msg)
+				// console.log('12231231321')
 				if(this.voicePlayer){
 					this.voicePlayer.pause()
 					this.voicePlayer = null
@@ -311,9 +298,10 @@ import Tip from './common/Tip'
 				this.voicePlayer = new window.Audio()
 				this.voicePlayer.src = obj.msg.vodUrl
 				this.voicePlayer.play()
+				console.log(obj)
 				this.setPlayingVoice({type:obj.type,i:obj.index})
 				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
-				this.voicePlayer.addEventListener('suspend',()=>{
+				this.voicePlayer.addEventListener('ended',()=>{
 					this.setPlayingVoice({type:obj.type+1,i:obj.index})
 				},false)
 			},
@@ -338,7 +326,7 @@ import Tip from './common/Tip'
 					if(nv == 9 ){
 						this.$nextTick(()=>{
 							this.$refs.pptPlayer.playRecord()
-							// console.log(2)
+							console.log(200000)
 						})
 					}
 				}
@@ -362,7 +350,7 @@ import Tip from './common/Tip'
 	.chat{
 		position: relative;
 		// flex:1 1 100%;
-		background-color: #f7f7f7;
+		background-color: #eef1f5;
 		height: calc(~'100vh - 3.05rem');
 		overflow: hidden;
 		&.no-ppt{
@@ -481,4 +469,5 @@ import Tip from './common/Tip'
 		margin: 0;
 		font-size:12px;
 	}
+
 </style>

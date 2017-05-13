@@ -17,9 +17,9 @@
 			</div>
 
 			<transition-group class="msg-list" name="list" tag="ul">
-				<div class="live-start-time" key="00000000">
+				<div class="live-start-time" key="00000000" v-if="advanceMsg.is_end">
 					<!--直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始-->
-          			直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('MM月dd日 hh:ss')}}</span>开始
+          			直播将于<span>{{startTime}}</span>开始
 				</div>
 				<li v-for="(m,index) in advanceMsg.msgList" :key="index"  v-bind:data-index="index">
 					<a-chat-item :msg="m" :index="index"></a-chat-item>
@@ -90,6 +90,32 @@ import AChatItem from './AChatItem'
 			...mapGetters(['advanceMsg','scroll','isStart']),
 			msgLength () {
 				return this.advanceMsg.msgList.length
+			},
+			startTime () {
+				var today_end = new Date().Format('yyyy/MM/dd') + ' 23:59:59'
+				var today_start = new Date().Format('yyyy/MM/dd') + ' 00:00:01'
+				var t_today_start = +new Date(today_start)/1000
+				var t_today_end = +new Date(today_end)/1000
+				var t_tomorrow_end = t_today_end + 86400
+				var t = this.subjectInfo.startTime
+				if (t) {
+					switch(true){
+						case t > t_tomorrow_end:
+							return new Date(t*1000).Format('MM月dd日 hh:mm')
+						break;
+						case t < t_today_start:
+							return new Date(t*1000).Format('MM月dd日 hh:mm')
+						break;
+						case t > t_today_start && t < t_today_end:
+							return '今天' + new Date(t*1000).Format('hh:mm') 
+						break;
+						case t > t_today_end && t < t_tomorrow_end:
+							return '明天' + new Date(t*1000).Format('hh:mm')
+						break;
+						default : 
+						return new Date(t*1000).Format('MM月dd日 hh:mm')
+					}
+				}
 			}
 		},
 		methods:{
@@ -107,7 +133,6 @@ import AChatItem from './AChatItem'
 				this.topStatus = status
 			},
 			handBottomStatus (status) {
-				// console.log(status)
 				this.bottomStatus = status
 			}
 		},
@@ -124,12 +149,6 @@ import AChatItem from './AChatItem'
 						box.scrollTop(100000)
 					}
 				})
-				// console.log(this.advanceMsg.msgList[nv-1])
-				if(this.advanceMsg.msgList[nv-1].msgType == 201){
-					// console.log(nv)
-					// console.log(ov)
-					this.setLiveStatu(1)
-				}
 			}
 		}
 	}

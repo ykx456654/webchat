@@ -130,9 +130,9 @@ import { api } from '../../utils/api.js'
 				margin-top: -10px;
 				width: 20px;
 				height: 20px;
-				background-image: url(../../assets/images/plus1.png);
+				background-image: url(../../assets/images/plus.png);
 				background-repeat: no-repeat;
-				background-size: 58%;
+				background-size: 70%;
 				&.checked{
 					background-image: url(../../assets/images/checked.png);
 					background-size: 90%;

@@ -23,7 +23,7 @@
 			@top-status-change="handTopStatus"
 			@bottom-status-change="handBottomStatus"
 			>
-				<transition-group name="list" tag="ul">
+				<!--<transition-group name="list" tag="ul">-->
 					<li class="discuss-item flex" :class="{'selected':m.selected}" v-for="(m,index) in normalMsg.msgList" :key="index">
 						<div class="discuss-item-left">
 							<img src="../../assets/images/default_head.png" v-if="m.headImg==''">
@@ -32,25 +32,27 @@
 						<div class="discuss-item-right">
 							<h5 class="name" v-text="m.name"></h5>
 							<p>{{new Date(m.msgTime*1000).Format('MM-dd hh:mm:ss')}}</p>
-							<div class="discuss-content">
+							<div data-flex="cross:center" class="discuss-content">
 								<i class="icon icon-wen" v-if="m.questionFlag"></i>
-								{{m.textContent}}
+								<span v-html="m.textContent.replace(/<script(?:\s+[^>]*)?>(.*?)<\/script\s*>/ig,'').replace(/\n/g,'<br>')"></span>
 							</div>
 							<div class="answer" v-if="m.questionFlag && m.ansList[0]">
 								<div class="flex align-items-center">
-									<img :src="m.ansList[0].headImg" alt="" v-if="m.ansList[0].headImg != ''">
-									<img src="http://img.yishengzhan.cn/user/head/e16deb512ab8456d9eb577dc96b22ab0.jpg" v-else>
+									<img :src="m.ansList[0].headUrl" alt="" v-if="m.ansList[0].headUrl != ''">
+									<img src="../../assets/icons/pic_men@2x.png" v-else>
 									<span>{{m.ansList[0].name}}</span>
 									<!--<span>fdsfs</span>-->
 								</div>
-								<div>
+								<div class="answer-teacher">
 									<div v-if="m.ansList[0].ansType == 1">
 										{{m.ansList[0].textContent}}
 									</div>
 									<div class="flex align-items-center" v-if="m.ansList[0].ansType == 3">
-										<div class="answer-voice content"  v-voice-width="{'vodDuration':m.ansList[0].vodDuration,'msgType':m.ansList[0].ansType}" @click="playVoice({vodUrl:m.ansList[0].vodUrl,vodDuration:m.ansList[0].vodDuration})">
+										<div class="answer-voice content"
+										v-voice-width="{'vodDuration':m.ansList[0].vodDuration,'msgType':m.ansList[0].ansType}"
+										@click="playVoice({vodUrl:m.ansList[0].vodUrl,vodDuration:m.ansList[0].vodDuration},5,index)">
 											<div class="voice-msg">
-												<i class="icon icon-voice"></i>
+												<i class="icon icon-voice" :class="{'icon-playing':m.ansList[0].playing}"></i>
 											</div>
 										</div>
 										<span class="times">{{m.ansList[0].vodDuration}}s</span>
@@ -59,7 +61,7 @@
 							</div>
 						</div>
 					</li>
-				</transition-group>
+				<!--</transition-group>-->
 			</Loadmore>
 		</div>
 		<normal-input></normal-input>
@@ -77,13 +79,34 @@ import { throttle } from '../../utils/func'
 			NormalInput,Loadmore,Indicator
 		},
 		created () {
-			if (!this.loopClock) {
-				this.init()
-
-			}else{
+			this.init()
+			.then(()=>{
 				this.hideLoad()
-				this.isLoad = true
-			}
+				const query = this.$route.query
+				if(typeof query.msgIndex != 'undefined'){
+					this.normalMsg.msgList.forEach(item=>{
+						item.selected = false
+					})
+					try{
+						this.$nextTick(()=>{
+							const length = this.normalMsg.msgList.length
+							const index = parseInt(query.msgIndex)
+							if(this.normalMsg.msgList && this.normalMsg.msgList.length >= 4){
+								this.normalMsg.msgList[length - 4 + index].selected = true
+							}else{
+								var arr = this.normalMsg.msgList
+								this.normalMsg.msgList[index].selected = true
+							}
+						})
+					}catch(e){
+						console.log(e)
+					}
+				}
+				setTimeout(()=>{
+					$('#load-wrap').scrollTop(10000)
+				},0)
+			})
+			this.isLoad = true
 		},
 		mounted () {
 			var $chatWrapper = $('#load-wrap')
@@ -98,42 +121,7 @@ import { throttle } from '../../utils/func'
 					_this.setScroll({b:$chatWrapper.scrollTop()})
 					_this.isBottom = false
 				}
-				// console.log(_this.isBottom)
 			},500,500))
-		},
-		activated() {
-			this.hideLoad()
-			let $chatWrapper = $('#load-wrap')
-			let b = this.scroll.b
-			let query = this.$route.query
-			// console.log('activated')
-			if (b != 'init' && !this.isBottom) {
-				this.$nextTick(()=>{
-					$('#load-wrap').scrollTop(b)
-				})
-			}
-			if (this.isBottom) {
-				$chatWrapper.scrollTop(100000)
-			}
-			if(typeof query.msgIndex != 'undefined'){
-				try{
-					this.$nextTick(()=>{
-						const length = this.normalMsg.msgList.length
-						const index = parseInt(query.msgIndex)
-						// console.log(this.normalMsg.msgList)
-						if(this.normalMsg.msgList && this.normalMsg.msgList.length >= 4){
-							this.normalMsg.msgList[length - 4 + index].selected = true
-						}else{
-							// console.log(index)
-							// var arr = this.normalMsg.msgList
-							// console.log(this.normalMsg.msgList)
-							// this.normalMsg.msgList[index].selected = true
-						}
-					})
-				}catch(e){
-					console.log(e)
-				}
-			}
 		},
 		data () {
 			return {
@@ -143,29 +131,34 @@ import { throttle } from '../../utils/func'
 				direction:false, //方向标识，true为拉取新消息，false拉取历史消息
 				limit:10,
 				onlyQuestion:false,
-				isBottom:true
+				isBottom:true,
+				flag:true,
+				player:null,
+				playerIndex:null
 			}
 		},
 		computed: {
 			...mapGetters(['normalMsg','loopClock','scroll','userInfo']),
 			msgLength () {
-				return this.normalMsg.msgList.length
+				if(this.normalMsg.msgList){
+					return this.normalMsg.msgList.length
+				}
 			}
 		},
 		methods:{
-			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg','setScroll']),
+			...mapMutations(['hideLoad','showLoad','setSubjectInfo','clearMsg','setScroll','setPlayingVoice']),
 			...mapActions(['getSubjectInfo','getNormalMsg','loopSubject','getAdvMsg','GETUSERINFO']),
 			backSubject () {
-				this.normalMsg.msgList.forEach(item=>{
-					item.selected = false
-				})
 				history.back()
 			},
 			getMsg () {
 				this.isBottom = false
+				let height = $('#chat-b-content').height()
 				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				.then(res=>{
 					this.$refs.loadmore.onTopLoaded()
+					
+
 				})
 				.done()
 			},
@@ -176,7 +169,6 @@ import { throttle } from '../../utils/func'
 				})
 				this.onlyQuestion = !this.onlyQuestion
 				this.clearMsg(2)
-				// this.isLoad = false
 				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				.then(res=>{
 					this.isLoad = true
@@ -192,7 +184,7 @@ import { throttle } from '../../utils/func'
 				var p1 = this.getSubjectInfo()
 				var p2 = this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				var p3 =this.getAdvMsg({direction:this.direction,limit:this.limit})
-				Promise.all([p1,p2,p3])
+				return Promise.all([p1,p2,p3])
 				.then(res=>{
 					return res.every(item => item == true)
 				})
@@ -214,6 +206,34 @@ import { throttle } from '../../utils/func'
 			},
 			handBottomStatus (value) {
 
+			},
+			playVoice (msg,type,index) {
+				// console.log(msg)
+				// console.log(index)
+				if(this.player){
+					this.player.pause()
+					this.player = null
+					if(this.playerIndex == index){
+						this.playerIndex = null
+						this.setPlayingVoice({type:type+1,i:index})
+						return false	
+					}
+				}
+				this.player = new Audio()
+				this.player.src = msg.vodUrl
+				this.player.play()
+				this.playerIndex = index
+				this.setPlayingVoice({type:type,i:index})
+				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止  type=5讨论区语音播放。 type=6讨论区语音停止播放
+				this.player.addEventListener('ended',()=>{
+					this.setPlayingVoice({type:type+1,i:index})
+				},false)
+			}
+		},
+		destroyed() {
+			if(this.player){
+				this.player.pause()
+				this.player = null
 			}
 		},
 		watch:{
@@ -221,6 +241,7 @@ import { throttle } from '../../utils/func'
 				this.$nextTick(()=>{
 					var box = $('#load-wrap')
 					if (this.isBottom) {
+						// console.log(111111)
 						box.scrollTop(100000)
 					}
 				})
@@ -301,10 +322,10 @@ import { throttle } from '../../utils/func'
 		border-bottom: 1px solid #f7f7f7;
 		&.selected{
 			/*background-color: #e9f4ea;*/
-      animation:myfirst 2s;
-      -moz-animation:myfirst 2s; /* Firefox */
-      -webkit-animation:myfirst 2s; /* Safari and Chrome */
-      -o-animation:myfirst 2s; /* Opera */
+      animation:myfirst 3s;
+      -moz-animation:myfirst 3s; /* Firefox */
+      -webkit-animation:myfirst 3s; /* Safari and Chrome */
+      -o-animation:myfirst 3s; /* Opera */
       @keyframes myfirst
       {
         from {background:#e2e2e2;}
@@ -358,8 +379,11 @@ import { throttle } from '../../utils/func'
 				word-break: break-word;
 				i{
 					margin-right: 10px;
-					margin-bottom: -5px;
+					width: 17px;
+					height: 17px;
 					float: left;
+					background-position: center;
+					background-size: 100%;
 				}
 				div{
 					text-align: left;
@@ -391,6 +415,10 @@ import { throttle } from '../../utils/func'
 			}
 
 		}
+		.answer-teacher{
+			margin-top: 6px;
+			padding-left: 26px;
+		}
 	}
 	.content{
 		font-size: .15rem;
@@ -410,6 +438,17 @@ import { throttle } from '../../utils/func'
 	.answer-voice{
 		// flex: 1;
 		margin-right: 5px;
+		.icon-voice{
+			background-image: url(../../assets/icons/yuying2.png);
+		}
+		.icon-playing{
+			animation:  blink 1s linear infinite;
+			@keyframes blink {
+				0% { background-image: url(../../assets/icons/yuying1.png)}
+				50% { background-image: url(../../assets/icons/yuying2.png) }
+				100% { background-image: url(../../assets/icons/yuying1.png)}
+			}
+		}
 	}
 	.list-enter-active, .list-leave-active {
 	  transition: all 1s;

@@ -81,7 +81,7 @@ export default {
             	var	params = {
                    	title: this.vdo.title,
 	            	desc: this.vdo.title.content,
-	            	link: 'http://' + window.location.hostname + '/CourseDetailLive/' + vdoid,
+	            	link: location.href,
 	            	imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
                 };
             	wx.onMenuShareAppMessage(params);

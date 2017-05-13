@@ -65,25 +65,20 @@ export const throttle = function(method,delay,duration){
 
 
 
-export const setPPT = function (current, actionList) {
+export const setPPT = function (current,actionList,initialValue) {
 	// console.log(actionList)
     if(actionList.length != 0){
         return actionList.reduce((previousValue, currentValue, currentIndex, array1)=>{
-            if(previousValue.actionTime >= current){
-                return Object.assign({},previousValue,{next:1})
+            if(current >= previousValue.actionTime && current < currentValue.actionTime){
+                return Object.assign({},previousValue)
             }
-            if(previousValue.actionTime < current && currentValue.actionTime >= current ){
-                return Object.assign({},currentValue,{next:2})
+            if(current >= currentValue.actionTime){
+                return Object.assign({},currentValue)
             }
-            if(current > currentValue.actionTime){
-                return Object.assign({},currentValue,{next:1})
-            }
-            return 
-        })
+        },initialValue)
     }else{
-        return {actionData:{}}
+        return {url:initialValue.url}
     }
-	// next 取值1 pageFrom  取2 pageTo
 }
 
 

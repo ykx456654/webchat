@@ -18,7 +18,7 @@
 						<div class="triangle bw" style="width:auto"></div>
 						<div class="triangle-border"></div>
 						<div class="word-msg">
-							<div class="msg">{{msg.textContent}}</div>
+							<div class="msg" v-html="msg.textContent.replace(/<script.*?>.*?<\/script>/ig,'').replace(/\n/g,'<br>')"></div>
 						</div>
 					</div>
 
@@ -46,7 +46,7 @@
 					<div class="triangle"></div>
 					<div class="triangle-border"></div>
 					<div>
-						<p class="text-left">
+						<p class="text-left t999">
 							{{msg.refQuestionText}}
 						</p>
 						<div class="bd1"></div>
@@ -58,7 +58,7 @@
 									<i class="icon icon-voice" :class="{'icon-playing':msg.ansList[0].playing}"></i>
 								</div>
 							</div>
-							<span class="times">{{msg.ansList[0].vodDuration}}s</span>
+							<span class="times answer-times">{{msg.ansList[0].vodDuration}}s</span>
 						</div>
 						<div class="text-left" v-if="msg.ansList[0].ansType == 1">
 							<p>
@@ -75,7 +75,7 @@
 			</div>
 		</div>
  		<div class="tip-to-app" v-if="!isStart && subjectRole == 1">
-			<a>要开始直播，请使用医生站APP。</a>
+			<a href="https://www.yishengzhan.cn/download?channel=release_webysz">要开始直播，请使用医生站APP。</a>
 		</div>
 <!-- 		<div class="gain">
 			<div>
@@ -127,12 +127,20 @@ import bus from '../../common/eventBus.js'
 			},
 			play (msg,type) {
 				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
+				bus.$emit('resetOtherVoicePlay',this.index)
 				if(this.flag){
+					this.flag = false
+					console.log('play')
 					bus.$emit('playVoice',{msg,index:this.index,type})
+					setTimeout(()=>{
+						// console.log(msg.vodDuration)
+						this.flag = true
+					},msg.vodDuration*990)
 				}else{
+					console.log('end')
+					this.flag = true
 					bus.$emit('endVoice',{index:this.index,type:type+1})
 				}
-				this.flag = !this.flag
 			},
 			gain (msg) {
 				bus.$emit('invoke',msg)
@@ -151,6 +159,15 @@ import bus from '../../common/eventBus.js'
 					}
 				}
 			}
+		},
+		mounted () {
+			bus.$on('resetOtherVoicePlay',index=>{
+				if(this.index != index){
+					// console.log('aaaaaaaaaaaa')
+					// console.log(index)
+					this.flag = true
+				}
+			})
 		}
 	}
 </script>
@@ -235,19 +252,18 @@ import bus from '../../common/eventBus.js'
 	}
 	.voice-msg{
 		.icon-playing{
-			animation:  blink 5s linear infinite;
-      @keyframes blink {
-        0% { background-image: url(../../../assets/icons/yuying1.png)}
-        50% { background-image: url(../../../assets/icons/yuying2.png) }
-        100% { background-image: url(../../../assets/icons/yuying1.png)}
-      }
+			animation:  blink 1s linear infinite;
+			@keyframes blink {
+				0% { background-image: url(../../../assets/icons/yuying1.png)}
+				50% { background-image: url(../../../assets/icons/yuying2.png) }
+				100% { background-image: url(../../../assets/icons/yuying1.png)}
+			}
 		}
 		.times{
 			color: #666;
 		}
 		.icon-voice{
 			background-image: url(../../../assets/icons/yuying2.png);
-
 		}
 	}
 
@@ -305,11 +321,16 @@ import bus from '../../common/eventBus.js'
 	.bd1{
 		height: 1px;
 		background-color: #e2e2e2;
-		margin: 10px 0 8px;
+		margin: 5px 0 4px;
 	}
 	.answer-voice{
-		flex:1;
 		margin-right: 5px;
 		background-color: #f9f9f9;
+	}
+	.answer-times{
+			// flex:0;
+		display: block;
+		// min-width:50px; 
+		word-break: normal;
 	}
 </style>

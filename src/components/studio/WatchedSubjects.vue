@@ -10,7 +10,6 @@
 				<seat-img v-if="subjects.length == 0 && isLoad" msg="暂无浏览过的话题"></seat-img>
 				<li v-for="(m,i) in subjects" @click="linkSubject(m.studioId,m.subjectId)">
 					<watched-subject :subject="m"></watched-subject>
-
 				</li>
 				<div class="no-more" v-if="allLoaded && subjects.length != 0">
 						没有更多了
@@ -66,7 +65,7 @@ import { api } from '../../utils/api'
 			linkSubject (studioId,subjectId) {
 				this.showLoad()
 				let openid = storage('openid')
-				this.$router.push({path:'/Subject',query:{studioId,subjectId,openid}})
+				this.$router.push({path:'/Subject',query:{studioId,subjectId}})
 			}
 		},
 		computed: {

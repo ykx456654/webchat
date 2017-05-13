@@ -33,7 +33,7 @@
 							</div>
 							<p class="course-detail-content" :class="{'active':lanchContent}" v-text="vdo.content"></p>
 							<div class="course-toggle" @click="lanch">
-                <span v-if="lanchContent">收起</span>
+                				<span v-if="lanchContent">收起</span>
 								<span v-else>展开</span>
 								<img :class="{'lanch':lanchContent}" src="../../../assets/images/arrow-bottom.png">
 							</div>
@@ -60,17 +60,17 @@
 							<div class="comment-item">
 								<p class="comment-name">{{c.nick_name}}</p>
 								<p class="comment-time">{{c.time}}</p>
-								<p class="comment-content">{{c.content}}</p>
+								<p class="comment-content" v-html="c.content.replace(/\n/g,'<br>')"></p>
 								<div class="at-user" v-if="c.reply_user_id && c.rawPic.url ==''">
 									<span class="at-user-name">@{{c.reply_nick_name}}</span>
 									<span class="at-user-content"> : {{c.rawContent}}</span>
 									<!--<span><i class="icon icon-comment-img"></i>图片</span>-->
 								</div>
 							</div>
-							<div class="comment-zan c-z flex align-items-center">
+							<!--<div class="comment-zan c-z flex align-items-center">
 								<img class="c-z" src="../../../assets/images/zan_.png">
 								<span class="c-z" zan>赞</span>
-							</div>
+							</div>-->
 						</div>
 					</div>
 					<div v-else class="no-comment">
@@ -109,15 +109,15 @@
 			<div class="course-detail-tab flex justify-space-between" v-show="show">
 				<div class="flex align-items-center justify-center">
 					<i class="sprite-icon comment-icon" @click="tabClick(1)"></i>
-					评论
+					<span @click="tabClick(1)">评论</span>
 				</div>
 				<div class="flex align-items-center justify-center" :class="{'red':vdo.supported == 1}">
 					<i class="sprite-icon support-icon" :class="{'supported-icon':vdo.supported == 1}"  @click="tabClick(2)"></i>
-					{{vdo.supportNum == 0 ? '赞':vdo.supportNum}}
+					<span @click="tabClick(2)">{{vdo.supportNum == 0 ? '赞':vdo.supportNum}}</span>
 				</div>
 				<div class="flex align-items-center justify-center">
 					<i class="sprite-icon download-icon" @click="tabClick(3)"></i>
-					下载
+					<span @click="tabClick(3)">下载</span>
 				</div>
 			</div>
 		</transition>
@@ -154,7 +154,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					var	params = {
 						title: this.vdo.title,
 						desc: this.vdo.content,
-						link:location.origin + '/CourseDetailSave/' + this.vdoid,
+						link:location.href,
 						imgUrl: 'http://' + window.location.hostname + '/images/zhibojian.png'
 					};
 					console.log(params)
@@ -423,18 +423,17 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						this.toast('评论成功！')
 						this.popupVisible = false
 						return res.rsps[0].body.comment_id
-
 					}
 				})
 				.then(comment_id=>{
-
-					this.commentList.push({
+					this.commentList.unshift({
 						time: new Date().Format("MM-dd hh:mm"),
 						content: this.comment,
 						nick_name: this.userInfo.nickName,
 						user_id:storage('uid'),
 						head_url:this.userInfo.headUrl,
-						comment_id
+						comment_id,
+						rawPic:{url:''}
 					})
 					this.comment = ''
 				})
@@ -443,11 +442,12 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				})
 			},
 			replyComment (reply_user_id,reply_comment_id,index) {
+				const userId = storage('uid')
 				let data = {
 					type:2,
 					content:this.comment,
 					topic_id:this.vdo.vdoid,
-					user_id:storage('uid'),
+					user_id:userId,
 					reply_user_id,
 					reply_comment_id
 				}
@@ -462,8 +462,23 @@ import zy from '../../../lib/zymedia/zy.media.js'
 						this.popupVisible = false
 						this.commentList[index].reply_nick_name = this.userInfo.nickName
 						this.commentList[index].rawContent = this.comment
-						this.commentList[index].reply_user_id = storage('uid')
+						this.commentList[index].reply_user_id = userId
+						let com = {
+							time: new Date().Format("MM-dd hh:mm"),
+							content: this.comment,
+							comment_id:res.rsps[0].body.comment_id,
+							nick_name: this.userInfo.nickName,
+							user_id:userId,
+							head_url:this.userInfo.headUrl,
+							rawPic:{url:''},
+							reply_nick_name:this.commentList[index].nick_name,
+							reply_comment_id,
+							rawContent:this.commentList[index].content,
+							reply_user_id
+						}
+						this.commentList.unshift(com)
 						this.comment = ''
+						this.isReply = false
 						return res.rsps[0].body.comment_id
 					}
 				})
@@ -595,13 +610,16 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			.f-1{
 				width: 60px;
 				flex: 1 0 60px;
+                /*height:120px;*/
+                max-width:60px;
 			}
 			.f-2{
 				margin-left: 10px;
-				flex: 0 1 auto;
+				flex: 0 0 auto;
 			}
 			img{
 				width: 100%;
+                height:100%;
 			}
 			p{
 				width: 100%;
@@ -616,11 +634,11 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			line-height: 22px;
 			height: 22px;
 			overflow: hidden;
-      font-size:14px;
+            font-size:14px;
 			&.active{
 				height: auto;
 				overflow: visible;
-        min-height: 44px;
+                min-height: 44px;
 			}
 		}
 		.course-toggle{
@@ -681,7 +699,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 	}
 	.relative-course-list{
 		>div{
-			padding: 5px 5px 10px;
+			padding: 5px;
 			border-bottom: 1px solid #f7f7f7;
 		}
 		.relative-course-img{
@@ -786,7 +804,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			border: 1px solid #ccc;
 		    border-radius: 2px;
 		    width: 100%;
-		    height: 160px;
+		    height: 80px;
 		    font-size: 12px;
 		    background: transparent;
 		    outline: transparent;

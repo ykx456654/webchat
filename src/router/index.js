@@ -135,7 +135,8 @@ export default new Router({
     },
     {
       path:'/Auth',
-      component:Auth
+      component:Auth,
+      meta:{hideTab:true}
     },
     {
       path:'/UpAuthImg',
@@ -155,11 +156,7 @@ export default new Router({
       path:'/Subject',
       component:Subject,
       name:'Subject',
-      meta:{hideTab:true,keepalive:true},
-      beforeEnter: (to, from, next) => {
-        // store.state.base.keepAliveComponents = ['Subject','Discuss'] 
-        next()
-      }
+      meta:{hideTab:true,keepalive:true}
     },
     {
       path:'/StudioList',

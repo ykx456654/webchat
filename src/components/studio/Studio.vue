@@ -8,8 +8,8 @@
 		<div class="header" :class="{'lanch':isLanch}">
 			<div class="user-info">
 				<div class="flex justify-center flex-wrap">
-          <img :src="studio.studioImg" v-if="studio.studioImg != ''">
-					<img  src="../../assets/images/default_head.png" v-else>
+                     <img :src="studio.studioImg" v-if="studio.studioImg != ''">
+					 <img  src="../../assets/images/icon_zbj_mr.png" v-else>
 				</div>
 				<div>
 					<p class="studio-name" v-text="studio.studioTitle"></p>
@@ -39,29 +39,31 @@
 			<img src="../../assets/images/wdzbij_qst.png">
 			<p>暂无直播话题</p>
 		</div>
-		<ul class="subjects">
-			<li v-for="s in subjects" @click="link(s)">
-				<subject-item :subject="s"></subject-item>
-			</li>
-			<div class="subjects-loading flex justify-center " v-show="showLoading">
-				<spinner></spinner>
-			</div>
-			<div class="click-more" @click="loadMore" v-show="showBtn">
-				<button>{{ subejectsIsEnd ?'没有更多了':'加载更多'}}</button>
-			</div>
-		</ul>
+		<Loadmore
+		:autoFill="false"
+		:bottom-method="loadMore"
+		:bottom-all-loaded="subejectsIsEnd"
+		ref="loadmore"
+		>
+			<ul class="subjects">
+				<li v-for="s in subjects" @click="link(s)">
+					<subject-item :subject="s"></subject-item>
+				</li>
+			</ul>
+		</Loadmore>
+
 	</div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import {Header,Spinner} from 'mint-ui'
+import {Header,Spinner,Loadmore} from 'mint-ui'
 import storage from 'storejs'
 import { api } from '../../utils/api'
 import SubjectItem from './common/SubjectItem'
 	export default {
 		name:'Studio',
 		components:{
-			xHeader:Header,SubjectItem,Spinner
+			xHeader:Header,SubjectItem,Spinner,Loadmore
 		},
 		mounted () {
 			// console.log(this.$route.params)
@@ -80,28 +82,28 @@ import SubjectItem from './common/SubjectItem'
 					this.toast(res.msg)
 				}else{
 					this.studio = res.rsps[0].body.studio
+					this.index = res.rsps[0].body.index
 					this.studioTitle = this.studio.studioTitle
+					this.subjects = this.subjects.concat(res.rsps[0].body.subjects)
+					this.subejectsIsEnd = res.rsps[0].body.is_end
+					this.subjectsStart+=this.subjectsLimit
+					this.isLoadOnce = true
+					this.checkInfoSize()
+					this.hideLoad()
+					wx.ready(() => {
+					var	params = {
+							title: this.studioTitle,
+							desc: this.studio.studioIntro,
+							link:location.href.replace(/code=+\w*/g,''),
+							imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
+						}
+						console.log(params)
+						wx.onMenuShareAppMessage(params);
+						wx.onMenuShareTimeline(params);
+					})
 					return true
 				}
 			})
-			var p2 = this.getSubjects()
-			Promise.all([p1,p2])
-			.then(res=>{
-				this.checkInfoSize()
-				this.hideLoad()
-				wx.ready(() => {
-					var	params = {
-						title: this.studioTitle,
-						desc: this.studio.studioIntro,
-						link:`${location.origin}/Studio?studioId=${this.studioId}`,
-						imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
-					};
-					console.log(params)
-					wx.onMenuShareAppMessage(params);
-					wx.onMenuShareTimeline(params);
-				});
-			})
-			.catch(e=>{})
 		},
 		data () {
 			return {
@@ -115,13 +117,14 @@ import SubjectItem from './common/SubjectItem'
 				studioTitle:'',
 				showLanchInfoArrow:false,
 				showLoading:false,
-				isLanch:false
+				isLanch:false,
+				index:0
 			}
 		},
 		methods:{
 			...mapMutations(['hideLoad','showLoad','hideTab']),
 			getStudioInfo () {
-				return api(this.uid,{cmd:'enter_studio',srv:'studio_studio'},{studioId:this.studioId,start:this.subjectsStart,limit:this.subjectsLimit})
+				return api(this.uid,{cmd:'enter_studio',srv:'studio_studio'},{studioId:this.studioId})
 				.then(res=>{
 					res = res.data
 					return res
@@ -129,7 +132,7 @@ import SubjectItem from './common/SubjectItem'
 			},
 			getSubjects () {
 				this.showLoading = true
-				return api(this.uid,{cmd:'get_subject_list',srv:'studio_studio'},{studioId:this.studioId,start:this.subjectsStart,limit:this.subjectsLimit})
+				return api(this.uid,{cmd:'get_subject_list',srv:'studio_studio'},{studioId:this.studioId,index:this.index,start:this.subjectsStart,limit:this.subjectsLimit})
 				.then(res=>{
 					res = res.data
 					if (res.result != 0) {
@@ -141,6 +144,7 @@ import SubjectItem from './common/SubjectItem'
 						this.subjects = this.subjects.concat(res.rsps[0].body.subjects)
 						this.subejectsIsEnd = res.rsps[0].body.is_end
 						this.subjectsStart+=this.subjectsLimit
+						this.$refs.loadmore.onBottomLoaded()
 						return true
 					}
 				})
@@ -162,8 +166,7 @@ import SubjectItem from './common/SubjectItem'
 					this.$router.push({path:'/SubjectIntro',query:{subjectId:s.subjectId,studioId:s.studioId}})
 				}else{
 					this.showLoad()
-					let openid = storage('openid')
-					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId,openid}})
+					this.$router.push({path:'/Subject',query:{subjectId:s.subjectId,studioId:s.studioId}})
 				}
 				// console.log(s)
 			},
@@ -307,9 +310,8 @@ import SubjectItem from './common/SubjectItem'
 		}
 	}
 	.click-more{
-		margin-bottom: .1rem;
 		background-color: #fff;
-    	padding: .1rem .1rem 0;
+    	padding: .1rem;
     	button{
     	    border: none;
  		    background: #fff;

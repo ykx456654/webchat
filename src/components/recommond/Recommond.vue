@@ -19,20 +19,21 @@
 							<img class="page" v-lazy="r.subjectImg" alt="" v-else>
 							<span class="tag status">{{ r.liveStatus | status}}</span>
 							<div class="bottom-tag flex">
-
 								<span class="num">{{r.pvNum}}人次</span>
 							</div>
 						</div>
 						<h4>{{r.subjectTitle}}</h4>
-            <p>{{ r.startTime | time }}<span v-if="r.fee != 0"></span><span class="price" v-if="r.fee != 0">￥ {{(r.fee/100).toFixed(2)}}</span></p>
-
+            			<p>
+							{{ r.startTime | time }}<span v-if="r.fee != 0">
+							</span><span class="price" v-if="r.fee != 0">￥ {{(r.fee/100).toFixed(2)}}</span>
+						</p>
             <!--<span class="price" v-if="r.fee != 0">￥{{(r.fee/100).toFixed(2)}}</span>-->
 						<!-- <p>{{new Date(r.startTime*1000).Format('yyyy-MM-dd hh:ss')}}</p> -->
 					</div>
 				</section>
-				<div class="no-more" v-if="allLoaded">
-					没有更多了
-				</div>
+			</div>
+			<div class="no-more" v-if="allLoaded">
+				没有更多了
 			</div>
 		</loadmore>
 	</div>
@@ -50,6 +51,17 @@ import { api } from '../../utils/api'
 		created () {
 			this.load()
 			.then(()=>{
+				wx.ready(() => {
+					var	params = {
+						title: '医生站',
+						desc: '医生学习的加油站',
+						link:`${location.href.replace(/code=+\w*/g,'')}`,
+						imgUrl: 'http://' + window.location.hostname + '/images/zhibojian.png'
+					};
+					console.log(params)
+					wx.onMenuShareAppMessage(params);
+					wx.onMenuShareTimeline(params);
+				})
 				window.scroll(0,0)
 			})
 		},
@@ -92,12 +104,12 @@ import { api } from '../../utils/api'
 			},
 			linkSubject (r) {
 				this.showLoad()
-				let openid = storage('openid')
+				// let openid = storage('openid')
 				// console.log(studioId,subjectId)
 				if(r.fee > 0){
 					this.$router.push({path:'/SubjectIntro',query:{studioId:r.studioId,subjectId:r.subjectId}})
 				}else{
-					this.$router.push({path:'/Subject',query:{studioId:r.studioId,subjectId:r.subjectId,openid}})
+					this.$router.push({path:'/Subject',query:{studioId:r.studioId,subjectId:r.subjectId}})
 				}
 			},
 			focus (id,index) {
@@ -133,9 +145,9 @@ import { api } from '../../utils/api'
 				var t_today_end = +new Date(today_end)/1000
 				// console.log(t-t_today_start,t_today_end-t)
 				if (t > t_today_start && t < t_today_end) {
-					return '今天  ' + new Date(t).Format('hh:ss')
+					return '今天  ' + new Date(t*1000).Format('hh:mm')
 				}else{
-					return new Date(t*1000).Format('yyyy-MM-dd hh:ss')
+					return new Date(t*1000).Format('yyyy-MM-dd hh:mm')
 				}
 			}
 		},
@@ -189,8 +201,8 @@ import { api } from '../../utils/api'
 				border-radius: 11px;
 				height: 22px;
 				line-height:22px;
-        display:inline-block;
-        float:right;
+                display:inline-block;
+                float:right;
 
 			}
 		}
@@ -199,9 +211,9 @@ import { api } from '../../utils/api'
 		margin-right: 12px;
 		/*position: relative;*/
 		width: 100%;
-    border:1px solid #f2f2f2;
-    border-radius: 10px;
-    margin-bottom: 15px;
+        border:1px solid #f2f2f2;
+        border-radius: 5px;
+        margin-bottom: 15px;
 		.page{
 			width: 100%;
 			position: absolute;
@@ -213,34 +225,37 @@ import { api } from '../../utils/api'
 			font-size: 15px;
 			text-align: left;
 			margin: 12px 0;
-      padding-left:10px;
-      font-weight:500;
-      color:#333;
+              padding-left:10px;
+              font-weight:500;
+              color:#333;
 		}
 		p{
 			text-align: left;
-			font-size: 14px;
+			font-size: 12px;
 			color: #666;
 			margin-bottom: 12px;
       padding-left:10px;
       span:nth-of-type(1){
         margin-left:10px;
-        height:14px;
+        margin-right: 10px;
+        height:12px;
         border-left:1px solid #f2f2f2;
         display:inline-block;
       }
       span:nth-of-type(2){
         color:#D93639;
-        font-size:14px;
+        font-size:12px;
       }
 		}
 		.img-box{
 			position: relative;
 			overflow: hidden;
 			/*padding-bottom: 41.6%;*/
-			border-radius: 3px;
+			/*border-radius: 3px;*/
       width:100%;
       height:125px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
 			.tag{
 				position: absolute;
 				background-color: rgba(0,0,0,0.6);

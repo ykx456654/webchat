@@ -2,17 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>webchat</title>
+    <title>医学直播间</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Cache-Control" content="no-cache"/>
     <!--<link rel="stylesheet" href="./static/iconfont.css">-->
     <script>
-	(function() {
+	  (function() {
     	document.addEventListener('DOMContentLoaded', function() {
       	var html = document.documentElement;
-      	var windowWidth = html.clientWidth;
+      	var windowWidth = Math.min(750,html.clientWidth) ;
       	html.style.fontSize = windowWidth / 3.75 + 'px';
     	}, false);
   	})()
@@ -29,6 +29,7 @@
         window.appId = 'wx9a4c6d9512f05f99'
       }
     </script>
+    <script src="https://cdn.bootcss.com/clappr/0.2.66/clappr.min.js"></script>
     <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <!-- built files will be auto injected -->
   </body>

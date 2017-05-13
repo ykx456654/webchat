@@ -1,33 +1,41 @@
 <template>
-    <div class="gain-container">
-        <i class="icon icon-close" @click="endInvoke"  :class="{'icon-pray-close':moneyType == 1}"></i>
-        <div class="money-list" v-if="moneyType == 0">
-            <div class="money-list-bg">
+<transition name="gain">
+    <div class="gain-box" data-flex="main:center cross:center" @click.self="endInvoke">
+        <div class="gain-container">
+            <i class="icon icon-close" @click="endInvoke"  :class="{'icon-pray-close':moneyType == 1}"></i>
+            <div class="money-list" v-if="moneyType == 0">
+                <div class="money-list-bg">
+                </div>
+                <img class="head-img" :src="info.headImg" v-if="info.headImg">
+                <img class="head-img" src="../../../assets/images/default_head.png" alt="" v-else>
+                <p class="name" v-text="info.name"></p>
+                <p class="tip-gain-gain">如果内容对您有用，欢迎打赏支持一下~</p>
+                <ul class="options flex flex justify-center">
+                    <li @click="setPrice(m)" v-for="m in moneyList">{{m + '元'}}</li>
+                </ul>
+                <a class="switch" @click="other">其他金额</a>
             </div>
-            <img class="head-img" :src="info.headImg" v-if="info.headImg">
-            <img class="head-img" src="../../../assets/images/default_head.png" alt="">
-            <p class="name" v-text="info.name"></p>
-            <p class="tip">如果内容对您有用，欢迎打赏支持一下~</p>
-            <ul class="options flex flex justify-center">
-                <li @click="setPrice(m)" v-for="m in moneyList">{{m + '元'}}</li>
-            </ul>
-            <a class="switch" @click="other">其他金额</a>
-        </div>
-        <div class="other-money" v-if="moneyType == 1">
-            <h5>其他金额</h5>
-            <div class="flex price-input align-items-center">
-                 <span>金额（元）</span>
-                 <input type="number" name="" v-model="price" placeholder="可填写1-200">
+            <div class="other-money" v-if="moneyType == 1">
+                <h5>其他金额</h5>
+                <div class="flex price-input align-items-center">
+                    <span>金额（元）</span>
+                    <input type="number" name="" v-model="price" placeholder="可填写1-200">
+                </div>
+                <button class="gain-btn btn" @click="setPrice(price)">打赏</button>
             </div>
-            <button class="gain-btn btn" @click="setPrice(price)">打赏</button>
         </div>
     </div>
+</transition>
+
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import bus from '../../common/eventBus.js'
 import {api} from '../../../utils/api'
     export default {
+        components:{
+            
+        },
         props:{
             info:{
                 type:Object,
@@ -54,25 +62,43 @@ import {api} from '../../../utils/api'
                 bus.$emit('endInvoke')
             },
             setPrice (m) {
-                this.price = m * 100
                 const data = {
                     studioId:this.id.studioId,
                     subjectId:this.id.subjectId,
                     grantUid:this.info.uid,
-                    grantMoney:this.price,
+                    grantMoney:m*100,
                     appid:window.appId
+                }
+                if(data.grantMoney > 20000){
+                    this.toast('最多只能打赏200元')
+                    return false
+                }
+                if(data.grantMoney < 200){
+                    this.toast('至少打赏2元')
+                    return false
                 }
                 api(this.uid,{cmd:'wechat_grant_prepay_generate',srv:'studio_studio'},data)
                 .then(res=>{
                     res = res.data
                     if(res.result!=0){
                         this.toast(res.msg)
+                        return false
                     }else{
-
+                        let info = res.rsps[0].body
+						var _this = this
+                        if (typeof WeixinJSBridge == "undefined"){
+							if( document.addEventListener ){
+								document.addEventListener('WeixinJSBridgeReady', onBridgeReady(info,_this), false);
+							}else if (document.attachEvent){
+								document.attachEvent('WeixinJSBridgeReady', onBridgeReady(info,_this)); 
+								document.attachEvent('onWeixinJSBridgeReady', onBridgeReady(info,_this));
+							}
+						}else{
+							// alert(1)
+							onBridgeReady(info,_this);
+						}
                     }
                 })
-                // alert(m)
-                // bus.$emit('endInvoke')
             },
             clear () {
                 this.moneyType = 0
@@ -80,16 +106,78 @@ import {api} from '../../../utils/api'
             }
         },
         mounted () {
-            
+            // this.toast({
+            //     message:'dfafdas',
+            //     duration:50000
+            // })
         }
     }
+
+
+function onBridgeReady(info,instance){
+	// alert(JSON.stringify(info))
+    WeixinJSBridge.invoke(
+       'getBrandWCPayRequest',info,
+       function(res){
+       	    // alert(JSON.stringify(res))
+		    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+		    if (res.err_msg == "get_brand_wcpay_request:ok") {
+				instance.isPaying = true
+				instance.toast({
+					message:'打赏成功',
+					iconClass:'icon icon-pay-success'
+				})
+			}else{
+                if(res.err_msg == "get_brand_wcpay_request:cancel"){
+                    instance.toast({
+                        message:'打赏取消',
+                        iconClass:'icon icon-pay-fail'
+                    })
+                }else{
+                    instance.toast({
+                        message:'打赏失败',
+                        iconClass:'icon icon-pay-fail'
+                    })
+                }
+			}
+            instance.endInvoke()
+       }
+   );
+}
 </script>
 <style lang="less" scoped>
+.gain-box{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background-color: rgba(0,0,0,0.5);
+}
+// .gain-mask{
+//     left: 0;
+//     top: 0;
+//     width: 100%;
+//     height: 100%;
+//     width: 100vw;
+//     height: 100vh;
+//     position: absolute;
+//     z-index: 501;
+//     background-color: rgba(0,0,0,0.5);
+// }
+
     .gain-container{
         width: 300px;
-        // position: relative;
-        border-radius: 10px;
+        position: relative;
+        // left: 50%;
+        // top: 50%;
+        // margin-left: -150px;
+        // margin-top: -50%;
         background-color: #fff;
+        border-radius: 10px;
         box-sizing: border-box;
         .icon-close{
             top: 10px;
@@ -114,6 +202,8 @@ import {api} from '../../../utils/api'
             margin-left: -150px;
             width: 300px;
             height: 80px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
             border-bottom-right-radius: 150px 50px;
             border-bottom-left-radius: 150px 50px;
             // border-radius: 50%;
@@ -133,7 +223,7 @@ import {api} from '../../../utils/api'
         .name{
             font-size: 16px;
         }
-        .tip{
+        .tip-gain{
             margin-top: .15rem;
             text-align: center;
             font-size: 14px;
@@ -211,5 +301,15 @@ import {api} from '../../../utils/api'
             border: none;
             outline:none;
         }
+    }
+    .gain-enter-active {
+    transition: all .5s ease;
+    }
+    .gain-leave-active {
+    transition: all .5s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+    .gain-enter, .gain-leave-active {
+    transform: scale(1.1);
+    opacity: 0;
     }
 </style>

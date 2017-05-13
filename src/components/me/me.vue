@@ -10,7 +10,7 @@
 				<div class="me-info">
 				<p class="flex justify-center">
 					<span class="ft14" v-text="userInfo.nickName"></span>
-					<span class="ft12" v-text="userInfo.title"></span>
+					<span class="ft14" v-text="userInfo.title"></span>
 				</p>
 				<p class="flex justify-center">
 					<span class="ft12" v-text="userInfo.hospital"></span>
@@ -87,9 +87,13 @@
 	}
 	.me-info{
 		color: #fff;
-		span{
-			margin: 5px 10px;
-		}
+    p{
+      margin-top: 2px;
+      span{
+        margin: 5px 1px;
+      }
+    }
+
 	}
   .focus{
     display:inline-block;

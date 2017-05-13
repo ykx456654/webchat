@@ -43,7 +43,7 @@
 		          	</div>
 		        </div>
 	        	<div class="privew-item flex align-items-center justify-center">
-	          		<div class="item-inner2" @click="chooseImage(2)">
+	          		<div class="item-inner2 flex align-items-center justify-center" @click="chooseImage(2)">
 		          		<spinner v-show="statu2 == 0"></spinner>
 		            	<i v-show="statu2 == 1">+</i>
 		            	<img v-show="statu2 == 2"  :src="imgData2"/>
@@ -63,12 +63,12 @@
 		          	<div class="tips-inner" v-if="selectValue == 1">身份证正面照</div>
 		        </div>
 		    </div>
-		    <!-- <button @click="chooseImage">upload</button> -->
+		     <x-button class="ft16" :disabled="btnDisable" size="large"  type="default"  @click="back">上传完成，返回</x-button> 
 		</div>
 	</div>
 </template>
 <script>
-import {Header,Spinner} from 'mint-ui'
+import {Header,Spinner,Button } from 'mint-ui'
 import {api} from '../../utils/api.js'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Group,Selector} from 'vux'
@@ -76,7 +76,7 @@ import EXIF from 'exif-js'
 	export default {
 		name:'UpAuthImg',
 		components:{
-			xHeader:Header,Group,Spinner
+			xHeader:Header,Group,Spinner,xButton:Button
 		},
 		created () {
 			this.hideTab()
@@ -98,10 +98,16 @@ import EXIF from 'exif-js'
 			...mapGetters(['uid']),
 			system () {
 				return this.$store.state.system
+			},
+			btnDisable () {
+				return this.imgData1 == '' || this.imgData2 == ''
 			}
 		},
 		methods:{
 			...mapMutations(['hideLoad','showLoad','hideTab','showTab']),
+			back () {
+				location.href = location.origin +'?webpay=1#/Setting'
+			},
 			chooseImage (n) {
 				var obj = document.getElementById('upLoad')
 				if (obj) {
@@ -184,11 +190,16 @@ import EXIF from 'exif-js'
 				    	break;
 				    }
 				    this['statu'+this.active] = 0
-				   	api(this.uid,{ srv: "user_user",cmd: "auth_pic"},{data:base64.split(',')[1],filename:filename,status:'single'})
+				   	api(this.uid,{ srv: "user_user",cmd: "auth_pic"},{data:base64.split(',')[1],fileName:filename,status:'single'})
 				   	.then(res => {
 				   		res = res.data
 				   		this['statu'+this.active] = 2
-				   		// res.
+						if(res.result != 0){
+							this['statu'+this.active] = 1
+							this.toast(res.msg)
+						}else{
+							this['imgData'+this.active] = base64
+						}
 				   	})
 				})
 			}

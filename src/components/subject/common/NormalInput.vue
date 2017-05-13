@@ -1,11 +1,11 @@
 <template>
-	<div class="normal input flex align-items-center justify-center">
+	<div ref="input" class="normal input flex align-items-center justify-center">
 		<div class="input-box flex align-items-center">
 			<div class="flex question align-items-center" @click="quiz">
 				<span class="icon" :class="{'icon-quized':isQuiz}"></span>
 				<span class="icon icon-wen"></span>
 			</div>
-			<textarea placeholder="输入讨论内容..." v-model="content"></textarea>
+			<textarea placeholder="输入讨论内容..." v-model="content" v-on:focus="inputFocus"></textarea>
 		</div>
 		<div>
 			<a class="btn " :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
@@ -65,6 +65,18 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 					Indicator.close()
 					// console.log(res)
 				})
+			},
+			inputFocus () {
+				// 输入框上浮
+				// console.log(1)
+				if (this.system == 'andriod') {
+					this.$refs.input.scrollIntoView(false)
+				}
+				if (this.system == 'ios') {
+					setTimeout(() => {
+					document.body.scrollTop = document.body.scrollHeight
+					}, 500)
+				}
 			}
 		},
 		computed: {
@@ -91,10 +103,11 @@ import { mapMutations ,mapGetters,mapActions} from 'vuex'
 		border: none;
 		border-radius: 5px;
 		background-color: #fcfcfc;
-		height: 80%;
+		height: 0.25rem;
+		line-height: 0.25rem;
 		font-size: 15px;
 		-webkit-appearance: none;
-    color:#333;
+    	color:#333;
 	}
 }
 .input-box{

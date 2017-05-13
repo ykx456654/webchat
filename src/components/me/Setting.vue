@@ -94,11 +94,11 @@
 				<span>实名认证</span>
 			</div>
 			<div class="setting-item-right" slot="right">
-				<span class="tag" :class="authClass">未认证</span>
+				<span class="tag" :class="authClass">{{authMessage}}</span>
 			</div>
 		</cellx>
 		<router-link to="/Auth" class="btn btn-auth" v-if="userInfo.authFlag == 0">去认证</router-link>
-		<popup  v-model="showPopup" :height="popupHeight">
+		<popup  v-model="showPopup"   position="right" width="100%" height="100%">
 			<div class="popup-content">
 				<x-header :title="popupTitle">
 					<a @click="hidePopup" slot="left">
@@ -161,7 +161,8 @@ import cellx from '../common/cell-x'
 				loadingData:false,
 				prop:'',
 				type:'',
-				isTouch:false
+				isTouch:false,
+        authMessage:'未认证'
 			}
 		},
 		methods: {
@@ -352,7 +353,6 @@ import cellx from '../common/cell-x'
 				this.setProp('nickName',this.nickName)
 			},
 			hidePopup () {
-				this.showTab()
 				this.showPopup = false
 			},
 			SetUserStatus (v) {
@@ -382,11 +382,11 @@ import cellx from '../common/cell-x'
 			...mapGetters(['uid','userInfo']),
 			authClass () {
 				switch(this.userInfo.authFlag){
-					case 0:return 'un-auth';break;
-					case 1:return 'authed';break;
-					case 2:return 'auth-failed';break;
-					case 3:return 'authing';break;
-					default:return 'un-auth';
+					case 0:this.authMessage = '未认证';return 'un-auth';break;
+					case 1:this.authMessage = '认证通过';return 'authed';break;
+					case 2:this.authMessage = '认证失败 ';return 'auth-failed';break;
+					case 3:this.authMessage = '认证中';return 'authing';break;
+					default:this.authMessage = '未认证';return 'un-auth';
 				}
 			}
 		},
@@ -462,7 +462,7 @@ import cellx from '../common/cell-x'
     	background-color: #83cc52;
     }
     &.authed{
-    	background-color: #fff990;
+    	background-color: #ff7800;
     }
     &.auth-failed{
     	background-color: #ff0000;

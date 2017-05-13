@@ -1,15 +1,23 @@
 <template>
 <div class="ppt-player" :style="{backgroundImage:'url('+pptImg.url+')'}" @click.self="controlSwitch">
+    <div class="old-video-player" id="old-video-player" v-if="isOldVideo">
+
+    </div>
     <img class="ppt-item" :src="options.poster"
      v-if="(options.liveStatus == 9 && recordPlayStatu == 1) || options.liveStatus == 0">
     <div class="seeking" v-if="seeking">
         <spinner :size="30" type="snake"/>
     </div>
     <!--<img src="" alt="">-->
-    <transition name="slide-fade" v-if="options.liveStatus == 9">
-        
-        <div data-flex="main:left cross:center" class="control" v-show="true">
-            <div :class="{'control-pause':recordPlayStatu==3,'control-start':recordPlayStatu==4}" @click="pause">
+    <transition name="slide-fade">    
+        <div data-flex="main:left cross:center" class="control" v-show="showControl && options.liveStatus == 9">
+            <div data-flex="main:center" class="control-s-p" @click="pause">
+                <div class="control-start" v-show="recordPlayStatu==4 ">
+                </div>
+                <div class="control-pause" v-show="recordPlayStatu==3">
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
             <range 
             class="range"
@@ -21,22 +29,43 @@
                 <div class="control-time align-items-center" slot="start">{{sourceTime}}</div>
                 <div class="control-time align-items-center" slot="end">{{sourceEnd}}</div>
             </range>
+            <!--<div class="full-screen-btn">
+            </div>-->
         </div>
     </transition>
+
+    <transition name="slide-fade">
+        <div data-flex="main:center cross:center" class="control" v-show="showLiveControl && options.liveStatus == 1">
+            <!--<div :class="{'control-pause':livePlayStatu==3,'control-start':livePlayStatu==4}" @click="pause">
+            </div>-->
+            <div class="ppt-num">
+                {{pptImg.page+1 + '/' + pptImg.totalPage}}
+            </div>
+        </div>
+    </transition>
+
+
+    <div data-flex="cross:center main:center" 
+    class="generate-mp4" 
+    v-if="(options.liveStatus == 9 || options.liveStatus == 2) && options.videoStatus != 0">
+        生成回放中...
+    </div>
     <!--<div class="btn-start"></div>-->
-    <div id="video" data-flex="main:center cross:center" v-if="options.liveStatus==1">
-        <!--<video id="video-player" 
-        crossOrigin="anonymous"
-        v-if="options.subjectType==2" 
-        preload="auto" 
-        type="application/x-mpegURL" 
-        x-webkit-airplay="allow" autoplay webkit-playsinline playsinline="true">
-            
-        </video>
-        -->
+    <div id="video" 
+    class="video-box" 
+    :class="{'audio':options.subjectType == 3}" 
+    data-flex="main:center cross:center" 
+    v-if="options.liveStatus==1">
     </div>
 
-    <div id="recordStart" class="control-btn" v-show="options.liveStatus==9 && (recordPlayStatu == 4 || recordPlayStatu == 1)"></div>
+    <div 
+    id="recordStart" 
+    class="control-btn" 
+    v-show="(options.liveStatus == 9 && (recordPlayStatu == 4 || recordPlayStatu == 1 || recordPlayStatu == 5)) && options.videoStatus == 0 && !isOldVideo">
+    </div>
+    <!--<div class="full-screen">
+        <img src="http://studioimage.yxj.org.cn/ios11494122809308080.jpeg" alt="">
+    </div>-->
 </div>
 </template>
 <script>
@@ -44,7 +73,8 @@ import { Range ,Spinner } from 'mint-ui'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import { setPPT,throttle,timeFormat} from '../../../utils/func'
 import Drag from '../../../utils/drag.js'
-import Clappr from 'clappr' 
+import bus from '../../../components/common/eventBus.js'
+// var Clappr = require('clappr')
     export default {
         name:'ppt-player',
         props:{
@@ -58,17 +88,27 @@ import Clappr from 'clappr'
             }
         },
         mounted () {
-
+            // console.log(22222222222)
+            if(this.options.liveStatus == 1){
+                this.playLive()
+                return false
+            }
+            if(this.options.liveStatus == 9){
+                this.playRecord()
+                return false
+            }
         },
         data () {
             return {
                 playCurrentPercentage:0,
                 currentTime:0,
 				recordPlayStatu:1,    //回看播放状态，1 未播放，2 已播放， 3 正在播放 ，4 暂停， 5，结束
+                livePlayStatu:1,        //直播播放状态，1 未播放，2 已播放， 3 正在播放 ，4 暂停， 5，结束
 				defaultPPTIndex:0,
                 coursePlayer:null,
                 duration:0,
                 showControl:false,
+                showLiveControl:false,
                 canUpdateTimeLine:true,
                 timer:null,
                 seeking:false,
@@ -78,7 +118,7 @@ import Clappr from 'clappr'
         },
         components:{Range,Spinner},
         computed:{
-            ...mapGetters(['recordPlayInfo','currentImg']),
+            ...mapGetters(['recordPlayInfo','currentImg','firstImg']),
     		recordPPTImg () {
 				if(this.recordPlayInfo.imgs.length){
 					return {url:this.recordImgUrl}
@@ -98,8 +138,10 @@ import Clappr from 'clappr'
                 }
             },
             pptRatio () {
-                if(this.pptImg.url){
+                if(this.pptImg.url && this.pptImg.height){
                     return this.pptImg.height/this.pptImg.width
+                }else{
+                    return 9/16
                 }
             },
             sourceEnd () {
@@ -109,9 +151,17 @@ import Clappr from 'clappr'
             sourceTime () {
                 let current = this.currentTime
                 return timeFormat(current,false)
+            },
+            isPlayLive () {
+                return this.$store.state.subject.isPlayLive
+            },
+            isOldVideo () {
+                // 兼容以前老版本视频
+                return !/.mp4*$/g.test(this.options.recordUrl) && this.options.recordUrl!=''
             }
         },
         methods:{
+            ...mapMutations(['setIsPlayLive']),
             playLive () {
 				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
                 console.log('livePlay') 
@@ -131,37 +181,100 @@ import Clappr from 'clappr'
                     try{
                         var _this = this
                         var video = document.getElementById('video')
-                        var player = new Clappr.Player({
+                        var options = {
                             source:{source:_this.options.livePullUrl,mimeType:'application/x-mpegURL'},
-                            autoPlay:false,
                             preload:true,
                             hideMediaControl:true,
-                            width:80,
-                            height:150,
+                            width:90,
+                            height:160,
                             playInline:true,
-                            mediacontrol:{external:controlBar}
-                        })
-                        // player.Playback
-                        player.attachTo(video)
-                        this.coursePlayer = player
-                        // console.log(player.Playback)
-                        setTimeout(()=>{
-                            new Drag({
-                                dragEle:'#video',
-                                ondrag:function(data){
-                                // console.log(data)
+                            mediacontrol:{external:controlBar},
+                            hlsjsConfig:{
+                                xhrSetup:function(xhr, url){
+                                    // console.log(xhr)
+                                    // console.log(_this.coursePlayer)
+                                    xhr.onerror = function(){
+                                        _this.toast('主讲人已离开，请稍后再试')
+                                    }
                                 }
-                            })
+                            }
+                        }
+
+                        if(this.options.subjectType == 3){
+                            options.audioOnly = true
+                            options.width = '100%'
+                            options.height = '100%'
+                            options.poster = _this.options.poster
+                        }
+
+
+                        var player = new Clappr.Player(options)
+                        player.attachTo(video)
+                        player.on(Clappr.Events.PLAYER_PLAY,function(){
+                            if(_this.options.subjectType == 3){
+                                video.style.display = 'none'
+                            }
+                            // console.log(1)
+                            _this.setIsPlayLive(true)
+                            _this.controlSwitch()
+                            _this.livePlayStatu = 3
+                        })
+
+                        player.on(Clappr.Events.PLAYER_PAUSE,function(){
+                            _this.showLiveControl = true
+                            _this.liveStatus = 4
+                        })
+
+                        player.on(Clappr.Events.PLAYBACK_PLAY ,function(){
+                            _this.toast('暂停后开始')
+                        })
+
+                        player.on(Clappr.Events.PLAYER_ERROR,function(){
+                             _this.toast('主讲人已离开，请稍后再试')
+                        })
+
+
+
+                        this.coursePlayer = player
+                        setTimeout(()=>{
+                            if(this.options.subjectType == 2){
+                                new Drag({
+                                    dragEle:'#video',
+                                    ondrag:function(data){
+                                    // console.log(data)
+                                    }
+                                })
+                            }
                         },100)
                     }catch(e){
                         alert(e)
                     }
-
                 })
 
 			},
 			playRecord () {
                 // console.log('recordplay')
+                if(this.isOldVideo){
+                    this.$nextTick(()=>{
+                        var _this = this
+                        var video = document.getElementById('old-video-player')
+                        var options = {
+                            source:{source:_this.options.recordUrl,mimeType:'video/mp4'},
+                            preload:true,
+                            hideMediaControl:true,
+                            width:'100%',
+                            height:'100%',
+                            playInline:true,
+                            poster:_this.options.poster
+                        }
+                        var player = new Clappr.Player(options)
+                        player.attachTo(video)
+                        this.coursePlayer = player
+                    })
+                    return false
+                }
+
+
 				if(this.coursePlayer){
 					return false
 				}
@@ -170,25 +283,31 @@ import Clappr from 'clappr'
 				let _this = this
 				player.src = this.options.recordUrl
 				this.recordPlayStatu = 1
-				player.load()
+				// player.load()
 				// 开始播放
 				$('#recordStart').click(function(){
-                    if(this.recordPlayStatu==1){
+                    // console.log(2222)
+                    if(_this.recordPlayStatu == 1 || _this.recordPlayStatu == 4 || _this.recordPlayStatu == 5){
                         _this.recordPlayStatu = 2
                     }
 					player.play()
                     _this.duration = player.duration
                     _this.controlSwitch()
-					// console.log(player.duration)
 				})
 
 				player.addEventListener('timeupdate',throttle(function(){
+                    // console.log(1221)
 					// 正在播放
 					// _this.playCurrentTime = player.currentTime
-                    _this.recordPlayStatu = 3
+                    if(_this.recordPlayStatu == 2){
+                        _this.duration = player.duration
+                        _this.recordPlayStatu = 3
+                    }
+
+                    // _this.toast('playing')
 					let currentTime = parseInt(player.currentTime)
-					let value = setPPT(currentTime,_this.recordPlayInfo.actionList)
-                    // console.log(value.actionData)
+					let value = setPPT(currentTime,_this.recordPlayInfo.actionList,_this.firstImg)
+                    // console.log(value)
 					let url = value.url
                     _this.currentTime = currentTime
                     if(_this.canUpdateTimeLine){
@@ -213,7 +332,10 @@ import Clappr from 'clappr'
 
 				player.addEventListener('ended',function(){
 					// 结束
-					_this.recordPlayStatu = 5
+                    _this.toast('结束播放')
+					setTimeout(()=>{
+                        _this.recordPlayStatu = 5
+                    },0)
 				})
 			},
             controlSwitch () {
@@ -223,6 +345,12 @@ import Clappr from 'clappr'
                     if(this.timer) clearTimeout(this.timer)
                     this.timer =  setTimeout(()=>{
                         this.showControl = false
+                    },3000)
+                }else{
+                    this.showLiveControl = true
+                    if(this.timer) clearTimeout(this.timer)
+                    this.timer = setTimeout(()=>{
+                        this.showLiveControl = false
                     },3000)
                 }
             },
@@ -242,30 +370,48 @@ import Clappr from 'clappr'
                 }
             },
             pause () {
-                if(this.recordPlayStatu == 3){
-                    this.coursePlayer.pause()
-                    this.recordPlayStatu = 4
-                    return false
-                }
-                if(this.recordPlayStatu == 4){
-                    this.coursePlayer.play()
-                    this.recordPlayStatu = 3
-                    return false
+                if(this.options.liveStatus == 1){
+                    if(this.livePlayStatu == 3){
+                        this.coursePlayer.pause()
+                        this.livePlayStatu = 4
+                        return false
+                    }
+                    if(this.livePlayStatu == 4){
+                        this.coursePlayer.play()
+                        this.livePlayStatu = 3
+                        return false
+                    }
+                }else if(this.options.liveStatus == 9){
+                    if(this.recordPlayStatu == 3){
+                        this.coursePlayer.pause()
+                        this.recordPlayStatu = 4
+                        return false
+                    }
+                    if(this.recordPlayStatu == 4){
+                        this.coursePlayer.play()
+                        this.recordPlayStatu = 3
+                        return false
+                    }
                 }
             },
             destoryPlayer () {
-                // console.log('end')
                 if(this.options.liveStatus == 9){
-                    this.coursePlayer && this.coursePlayer.pause()
-                    clearTimeout(this.timer)
+                    if(this.isOldVideo){
+                        // 以前的视频，关闭播放器
+                        this.coursePlayer && this.coursePlayer.destroy()
+                    }else{
+                        this.coursePlayer && this.coursePlayer.pause()
+                        clearTimeout(this.timer)
+                    }
                 }else if(this.options.liveStatus == 1){
+                     console.log('end')
                     this.coursePlayer && this.coursePlayer.destroy()
                 }
                 this.coursePlayer = null
             }
         },
         destroyed () {
-            // this.destoryPlayer()
+            this.destoryPlayer()
         },
         watch: {
 
@@ -329,14 +475,14 @@ import Clappr from 'clappr'
 	transform: translateY(10px);
 	opacity: 0;
 	}
-    #video{
+    .video-box{
         display: block;
         position: absolute;
-        z-index: 1000;
+        z-index: 999;
         background-color: #000;
-        width: 80px;
-        height: 150px;
-        left: calc(~'100vw - 80px');
+        width: 90px;
+        height: 160px;
+        left: calc(~'100vw - 100px');
         top: 60px;
         color: #fff;
         font-size: 16px;
@@ -344,6 +490,16 @@ import Clappr from 'clappr'
         video{
             margin: 0 auto;
             display: block;
+        }
+        &.audio{
+            width: 100%;
+            height: 60px;
+            // border-radius: 50%;
+            left: 0;
+            top: 0;
+            height: 100%;
+            // transform: translate(-30px,-30px);
+            // background-color: rgba(0,0,0,0.5);
         }
     }
     .btn-start{
@@ -357,11 +513,18 @@ import Clappr from 'clappr'
     .range{
         width: 100%;
     }
+    .control-s-p{
+        width: 25px;
+    }
     .control-pause{
-        width: 12px;
+        width: 20px;
         height: 12px;
-        background-color: #fff;
-        margin-right: 5px;
+        span{
+            display: inline-block;
+            width: 3px;
+            height: 12px;
+            background-color: #fff;
+        }
     }
     .control-start{
         width: 0;
@@ -370,5 +533,28 @@ import Clappr from 'clappr'
         border-left: 10px solid #fff;
         border-bottom: 6px solid transparent;
         margin-right: 5px;
+    }
+    .generate-mp4{
+        position: absolute;
+        top: 50%;
+        color: #fff;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.3);
+    }
+    .full-screen-btn{
+        width: 15px;
+        height: 15px;
+        margin-left: 5px;
+        background-image: url(../../../assets/icons/icon_zbht_qp@2x.png);
+        background-size: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .old-video-player{
+        width: 100%;
+        height: 100%;
     }
 </style>

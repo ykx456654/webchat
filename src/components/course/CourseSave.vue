@@ -238,11 +238,19 @@ export default {
                 justify-content: center;
                 h5 {
                     margin: 5px 4px;
-                   color:#010101;
+                    color:#000;
+                    font-weight: normal;
+                    font-size: 13px;
+                    height:38px;
+                    margin-bottom:-2px;
                 }
                 p {
                     margin: 5px 4px;
+                    font-size: 12px;
                     color:#666;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
             }
         }

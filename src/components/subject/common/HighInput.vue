@@ -1,24 +1,25 @@
 <template>
-	<div data-flex="main:justify box:justify" class="high input flex align-items-center">
-		<div @click="recordVoice">
+	<div ref="input" data-flex="main:justify" class="high input flex align-items-center">
+		<div data-flex="box:1" @click="recordVoice">
 			<i class="icon icon-voice-input"></i>
 		</div>
-		<div data-flex="box:0"  class="input-box flex align-items-center">
-			<textarea v-model="content"></textarea>
+		<div data-flex="box:7"  class="input-box-high flex align-items-center">
+			<textarea placeholder="输入内容..." v-model="content" v-on:focus="inputFocus"></textarea>
 		</div>
 		<div data-flex="box:1">
-			<a class="btn " :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
-		</div>
-		<div data-flex="box: 0">
 			<i class="icon icon-plus" @click="sendImg"></i>
 		</div>
+		<div data-flex="box:1">
+			<a class="btn" :class="[canSend?'btn-send':'no-send']" @click="sendMsg">发送</a>
+		</div>
+
 		<!-- <input type="file" name=""> -->
 	</div>
 </template>
 <script>
 import bus from '../../common/eventBus'
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
-import { Indicator,MessageBox  } from 'mint-ui';
+import { Indicator,MessageBox  } from 'mint-ui'
 	export default {
 		data () {
 			return {
@@ -34,6 +35,7 @@ import { Indicator,MessageBox  } from 'mint-ui';
 			}
 		},
 		computed :{
+			...mapGetters(['system']),
 			canSend () {
 				if (this.content != '') {
 					return true
@@ -108,6 +110,18 @@ import { Indicator,MessageBox  } from 'mint-ui';
 					Indicator.close()
 					// console.log(res)
 				})
+			},
+			inputFocus () {
+				// 输入框上浮
+				console.log(1)
+				if (this.system == 'andriod') {
+					this.$refs.input.scrollIntoView(false)
+				}
+				if (this.system == 'ios') {
+					setTimeout(() => {
+					document.body.scrollTop = document.body.scrollHeight
+					}, 500)
+				}
 			}
 		}
 	}
@@ -117,15 +131,25 @@ import { Indicator,MessageBox  } from 'mint-ui';
 .icon{
 	width: 0.22rem;
 	height: 0.22rem;
-	margin-right: 0.11rem;
+	// margin-right: 0.11rem;
 }
 .icon-plus{
-	margin: 0 0 0 0.11rem;
+	// margin: 0 0 0 0.11rem;
 }
-.input-box{
-	width: auto;
+.high.input{
+
+}
+.input-box-high{
+	height: 0.3rem;
+    width: 60%;
+    border: 1px solid #e2e2e2;
+    border-radius: 5px;
+    padding: 0 7px;
+    background-color: #fcfcfc;
 	textarea{
 		overflow:hidden; resize:none;
+		height: 0.25rem;
+		line-height: 0.25rem;
 	}
 }
 .btn{
