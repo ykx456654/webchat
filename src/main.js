@@ -58,6 +58,10 @@ router.beforeEach((to, from, next) => {
                 // alert(JSON.stringify(res))
                 let openid
                 if(res.result!=0){
+                    location.href =  
+                    'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
+                    window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect'  
+                    
                     return Promise.reject(res.msg)
                 }
                 
@@ -68,7 +72,16 @@ router.beforeEach((to, from, next) => {
             })
             .then(res=>{
                 if(res.result!=0){
-                    Toast(res.msg)
+                    const openid = storage('openid')
+                    if(!openid){
+                        // console.log(1111)
+                         location.href =  
+                    'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ 
+                    window.appId+'&redirect_uri='+encodeURIComponent(window.location.href)+'&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect' 
+                        Toast(res.msg)
+                    }else{
+                        location.href = '../../testLogin/build/index.html'
+                    }
                     if(res.result == -1){
                         storage('from',location.href.replace(/code=+\w*/g,''))
                         location.href = '../../testLogin/build/index.html'
@@ -115,7 +128,7 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
     getJsTicket(encrypt)
     .then(res=>{
         if(res.result!=0){
-            Toast(res.msg)
+            // Toast(res.msg)
         }else{
             const signParams = Object.assign({},res.rsps[0].body,{
                 debug: false,
@@ -126,17 +139,6 @@ if (!/MicroMessenger/i.test(navigator.userAgent)) {
     })
     .then(sign=>{
         wx.config(sign)
-        wx.ready(function () {
-            var
-            params = {
-                title: '医生站-医生学习的加油站',
-                desc: '医生站 医生学习的加油站，服务医生改善医疗',
-                link: 'http://' + window.location.href,
-                imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
-            };
-            wx.onMenuShareAppMessage(params);
-            wx.onMenuShareAppMessage(params);
-        });
         app.$mount('#app')
     })
     .catch(e=>{

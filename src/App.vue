@@ -26,7 +26,7 @@ export default {
         return this.$store.state.base.loading
     },
     tabS () {
-        return this.$store.state.base.tabShow
+        return this.$store.state.base.tabShow && this.$store.getters.uid!=0
     },
     keepAlives () {
         return ''
@@ -38,9 +38,8 @@ export default {
       ]),
   },
   mounted () {
-    // $('body').on('touchmove', function (event) {
-    //   event.preventDefault();
-    // });
+
+    
   }
 }
 </script>

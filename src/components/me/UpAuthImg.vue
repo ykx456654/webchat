@@ -106,7 +106,7 @@ import EXIF from 'exif-js'
 		methods:{
 			...mapMutations(['hideLoad','showLoad','hideTab','showTab']),
 			back () {
-				location.href = location.origin +'?webpay=1#/Setting'
+				location.href = location.origin +'/live/dist/index.html?webpay=1#/Setting'
 			},
 			chooseImage (n) {
 				var obj = document.getElementById('upLoad')

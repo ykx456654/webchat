@@ -28,7 +28,7 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-        '/api':'http://192.168.1.55:3030',
+        '/api':'http://192.168.1.74:3030',
         '/wechatApi':'http://test-web.yxj.org.cn',
         '*':'http://test.api.yishengzhan.cn'
     },

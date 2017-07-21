@@ -63,7 +63,9 @@
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner,MessageBox,Indicator } from 'mint-ui'
 import { api } from '../../utils/api'
+import { getUrlParam } from '../../utils/func' 
 import storage from 'storejs'
+import _ from 'lodash'
 export default {
 	name:'SubjectIntro',
 	components:{
@@ -71,8 +73,25 @@ export default {
 	},
 	created () {
 		const query = this.$route.query
+		const froment = query.froment
+		const encryptKey = query.encryptKey
+		// console.log(encryptKey)
+		this.froment = froment
+		this.type = Number(query.type)
+		// console.log(from)
 		this.subjectId = Number(query.subjectId)
 		this.studioId = Number(query.studioId)
+		let arr = []
+		let shareSubjectIdArray = storage('shareSubjectIdArray') || []
+		arr = arr.concat(shareSubjectIdArray)
+		// console.log(arr)
+		if (encryptKey && arr.indexOf(this.subjectId) < 0) {
+			api(this.uid,{cmd:'share_points',srv:'ent_hh'},{type_id:this.subjectId,type:6,key:encryptKey})
+			.then(()=>{
+				arr.push(this.subjectId)
+				storage({'shareSubjectIdArray':arr})
+			})
+		}
 		this.getSubjectInfo()
 		.then(()=>{
 			this.hideLoad()
@@ -80,8 +99,8 @@ export default {
 				var	params = {
 					title: this.subject.subjectTitle,
 					desc: this.subject.subjectIntro,
-					link:location.href.replace(/code=+\w*/g,''),
-					imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
+					link:this.subject.shareUrl,
+					imgUrl: this.subject.shareImg
 				};
 				console.log(params)
 				wx.onMenuShareAppMessage(params);
@@ -99,7 +118,8 @@ export default {
 			studioId:0,
 			subject:{},
 			studio:{},
-			isPaying:false
+			isPaying:false,
+			froment:''
 		}
 	},
 	methods : {
@@ -108,7 +128,8 @@ export default {
 			history.back()
 		},
 		getSubjectInfo () {
-			return api(this.uid,{srv:'studio_studio',cmd:'subject_introduce'},{studioId:this.studioId,subjectId:this.subjectId})
+			let type = Number(this.$route.query.type)
+			return api(this.uid,{srv:'studio_studio',cmd:'subject_introduce'},{studioId:this.studioId,subjectId:this.subjectId,type})
 			.then(res => {
 				res = res.data
 				if (res.result != 0) {
@@ -157,12 +178,17 @@ export default {
 			}
 			// alert(openid)
 			this.showLoad()
-			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId,openid}})
+			this.$router.push({path:'/Subject',query:{subjectId:this.subjectId,studioId:this.studioId,froment:this.froment}})
 		},
 		toStudio () {
 			// console.log('fsafasd')
 			this.showLoad()
-			this.$router.push({path:'/Studio',query:{studioId:this.studioId}})
+			if(!!this.froment){
+				let _url = decodeURIComponent(this.froment)
+				location.href = _url
+			}else{
+				this.$router.push({path:'/Studio',query:{studioId:this.studioId}})
+			}
 		},
 		focus () {
 			api(this.uid,{cmd:"subscribe_studio",srv:"studio_studio"},{

@@ -13,6 +13,7 @@ function Drag(opts){
         this.init();
         this.setEvent();
     },100)
+    return this
 }
 
 Drag.prototype =  {
@@ -42,6 +43,7 @@ function offset(curEle){
     }
     return {left:totalLeft,top:totalTop};
 }
+
 Drag.prototype.init = function () {
     this.dragEle = typeof this.opts.dragEle=='string' ? this.$(this.opts.dragEle) : this.opts.dragEle ;//获得外层元素
     this.offset = offset(this.dragEle)
@@ -59,9 +61,13 @@ Drag.prototype.init = function () {
     // console.log(this.dragEle)
 };
 
+var startHandler
+var moveHandler
+var endHandler
+
 Drag.prototype.setEvent = function(){
     var self = this;
-    var startHandler = function(e){
+    startHandler = function(e){
         // e.preventDefault();
         // e.stopPropagation();
         // if(e)
@@ -82,7 +88,7 @@ Drag.prototype.setEvent = function(){
         return true
     };
 
-    var moveHandler = function(e){
+    moveHandler = throttle(function(e){
         e.preventDefault();
         e.stopPropagation();
         self.offsetY = e.targetTouches[0].pageY - self.startY;
@@ -98,9 +104,9 @@ Drag.prototype.setEvent = function(){
         
         console.log(2)
         //self.opts.ondrag.call(self, {left: left, top: top, offsetX: self.offsetX, type: 'move'});
-    };
+    },10,20);
 
-    var endHandler = function(e){
+    endHandler = function(e){
         var pos = self.dragEle.getAttribute('pos'),
             left = self.left + self.offsetX,
             top = self.top + self.offsetY;
@@ -118,7 +124,7 @@ Drag.prototype.setEvent = function(){
 
 
     this.dragEle.addEventListener('touchstart', startHandler);
-    this.dragEle.addEventListener('touchmove', throttle(moveHandler,10,20));
+    this.dragEle.addEventListener('touchmove', moveHandler);
     this.dragEle.addEventListener('touchend', endHandler)
 };
 
@@ -130,5 +136,13 @@ Drag.prototype.pos = function (obj) {
     this.dragEle.setAttribute('pos', this.left+'-' + this.top);
     this.dragEle.style.cssText += '-webkit-transform: translate3d(0,0,0);left: '+ obj.l + 'px; ' + 'top: ' + obj.t + 'px;right:auto;bottom:auto;';
 };
+
+Drag.prototype.offEvent = function(){
+    this.dragEle.removeEventListener('touchstart',startHandler)
+    this.dragEle.removeEventListener('touchmove',moveHandler)
+    this.dragEle.removeEventListener('touchend',endHandler)
+    this.dragEle.style = ''
+    this.dragEle = null
+}
 
 export default Drag

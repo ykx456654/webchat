@@ -9,10 +9,8 @@
 <!-- 		<div class="video-pannel">
 			<video class="video-js vjs-custom-skin" id="video-play" playsinline></video>
 		</div> -->
-		<div class="zy_media" :style="bindStyle">
-			<video id="ss" v-if="isStart" :poster="vdo.coverpicUrl" playsinline>
-		        <source :src="playurl"  type="application/x-mpegURL">
-		    </video>
+		<div id="video-player"  :style="bindStyle">
+		
 		</div>
 		<div data-flex="dir:right" class="course-menu flex">
 			<div class="flex align-items-center" :class="{'active':vdo.signup}" @click="signIn">
@@ -26,8 +24,7 @@
 		</div>
 		<section class="course-intro">
 			<h4>课程介绍</h4>
-			<article>
-				{{vdo.content}}
+			<article v-html="vdo.content.replace(/<script.*?>.*?<\/script>/ig,'').replace(/\n/g,'<br>')">
 			</article>
 		</section>
 		<section class="teacher-intro">
@@ -92,7 +89,9 @@ export default {
 	data () {
 		return {
 			vdoid:0,
-			vdo:{},
+			vdo:{
+				content:''
+			},
 			videoOption:{},
 			player:null,
 			playurl:''
@@ -108,13 +107,29 @@ export default {
 			var _this = this
 			if(this.isStart){
 				this.$nextTick(()=>{
-					_this.player =  zy(document.getElementById('ss'),{
-						videoHeight:height,
-						audioHeight: 40,
-						error:function(){
-							_this.toast('视频错误')
+					var video =document.getElementById('video-player')
+					var options = {
+						source:{source:_this.playurl,mimeType:'application/x-mpegURL'},
+						preload:true,
+						hideMediaControl:true,
+						width:'100%',
+						height:window.innerWidth * 0.56,
+						playInline:true,
+						poster:_this.vdo.coverpicUrl,
+						mediacontrol:{ buttons: "#BEBEBE"},
+						hlsjsConfig:{
+							xhrSetup:function(xhr, url){
+								// console.log(xhr)
+								// console.log(_this.coursePlayer)
+								xhr.onerror = function(){
+									_this.toast('直播链接错误')
+								}
+							}
 						}
-					}) 
+					}
+					var player = new Clappr.Player(options)
+					player.attachTo(video)
+					_this.player = player
 				})
 			}
 
@@ -174,7 +189,11 @@ export default {
 			if(!this.isStart){
 				return {
 					backgroundImage:`url(${ this.vdo.coverpicUrl })`,
-					height:window.innerWidth * 0.56 + 'px'
+					height:window.innerWidth * 0.56 + 'px',
+					backgroundColor:'#f2f2f2',
+					backgroundSize:'contain',
+					backgroundRepeat:'no-repeat',
+					backgroundPosition:'center'
 				}
 			}else{
 				return ''
@@ -182,9 +201,9 @@ export default {
 		}
 	},
 	beforeRouteLeave  (to ,from ,next) {
-		this.player && this.player.media.pause()		
+		this.player && this.player.destroy()		
 		this.player = null
-		delete this.player
+		// delete this.player
 		this.show = false
 		this.showTab()
 		next()
@@ -195,6 +214,7 @@ export default {
 @import '../../../lib/zymedia/zy.media.css';
 .course-detail-live{
 	padding-bottom: 55px;
+	background-color: #fff;
 }
 .zy_media{
 	background-repeat: no-repeat;

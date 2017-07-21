@@ -69,13 +69,16 @@ import SubjectItem from './common/SubjectItem'
 			// console.log(this.$route.params)
 			const query = this.$route.query
 			const studioId = query.studioId
+			// const encryptKey = query.encryptKey
 			if (studioId) {
 				this.studioId = Number(studioId)
 			}else{
 				this.studioTitle = '我的直播间'
 				this.studioId = this.myStudioID
 			}
-
+			// if (encryptKey) {
+			// 	api(this.uid,{cmd:'share_points',srv:'ent_hh'},{type_id:this.subjectId,type:1})
+			// }
 			var p1 = this.getStudioInfo()
 			.then(res=>{
 				if (res.result != 0) {
@@ -94,7 +97,7 @@ import SubjectItem from './common/SubjectItem'
 					var	params = {
 							title: this.studioTitle,
 							desc: this.studio.studioIntro,
-							link:location.href.replace(/code=+\w*/g,''),
+							link:this.studio.shareUrl,
 							imgUrl: this.studio.studioImg =='' ? 'http://' + window.location.hostname + '/images/zhibojian.png' : this.studio.studioImg
 						}
 						console.log(params)
@@ -273,8 +276,11 @@ import SubjectItem from './common/SubjectItem'
 			position: relative;
 			width: 100%;
 			.studio-jj{
-				width: 36px;
-				flex:0 0 36px;
+				flex:0 0 45px;
+				flex-basis: 45px;
+				flex-shrink: 0;
+				flex-grow: 0;
+				width: 45px;
 			}
 			span.lanch{
 				height: 48px;

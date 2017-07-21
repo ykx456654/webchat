@@ -28,7 +28,9 @@ export default {
 		firstImg:'',
 		actionList:[],
 		imgs:[],
-		isPlayLive:false   //播放器是否正在播放
+		isPlayLive:false,   //播放器是否正在播放
+		onlyQuestion:false,
+		playFlag:0
 	},
 	getters:{
 		subject (state) {
@@ -116,25 +118,28 @@ export default {
 		},
 		pushAdvMsg (state,{msgId,msgList}) {
 			// 轮询获取高级消息
+			// console.log(msgList)
 			var rIds = state.repeatAdvId
 			state.subjectMsg.advanceMsg.msgId = msgId
 			var list = state.subjectMsg.advanceMsg.msgList
-			for (var i = 0; i < rIds.length; i++) {
+			for (var i = 0; i <= rIds.length; i++) {
 				for (var j = 0; j < msgList.length; j++) {
 					if (msgList[j].msgType == 3) {
+						// console.log('0.0')
 						msgList[j].playing = false
 					}
 					if(msgList[j].msgType == 201){
 						state.subject.liveStatus = 1
 					}
 					if(msgList[j].msgType == 202){
+						// console.log('0.0')
 						state.subject.liveStatus = 2
 					}
 					if(msgList[j].msgType == 203){
 						state.subject.liveStatus = 9
 					}
-					if(msgList[i].answerFlag){
-						msgList[i].ansList[0].playing = false
+					if(msgList[j].answerFlag){
+						msgList[j].ansList[0].playing = false
 					}
 					if (msgList[j].id == rIds[i]) {
 						rIds.splice(i,1);
@@ -175,6 +180,9 @@ export default {
 						j--;
 					}
 				}
+			}
+			if(state.onlyQuestion){
+				msgList = msgList.filter(item=> item.questionFlag == true)
 			}
 			state.subjectMsg.normalMsg.msgList = list.concat(msgList)
 		},
@@ -298,6 +306,9 @@ export default {
 		},
 		setIsPlayLive (state,flag) {
 			state.isPlayLive = flag
+		},
+		setPlayFlag (state,n) {
+			state.playFlag = n
 		}
 	},
 	actions: {
@@ -366,7 +377,12 @@ export default {
 			/*获取普通消息*/
 			const uid = rootState.user.uid
 			const msgId = state.subjectMsg.normalMsg.msgId
-			return api(uid,{cmd:'get_normal_msg_list',srv:'studio_studio'},{limit,onlyQuestion,msgId,direction,studioId:state.studioId,subjectId:state.subjectId})
+			state.onlyQuestion = onlyQuestion
+			return api(
+				uid,
+				{cmd:'get_normal_msg_list',srv:'studio_studio'},
+				{limit,onlyQuestion,msgId,direction,studioId:state.studioId,subjectId:state.subjectId}
+			)
 			.then(res=>{
 				res = res.data
 				if (res.result != 0) {
@@ -401,7 +417,8 @@ export default {
 							subjectId:state.subjectId,
 							advMsgId:state.subjectMsg.advanceMsg.msgId,
 							nmrMsgId:state.subjectMsg.normalMsg.msgId,
-							updateKeys:state.updateKeys
+							updateKeys:state.updateKeys,
+							playFlag:state.playFlag
 						}
 					}]
 				},

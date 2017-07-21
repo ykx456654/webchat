@@ -16,7 +16,7 @@
 				<spinner :size="15" v-show="topStatus == 'loading'"></spinner>
 			</div>
 
-			<transition-group class="msg-list" name="list" tag="ul">
+			<ul class="msg-list">
 				<div class="live-start-time" key="00000000" v-if="advanceMsg.is_end">
 					<!--直播将于<span>{{new Date(subjectInfo.startTime*1000).Format('yyyy年MM月dd日 hh:ss')}}</span>开始-->
           			直播将于<span>{{startTime}}</span>开始
@@ -24,7 +24,7 @@
 				<li v-for="(m,index) in advanceMsg.msgList" :key="index"  v-bind:data-index="index">
 					<a-chat-item :msg="m" :index="index"></a-chat-item>
 				</li>
-			</transition-group>
+			</ul>
 		</loadmore>
 	</div>
 </template>
@@ -66,7 +66,7 @@ import AChatItem from './AChatItem'
 				$chatWrapper.scrollTop(a)
 			}
 			if (this.isBottom) {
-				$chatWrapper.scrollTop(100000)
+				$chatWrapper.scrollTop($chatWrapper.get(0).scrollHeight)
 			}
 		},
 		data () {
@@ -122,9 +122,14 @@ import AChatItem from './AChatItem'
 			...mapMutations(['setScroll','setLiveStatu']),
 			...mapActions(['getAdvMsg']),
 			getHistory () {
+				let height = $('#chat-a-content').height()
 				this.isBottom = false
 				this.getAdvMsg({limit:this.limit,direction:false})
 				.then(res=>{
+					this.$nextTick(()=>{
+						let newHeight =  $('#chat-a-content').height()
+						$('#load-wrap').scrollTop(newHeight - height)
+					})
 					this.$refs.loadmore.onTopLoaded()
 				})
 				.done()
@@ -142,11 +147,11 @@ import AChatItem from './AChatItem'
 					let box = $('#load-wrap')
 					if (this.scroll.a == 'init') {
 						setTimeout(()=>{
-							box.scrollTop(100000)
+							box.scrollTop(box.get(0).scrollHeight)
 						},100)
 					}
 					if (this.isBottom) {
-						box.scrollTop(100000)
+						box.scrollTop(box.get(0).scrollHeight)
 					}
 				})
 			}

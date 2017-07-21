@@ -1,11 +1,12 @@
 <template>
 	<div class="me-wrap">
 		<div class="me">
-			<img class="me-bg" src="../../assets/images/wo_bg.jpg">
+			<img class="me-bg" src="../../assets/images/pic_bg_wo.jpg">
 			<div class="me-header">
-				<router-link to="/Setting">
+				<router-link class="user-ava" to="/Setting">
 					<img :src="userInfo.headUrl" v-if="userInfo.headUrl != ''">
 					<img src="../../assets/images/default_head.png" alt="" v-else>
+					<i class="icon icon-edit"></i>
 				</router-link>
 				<div class="me-info">
 				<p class="flex justify-center">
@@ -61,16 +62,17 @@
 		width: 100%;
 		left: 0;
 		top: 0;
-		max-height: 210px;
+		height: 100%;
 	}
 	.me-header{
 		width: 100%;
 		position: absolute;
 		margin-top: 10%;
 		img{
-			width: 20%;
+			width: 0.75rem;
+			height: 0.75rem;
 			margin: 0 auto;
-			border-radius: 50%;
+			border-radius: 0.375rem;
 		}
 	}
 	.cells{
@@ -119,6 +121,20 @@
     height:20px;
     background-size:90%;
     vertical-align: middle;
+  }
+  .user-ava{
+  	width: 0.75rem;
+  	height: 0.75rem;
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    i{
+    	position: absolute;
+    	right: -0.08rem;
+    	bottom: 0.05rem;
+    	width: 0.15rem;
+    	height: 0.15rem;
+    }
   }
 </style>
 <script>

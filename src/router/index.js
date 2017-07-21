@@ -102,18 +102,20 @@ export default new Router({
     {
       path:'/CourseDetailLive/:vdoid',
       name:'CourseDetailLive',
-      component:CourseDetailLive
+      component:CourseDetailLive,
+      meta:{hideTab:true}
     },
     {
       path:'/CourseDetailSave/:vdoid',
       name:'CourseDetailSave',
       component:CourseDetailSave,
-      meta:{requiresAuth:true}
+      meta:{requiresAuth:true,hideTab:true}
     },
     {
       path:'/Search',
       name:'Search',
-      component:Search
+      component:Search,
+      meta:{hideTab:true}
     },
     {
       path:'/Channel',

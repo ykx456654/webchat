@@ -103,6 +103,9 @@ import {api} from '../../../utils/api'
             clear () {
                 this.moneyType = 0
                 this.price = ''
+            },
+            continuePlay () {
+                bus.$emit('continue_play')
             }
         },
         mounted () {
@@ -141,6 +144,7 @@ function onBridgeReady(info,instance){
                 }
 			}
             instance.endInvoke()
+            instance.continuePlay()
        }
    );
 }

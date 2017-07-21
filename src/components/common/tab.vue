@@ -73,7 +73,23 @@ export default {
 		// console.log('sadasdas')
 	},
 	mounted () {
-
+		console.log(location)
+    	const url = location.hash
+		switch(url){
+			case '#/Recommond':
+			// console.log(position)
+			this.active = 2;
+			break;
+			case '#/CourseLive':
+			// console.log(position)
+			this.active = 1;
+			break;
+			case '#/me':
+			// console.log(position)
+			this.active = 3;
+			break;
+		} 
+		// console.log(this.active)
   	},
 	watch:{
 		$route (nv ,ov) {

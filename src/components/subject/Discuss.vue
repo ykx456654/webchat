@@ -4,7 +4,7 @@
 			<span class="mask"></span>
 			<div class="flex align-items-center" @click="seeQuestion">
 				<i class="icon" :class="{'icon-nike':onlyQuestion}"></i>
-				<span>只看问题</span>
+				<span>只看提问</span>
 			</div>
 			<div class="flex align-items-center" @click="backSubject">
 				<span>返回直播话题</span>
@@ -32,16 +32,15 @@
 						<div class="discuss-item-right">
 							<h5 class="name" v-text="m.name"></h5>
 							<p>{{new Date(m.msgTime*1000).Format('MM-dd hh:mm:ss')}}</p>
-							<div data-flex="cross:center" class="discuss-content">
+							<div data-flex="cross:center box:first" class="discuss-content">
 								<i class="icon icon-wen" v-if="m.questionFlag"></i>
-								<span v-html="m.textContent.replace(/<script(?:\s+[^>]*)?>(.*?)<\/script\s*>/ig,'').replace(/\n/g,'<br>')"></span>
+								<div v-html="m.textContent.replace(/<script(?:\s+[^>]*)?>(.*?)<\/script\s*>/ig,'').replace(/\n/g,'<br>')"></div>
 							</div>
 							<div class="answer" v-if="m.questionFlag && m.ansList[0]">
 								<div class="flex align-items-center">
 									<img :src="m.ansList[0].headUrl" alt="" v-if="m.ansList[0].headUrl != ''">
 									<img src="../../assets/icons/pic_men@2x.png" v-else>
 									<span>{{m.ansList[0].name}}</span>
-									<!--<span>fdsfs</span>-->
 								</div>
 								<div class="answer-teacher">
 									<div v-if="m.ansList[0].ansType == 1">
@@ -91,19 +90,23 @@ import { throttle } from '../../utils/func'
 						this.$nextTick(()=>{
 							const length = this.normalMsg.msgList.length
 							const index = parseInt(query.msgIndex)
+							// this.$refs.loadmore.scrollTop = this.$refs.loadmore.$el.scrollHeight
+							// console.log(this.$refs.loadmore.$el.scrollHeight)
 							if(this.normalMsg.msgList && this.normalMsg.msgList.length >= 4){
 								this.normalMsg.msgList[length - 4 + index].selected = true
 							}else{
 								var arr = this.normalMsg.msgList
 								this.normalMsg.msgList[index].selected = true
 							}
+							// $()
 						})
 					}catch(e){
 						console.log(e)
 					}
 				}
 				setTimeout(()=>{
-					$('#load-wrap').scrollTop(10000)
+					$('#load-wrap')[0].scrollTop = $('#load-wrap')[0].scrollHeight
+					$('#chat-b-content').click()
 				},0)
 			})
 			this.isLoad = true
@@ -157,8 +160,10 @@ import { throttle } from '../../utils/func'
 				this.getNormalMsg({direction:this.direction,limit:this.limit,onlyQuestion:this.onlyQuestion})
 				.then(res=>{
 					this.$refs.loadmore.onTopLoaded()
-					
-
+					this.$nextTick(()=>{
+						let newHeight = $('#chat-b-content').height()
+						$('#load-wrap').scrollTop(newHeight - height)
+					})
 				})
 				.done()
 			},
@@ -242,7 +247,7 @@ import { throttle } from '../../utils/func'
 					var box = $('#load-wrap')
 					if (this.isBottom) {
 						// console.log(111111)
-						box.scrollTop(100000)
+						box.scrollTop(box.get(0).scrollHeight)
 					}
 				})
 			}
@@ -378,15 +383,19 @@ import { throttle } from '../../utils/func'
 				text-align: left;
 				word-break: break-word;
 				i{
+					margin-top: 3px;
 					margin-right: 10px;
 					width: 17px;
 					height: 17px;
 					float: left;
 					background-position: center;
 					background-size: 100%;
+					align-self:flex-start;
 				}
 				div{
 					text-align: left;
+					word-break: break-word;
+					flex:1;
 				}
 			}
 		}

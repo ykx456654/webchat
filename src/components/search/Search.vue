@@ -38,14 +38,14 @@
                                 <img :src="v.coverpicUrl">
                             </div>
                             <div class="flex flex-direction-column justify-space-between">
-                                <p class="text-overflow" v-text="v.title"></p>
-                                <p class="text-overflow" v-text="v.content"></p>
+                                <p class="text-overflow" v-html="v.title"></p>
+                                <p class="text-overflow" v-html="v.content"></p>
                             </div>
                         </section>
                     </li>
-<!--                     <div class="more">
-                        更多视频
-                    </div> -->
+                     <div class="more" @click="loadMore">
+                       {{is_end?'没有更多了':' 更多视频 >'}}
+                    </div> 
                 </ul>
             </div>
             <div class="seat" v-show="searchVideos.length === 0 && showResult">
@@ -79,7 +79,10 @@ export default {
             hotSearch:[],
             historySearch:[],
             searchVideos:[],
-            showResult:false
+            showResult:false,
+            start:0,
+            limit:10,
+            is_end:false
         }
     },
     methods: {
@@ -87,21 +90,38 @@ export default {
             'hideLoad','showLod'
         ]),
         search:throttle(function(){
-           api(this.uid,{srv: "article_article",cmd: "search_list"},{content:this.searchWord})
-           .then(res=>{
+            this.is_end = false
+            api(this.uid,{srv: "article_article",cmd: "search_list"},{content:this.searchWord})
+            .then(res=>{
                 res = res.data
                 if (res.result != 0) {
                     this.toast(res.msg)
                 }else{
                     this.showResult = true
-                    this.searchVideos = res.rsps[0].body.videos
+                    let videos = res.rsps[0].body.videos
+                    if(videos.length > 0){
+                        // console.log(videos)
+                        videos.forEach(item=>{
+                            item.title=item.title.replace(this.searchWord,'<span class="red">' + this.searchWord + '</span>')
+                            item.content=item.content.replace(this.searchWord,'<span class="red">' + this.searchWord + '</span>')
+                        })
+                        // console.log(videos)
+                    }
+                    this.searchVideos = videos
                 }
            })
         },1000,1000),
         recordSearch () {
             var word = this.searchWord
-            this.historySearch.unshift(word)
-            ls.set('histroy',JSON.stringify(this.historySearch))
+            if(word){
+                let arr = ls.get('histroy')
+                if (this.historySearch.indexOf(word) < 0) {
+                    this.historySearch.unshift(word)
+                }
+            }
+            if(this.historySearch.length != 0){
+                ls.set('histroy',JSON.stringify(this.historySearch))
+            }
         },
         getHotSearch () {
             api(this.uid,{ srv: "article_article",cmd: "get_hot_search"},{})
@@ -111,6 +131,33 @@ export default {
                     this.toast(res.msg)
                 }else{
                     this.hotSearch = res.rsps[0].body.hotList.slice(0,8)
+                }
+            })
+        },
+        loadMore () {
+            if(this.is_end) return
+            api(this.uid,{ srv: "video_video",cmd: "search_video_list"},{
+                flag:1,
+                start:this.start,
+                limit:this.limit,
+                content:this.searchWord
+            })
+            .then(res=>{
+                res = res.data
+                if(res.result !=0 ){
+                    this.toast(res.msg)
+                }else{
+                    this.start+=this.limit
+                    let videos = res.rsps[0].body.videos
+                    if(videos.length > 0){
+                        videos.forEach(item=>{
+                            item.title=item.title.replace(this.searchWord,'<span class="red">' + this.searchWord + '</span>')
+                            item.content=item.content.replace(this.searchWord,'<span class="red">' + this.searchWord + '</span>')
+                        })
+                        // console.log(videos)
+                    }
+                    this.searchVideos = this.searchVideos.concat(videos)
+                    this.is_end = res.rsps[0].body.is_end
                 }
             })
         },
@@ -142,8 +189,8 @@ export default {
 <style lang="less">
 .search{
     background-color: #f2f2f2;
-    min-height:95vh;
-    min-height:95%;
+    min-height:100vh;
+    min-height:100%;
 }
 .search-head {
     padding: 5px 10px;
@@ -303,10 +350,13 @@ export default {
         }
     }
 }
+.red{
+    color: #d93639;
+}
 .more{
     height: 40px;
     line-height: 40px;
-    padding-left: 12px;
+    padding-left: 14px;
     font-size: 16px;color: #666;text-align: left;
 }
 </style>

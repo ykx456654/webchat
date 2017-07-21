@@ -1,12 +1,12 @@
 <template>
-	<div data-flex="box:first" class="studio-item flex">
+	<div  class="studio-item flex">
 		<div  class="topic-item-img flex align-items-center justify-center">
 			<p class="status">{{subject.liveStatus | status}}</p>
       		<img :src="subject.subjectImg" alt="" v-if="subject.subjectImg != ''">
 			<img src="../../../assets/images/banner_zbj_small.png" v-else>
 			<i class="icon icon-fee" v-if="subject.fee > 0"></i>
 		</div>
-		<div class="studio-item-info flex justify-space-between flex-wrap flex-direction-column">
+		<div data-flex="dir:top main:justify" class="studio-item-info">
 			<div class="topic-item-title flex justify-space-between">
 				<p class="text-overflow">{{subject.subjectTitle}}</p>
 			</div>
@@ -57,10 +57,10 @@
 	    box-sizing: border-box;
 	    border-bottom: 1px solid #f7f7f7;
 	    .studio-item-info{
-			// flex:1 1 100%;
 			>div{
 				width: 100%;
 			}
+			// width: 55vw;
 	    }
 	}
 	.topic-item-img{

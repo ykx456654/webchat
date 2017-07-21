@@ -4,7 +4,7 @@
 			<img :src="studio.studioImg" v-if="studio.studioImg != ''">
 			<img src="../../../assets/images/icon_zbj_mr.png" v-else>
 		</div>
-		<div data-flex="dir:top" class="flex flex-direction-column just-space-around ">
+		<div data-flex="dir:top" class="studio-item-info">
 			<p class="text-left text-overflow" v-text="studio.studioTitle"></p>
 			<p class="text-left text-overflow" v-text="studio.subjectTitle"></p>
 		</div>
@@ -82,5 +82,9 @@
 				font-size: 12px;
 			}
 		}
+		.studio-item-info{
+			width: 60%;
+		}
 	}
+
 </style>

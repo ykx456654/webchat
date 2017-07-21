@@ -97,7 +97,7 @@
 				<span class="tag" :class="authClass">{{authMessage}}</span>
 			</div>
 		</cellx>
-		<router-link to="/Auth" class="btn btn-auth" v-if="userInfo.authFlag == 0">去认证</router-link>
+		<router-link to="/Auth" class="btn btn-auth" v-if="userInfo.authFlag == 0 || userInfo.authFlag == 2">去认证</router-link>
 		<popup  v-model="showPopup"   position="right" width="100%" height="100%">
 			<div class="popup-content">
 				<x-header :title="popupTitle">

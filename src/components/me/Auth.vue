@@ -28,7 +28,7 @@
 					<span v-show="!loadingData" v-text="userInfo.hospital"></span>
 				</span>
 	    	</cell>
-	    	<cell title="科室" @click.native="selectDepartment" value="大丰大厦" is-link></cell>
+	    	<cell title="科室" @click.native="selectDepartment" :value="department" is-link></cell>
 	    	<selector placeholder="请输入职称" title="职称" :options="['主任医师','副主任医师','主治医师','住院医师','其他']" @on-change=""></selector>
 	    	<!-- <x-input title="邮箱" v-model="" placeholder="请输入邮箱" is-type="email"></x-input> -->
 	    	<x-input title="邀请码" placeholder="请输入邀请码（选填）"></x-input>
@@ -230,6 +230,9 @@ import { api } from '../../utils/api.js'
 						obj[prop] = value
 						this.setUserInfo(obj)
 						this.showPopup = false
+						if (this.option === 1) {
+							this.department =  value
+						}
 					}
 				})
 			},

@@ -37,7 +37,17 @@
 
 		},
 		mounted () {
-			
+			wx.ready(function () {
+            var
+            params = {
+                title: '医生站-医生学习的加油站',
+                desc: '医生站 医生学习的加油站，服务医生改善医疗',
+                link: 'http://' + window.location.href.replace(/code=+\w*/g,''),
+                imgUrl: 'http://' + window.location.hostname + '/images/shared_icon.jpg'
+            }
+            wx.onMenuShareAppMessage(params);
+            wx.onMenuShareTimeline(params);
+        });
 
 		},
 		data () {

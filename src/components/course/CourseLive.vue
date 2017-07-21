@@ -6,8 +6,6 @@
 					<img src="../../assets/images/banner_01.jpg">
 				</a>
 			</Swipe-item>
-			<Swipe-item class="banner-item"><img src="../../assets/images/banner1114.png"></Swipe-item>
-			<Swipe-item class="banner-item"><img src="../../assets/images/Artboard2.png"></Swipe-item>
 		</Swipe>
 		<div class="course-live-list">
 			<ul class="course-live-date"  v-for="(data,index) in titles" v-bind:class="{'close': stretch[index]}" >
@@ -65,9 +63,9 @@ export default {
 		next()
 	},
 	mounted () {
-		// alert(1)
 		const uid = this.uid
-		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0})
+		const type = this.$route.query.type
+		api(uid,{srv: "video_video",cmd: "get_live_list"},{catid:0,type})
 		.then(res=>{
 			this.hideLoad()
 			var data = res.data

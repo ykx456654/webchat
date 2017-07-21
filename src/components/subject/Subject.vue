@@ -44,17 +44,17 @@
 			<record-voice></record-voice>
 		</popup>
 		<gain v-show="gainShow" :info="gainInfo" ref="gain"/>
+		<question :info="questionInfo" v-model="questionShow"/>
 	</div>
 </template>
 <script>
 import { mapMutations ,mapGetters,mapActions} from 'vuex'
 import {Header,Spinner,Swipe, SwipeItem,Range  } from 'mint-ui'
-import { Previewer, Popup ,XDialog} from 'vux'
+import { Previewer, Popup } from 'vux'
 import { api } from '../../utils/api'
-import { throttle,setPPT } from '../../utils/func'
+import { throttle,setPPT,getUrlParam } from '../../utils/func'
 import bus from '../common/eventBus'
 import storage from 'storejs'
-// import zy from '../../lib/zymedia/zy.media.js'
 
 import ChatPartA from './common/ChatPartA'
 import ChatPartB from './common/ChatPartB'
@@ -64,6 +64,7 @@ import RecordVoice from './common/RecordVoice'
 import Gain from './common/Gain'
 import pptPlayer from './common/PPTPlayer'
 import Tip from './common/Tip'
+import Question from './common/Question'
 	export default {
 		name:'Subject',
 		components:{
@@ -76,15 +77,17 @@ import Tip from './common/Tip'
 			Popup,
 			RecordVoice,
 			Gain,
-			XDialog,
 			Swipe,
 			SwipeItem,
 			Range,
 			pptPlayer,
-			Tip
+			Tip,
+			Question
 		},
 		created () {
 			// console.log(1)
+			const froment = this.$route.query.froment
+			this.froment = froment
 			if (!this.loopClock) {
 				this.init()
 			}
@@ -115,6 +118,10 @@ import Tip from './common/Tip'
 			})
 			bus.$on('endInvoke', ()=>{
 				this.gainShow = false
+			})
+
+			bus.$on('showQuestion',url=>{
+				this.showQuestion(url)
 			})
 
 			if(this.isWeChat && this.subject.subjectType != 1){
@@ -177,7 +184,10 @@ import Tip from './common/Tip'
 				gainShow:false,
 				canplay:false,
 				tipShow:true,
-				gainInfo:{}
+				gainInfo:{},
+				questionInfo:{},
+				froment:'',
+				questionShow:false
 			}
 		},
 		computed: {
@@ -185,6 +195,7 @@ import Tip from './common/Tip'
 			liveStatus () {
 				return this.subject.liveStatus
 			},
+			
 			PPTPlayerOption () {
 				return {
 					liveStatus:this.liveStatus,
@@ -229,8 +240,9 @@ import Tip from './common/Tip'
 			},
 			linkSubjectIntro () {
 				this.showLoad()
+				let froment = this.froment
 				setTimeout(()=>{
-					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId,studioId:this.id.studioId}})
+					this.$router.push({path:'/SubjectIntro',query:{subjectId:this.id.subjectId,studioId:this.id.studioId,froment}})
 				},0)
 			},
 			linkDiscuss () {
@@ -241,7 +253,12 @@ import Tip from './common/Tip'
 			linkStudio () {
 				this.showLoad()
 				const query = this.$route.query
-				this.$router.push({path:'/Studio',query})
+				if(!!query.froment){
+					let _url = decodeURIComponent(query.froment)
+					location.href = _url
+				}else{
+					this.$router.push({path:'/Studio',query})
+				}
 			},
 			showPreviewer (index) {
 				setTimeout(()=>{
@@ -258,7 +275,6 @@ import Tip from './common/Tip'
 				var p1 = this.enterSubejct(this)
 				var p2 = this.getAdvMsg({direction:this.advMsgDirection,limit:this.limit})
 				var p3 = this.getNormalMsg({direction:this.nrmMsgDirection,limit:this.limit,onlyQuestion:false})
-				// if (this.subject.) {}
 				Promise.all([p1,p2,p3])
 				.then(res=>{
 					return res.every(item => item == true)
@@ -298,7 +314,6 @@ import Tip from './common/Tip'
 				this.voicePlayer = new window.Audio()
 				this.voicePlayer.src = obj.msg.vodUrl
 				this.voicePlayer.play()
-				console.log(obj)
 				this.setPlayingVoice({type:obj.type,i:obj.index})
 				// type= 1播放，type=2停止，type=3答案语音播放，type=4答案语音停止
 				this.voicePlayer.addEventListener('ended',()=>{
@@ -312,21 +327,37 @@ import Tip from './common/Tip'
 					this.voicePlayer = null
 				}
 				this.setPlayingVoice({type:obj.type,i:obj.index})
+			},
+			showQuestion (info) {
+				// alert(1464556)
+				this.questionInfo = info 
+				this.$nextTick(()=>{
+					this.questionShow = true
+				})
 			}
 		},
 		watch:{
 			liveStatus (nv,ov) {
 				if(this.subject.subjectType > 1){
 					if(nv == 1 ){
+						// 开始直播
 						this.$nextTick(()=>{
 							this.$refs.pptPlayer.playLive()
-							// console.log(1)
+							console.log('开始直播')
 						})
 					}
+					if(nv == 2){
+						// 结束直播进入问答
+						this.$nextTick(()=>{
+							this.$refs.pptPlayer.destoryPlayer()
+							console.log('结束直播进入问答')
+						})
+					}
+
 					if(nv == 9 ){
 						this.$nextTick(()=>{
 							this.$refs.pptPlayer.playRecord()
-							console.log(200000)
+							console.log('播放回顾')
 						})
 					}
 				}

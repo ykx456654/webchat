@@ -1,6 +1,6 @@
 <template>
 	<div class="chat-a-item">
-		<div class="flex" v-if="msg.msgType <= 3">
+		<div class="flex" v-if="msg.msgType <= 200">
 			<div class="chat-speaker">
 				<img :src="msg.headImg" v-if="msg.headImg !='' && msg.headImg ">
 				<img src="../../../assets/images/default_head.png" v-else>
@@ -67,9 +67,24 @@
 						</div>
 					</div>
 				</div>
+				<!--//调研-->
+				<div class="question" @click="showQuestion(msg)" v-if="msg.msgType === 100">
+					<div>
+						<h4 v-text="msg.refQuestionText"></h4>
+						<div class="question-intro" data-flex="box:last" >
+							<div v-text="msg.textContent"></div>
+							<div class="question-img" :style="{'background-image':`url(${msg.imgUrl})`}">
+							</div>
+						</div>
+					</div>
+					<div class="question-bt-icon" data-flex="cross:center">
+						<i class="icon icon-question" :style="{'background-image':`url(${subject.subjectImg})`}"></i>
+						<p v-text="subject.subjectTitle"></p>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div  v-if="msg.msgType > 3">
+		<div  v-if="msg.msgType > 200">
 			<div class="tip-live-notice" >
 				<p v-text="msg.textContent"></p>
 			</div>
@@ -77,7 +92,7 @@
  		<div class="tip-to-app" v-if="!isStart && subjectRole == 1">
 			<a href="https://www.yishengzhan.cn/download?channel=release_webysz">要开始直播，请使用医生站APP。</a>
 		</div>
-<!-- 		<div class="gain">
+ 		<!--<div class="gain">
 			<div>
 				<div class="gain-inner flex align-items-center justify-center">
 					<i class="icon icon-gain"></i>
@@ -112,7 +127,7 @@ import bus from '../../common/eventBus.js'
 			}
 		},
 		computed :{
-			...mapGetters(['subjectRole','isStart'])
+			...mapGetters(['subjectRole','isStart','subject'])
 		},
 		methods: {
 			showPreview () {
@@ -145,6 +160,9 @@ import bus from '../../common/eventBus.js'
 			gain (msg) {
 				bus.$emit('invoke',msg)
 			},
+			showQuestion (msg) {
+				bus.$emit('showQuestion',{title:msg.refQuestionText,brief:msg.textContent,imgUrl:msg.imgUrl,url:msg.vodUrl})
+			}
 		},
 		filters: {
 
@@ -163,8 +181,6 @@ import bus from '../../common/eventBus.js'
 		mounted () {
 			bus.$on('resetOtherVoicePlay',index=>{
 				if(this.index != index){
-					// console.log('aaaaaaaaaaaa')
-					// console.log(index)
 					this.flag = true
 				}
 			})
@@ -197,7 +213,6 @@ import bus from '../../common/eventBus.js'
 	    position: relative;
 	}
 	.chat-speaker-name{
-		// margin-top: 0.05rem;
 		color: #4a4a4a;
 		font-size: 0.15rem;
 		text-align: left;
@@ -332,5 +347,57 @@ import bus from '../../common/eventBus.js'
 		display: block;
 		// min-width:50px; 
 		word-break: normal;
+	}
+	.question{
+		border-radius: 5px;
+		border: 1px solid #e2e2e2;
+		background-color: #fff;
+		max-width: 2.4rem;
+		min-width: 2.2rem;
+		margin-bottom: 5px;
+		h4{
+			font-size: 15px;
+			color: #000;
+			padding: 12px 10px 0px;
+			font-weight: normal;
+			text-align: left;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			overflow: hidden;
+		}
+		.question-intro{
+			color: #999;
+			font-size: 12px;
+			padding: 8px 10px 10px;
+			>div:nth-child(1){
+				text-align: left;
+				overflow:hidden; 
+				text-overflow:ellipsis;
+				display:-webkit-box; 
+				word-break:break-all;
+				-webkit-box-orient:vertical;
+				-webkit-line-clamp:2; 
+				height: 40px;
+			}
+			>div:nth-child(2){
+				width: 45px;
+				height: 45px;
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				margin-left: 12px;
+			}
+		}
+		.question-bt-icon{
+			border-top: 1px solid #e2e2e2;
+			padding: 6px 10px;
+			color: #999;
+			.icon{
+				margin-right: 6px;
+				width: 16px;
+				height: 16px;
+			}
+		}
 	}
 </style>

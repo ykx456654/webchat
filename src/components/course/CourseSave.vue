@@ -161,6 +161,7 @@ export default {
             height: 50px;
             overflow: scroll;
             -webkit-overflow-scrolling: touch;
+            width: calc(~'100vw - 45px');
             &::-webkit-scrollbar {
                 display: none !important;
             }
@@ -171,6 +172,7 @@ export default {
             flex-wrap: nowrap;
             height: 100%;
             padding-right: 50px;
+            
             align-content: stretch;
             .channel-item {
                 padding: 0 10px;

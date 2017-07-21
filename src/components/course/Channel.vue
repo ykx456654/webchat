@@ -9,7 +9,7 @@
 			<h4 class="title" v-text="a.title"></h4>
 			<ul>
 				<li v-for="(f,i) in a.data">
-					<label class="focus-item" @click="foucs(f.catid,selected.indexOf(f.catid) > -1)">
+					<label class="focus-item" @click.self.stop="foucs(f.catid,selected.indexOf(f.catid) > -1)">
 						{{f.name}}
 						<input style="display: none" type="checkbox" name="focus" :value="f.catid" v-model="selected">
 					</label>

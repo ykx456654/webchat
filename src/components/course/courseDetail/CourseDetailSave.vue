@@ -6,10 +6,10 @@
 			</router-link>
 			<!-- <a class="btn course-detail-btn" slot="right">关注</a> -->
 		</x-header>
-		<div class="zy_media">
-			<video id="ss" :poster="vdo.coverpicUrl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true" >
+		<div id="video-player">
+			<!--<video id="ss" :poster="vdo.coverpicUrl" x5-video-player-type="h5" webkit-playsinline="true"  x-webkit-airplay="true" playsinline="true" >
 		        <source :src="playurl" type="video/mp4">
-		    </video>
+		    </video>-->
 		</div>
 
 		<div class="course-detail-content">
@@ -131,13 +131,9 @@
 				<textarea v-model="comment" placeholder="我要评论.." maxlength="1000"></textarea>
 			</div>
 		</popup>
-<!-- 		<video id="zzz" style="display: none" src="http://7xnvc7.com1.z0.glb.clouddn.com/yv0_1490067507481.mp4" type="video/mp4">
-		</video>
-		<button id="but">start</button> -->
 	</div>
 </template>
 <script>
-// 'https://www.yishengzhan.cn/download?channel=release_webysz';
 import { mapGetters,mapActions,mapMutations } from 'vuex'
 import {api} from '../../../utils/api'
 import { Header ,TabContainer, TabContainerItem,Actionsheet,Spinner,MessageBox} from 'mint-ui';
@@ -177,7 +173,6 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				sheetVisible:false,
 				popupVisible:false,
 				comment:'',
-				commentStart:0,
 				commentLimit:10,
 				commentOrder:0,
 				commentList:[],
@@ -274,13 +269,28 @@ import zy from '../../../lib/zymedia/zy.media.js'
 					self.playurl = self.classify[0].downUrl || vdo.newPlayUrl
 					self.poster = vdo.coverpicUrl
 				}
-				self.player =  zy(document.getElementById('ss'),{
-					videoHeight:height,
-					audioHeight: 40,
-					error:function(){
-						self.toast('视频错误')
+				
+
+				var video = document.getElementById('video-player')
+				var options = {
+					source:{source:self.playurl,mimeType:'video/mp4'},
+					playInline:true,
+					poster:self.poster,
+					playInline:true,
+					width:'100%',
+					height:height,
+					mediacontrol:{ buttons: "#BEBEBE"},
+					events:{
+						onError () {
+							self.toast('链接错误')
+						}
 					}
-				})
+				}
+
+				
+				var player = new Clappr.Player(options)
+				player.attachTo(video)
+				self.player = player
 			},
 			getDetail () {
 				const params = this.$route.params
@@ -314,9 +324,9 @@ import zy from '../../../lib/zymedia/zy.media.js'
 			setPlay (n) {
 				n = Number(n)
 				this.playId = n
-				this.player.media.pause()
-				this.player.media.src = this.classify[n].downUrl
-				this.player.media.play()
+				// this.player.pause()
+				this.player.load(this.classify[n].downUrl)
+				this.player.play()
 			},
 			tabClick (n) {
 				const uid = this.uid
@@ -496,7 +506,8 @@ import zy from '../../../lib/zymedia/zy.media.js'
 				})
 			},
 			toRelative (id) {
-				this.player.media && this.player.media.pause()
+				this.player && this.player.destroy()
+				this.player = null
 				// console.log(this.$router)
 				this.$router.push({name:'CourseDetailSave',params:{vdoid:id},force: true})
 				this.$nextTick(()=>{
@@ -506,7 +517,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 		},
 		destroyed () {
 			// console.log(to)
-			this.player.media && this.player.media.pause()
+			this.player && this.player.destroy()
 			this.player = null
 			delete this.player
 			this.show = false
@@ -518,6 +529,7 @@ import zy from '../../../lib/zymedia/zy.media.js'
 @import '../../../lib/zymedia/zy.media.css';
 	.course-detail-save{
 		padding-bottom: 50px;
+		background-color: #fff;
 	}
 	.course-detail-tab{
 		position: fixed;

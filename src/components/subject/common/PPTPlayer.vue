@@ -1,10 +1,12 @@
 <template>
 <div class="ppt-player" :style="{backgroundImage:'url('+pptImg.url+')'}" @click.self="controlSwitch">
-    <div class="old-video-player" id="old-video-player" v-if="isOldVideo">
-
+    <div class="old-video-player" id="old-video-player" v-if="isOldVideo || (!hasPPt && options.videoStatus === 0) || (!hasPPt && options.liveStatus === 1)">
     </div>
-    <img class="ppt-item" :src="options.poster"
-     v-if="(options.liveStatus == 9 && recordPlayStatu == 1) || options.liveStatus == 0">
+<!--     <div class="old-video-player" id="no-ppt-live-video-player" v-if="isOldVideo || (!hasPPt && options.videoStatus === 0)">
+
+    </div> -->
+<!--     <img class="ppt-item" :src="options.poster"
+     v-if="(options.liveStatus == 9 && recordPlayStatu == 1) || (options.liveStatus == 0 && hasPPt)"> -->
     <div class="seeking" v-if="seeking">
         <spinner :size="30" type="snake"/>
     </div>
@@ -35,19 +37,21 @@
     </transition>
 
     <transition name="slide-fade">
-        <div data-flex="main:center cross:center" class="control" v-show="showLiveControl && options.liveStatus == 1">
+        <div data-flex="main:center cross:center" class="control" v-show="showLiveControl && options.liveStatus == 1 && hasPPt">
             <!--<div :class="{'control-pause':livePlayStatu==3,'control-start':livePlayStatu==4}" @click="pause">
             </div>-->
             <div class="ppt-num">
-                {{pptImg.page+1 + '/' + pptImg.totalPage}}
+                {{(pptImg.page || 0 ) +1 + '/' + (pptImg.totalPage || 0)}}
             </div>
         </div>
     </transition>
 
 
-    <div data-flex="cross:center main:center" 
+    <div
+    data-flex="cross:center main:center" 
     class="generate-mp4" 
-    v-if="(options.liveStatus == 9 || options.liveStatus == 2) && options.videoStatus != 0">
+    :class="{'pos':hasPPt}"
+    v-show="(options.liveStatus == 9 || options.liveStatus == 2) && options.videoStatus != 0">
         生成回放中...
     </div>
     <!--<div class="btn-start"></div>-->
@@ -55,13 +59,15 @@
     class="video-box" 
     :class="{'audio':options.subjectType == 3}" 
     data-flex="main:center cross:center" 
-    v-if="options.liveStatus==1">
+    v-if="options.liveStatus==1 && hasPPt">
+    <!-- 存在ppt -->
     </div>
+
 
     <div 
     id="recordStart" 
     class="control-btn" 
-    v-show="(options.liveStatus == 9 && (recordPlayStatu == 4 || recordPlayStatu == 1 || recordPlayStatu == 5)) && options.videoStatus == 0 && !isOldVideo">
+    v-show="(options.liveStatus == 9 && (recordPlayStatu == 4 || recordPlayStatu == 1 || recordPlayStatu == 5)) && options.videoStatus == 0 && !isOldVideo && hasPPt">
     </div>
     <!--<div class="full-screen">
         <img src="http://studioimage.yxj.org.cn/ios11494122809308080.jpeg" alt="">
@@ -113,15 +119,21 @@ import bus from '../../../components/common/eventBus.js'
                 timer:null,
                 seeking:false,
                 hls:null,
-                recordImgUrl:''
+                recordImgUrl:'',
+                dragger:null
             }
         },
         components:{Range,Spinner},
         computed:{
             ...mapGetters(['recordPlayInfo','currentImg','firstImg']),
     		recordPPTImg () {
-				if(this.recordPlayInfo.imgs.length){
-					return {url:this.recordImgUrl}
+				if(this.recordPlayInfo.imgs.length && this.options.videoStatus === 0){
+                    if (this.recordImgUrl !== '') {
+                        return {url:this.recordImgUrl}
+                    }else{
+                        return {url:this.options.poster}
+                    }
+
 				}else{
 					return {url:this.options.poster}
 				}
@@ -132,7 +144,10 @@ import bus from '../../../components/common/eventBus.js'
                     return this.currentImg
                 }else if(this.options.liveStatus == 9){
                     // 录播， 返回recordIMG
+                    // console.log(this.recordPPTImg)
                     return this.recordPPTImg
+                }else if(this.options.liveStatus === 0){
+                    return {url:this.options.poster}
                 }else{
                     return {url:'./static/images/pic__zbht.jpg'}
                 }
@@ -155,13 +170,16 @@ import bus from '../../../components/common/eventBus.js'
             isPlayLive () {
                 return this.$store.state.subject.isPlayLive
             },
+            hasPPt () {
+                return this.$store.state.subject.imgs.length !== 0
+            },
             isOldVideo () {
                 // 兼容以前老版本视频
                 return !/.mp4*$/g.test(this.options.recordUrl) && this.options.recordUrl!=''
             }
         },
         methods:{
-            ...mapMutations(['setIsPlayLive']),
+            ...mapMutations(['setIsPlayLive','setPlayFlag']),
             playLive () {
 				// this.playurl = 'http://vjs.zencdn.net/v/oceans.mp4'
                 console.log('livePlay') 
@@ -180,7 +198,7 @@ import bus from '../../../components/common/eventBus.js'
                 this.$nextTick(()=>{
                     try{
                         var _this = this
-                        var video = document.getElementById('video')
+                        var video =  document.getElementById('video')
                         var options = {
                             source:{source:_this.options.livePullUrl,mimeType:'application/x-mpegURL'},
                             preload:true,
@@ -207,41 +225,56 @@ import bus from '../../../components/common/eventBus.js'
                             options.poster = _this.options.poster
                         }
 
-
+                        if (!this.hasPPt && this.options.subjectType !== 3) {
+                            // 没有ppt的话，直接播放视频
+                            options.width = '100%'
+                            options.height = '100%'
+                            options.poster = _this.options.poster
+                            options.hideMediaControl = true
+                            options.mediacontrol = { buttons: "#BEBEBE"}
+                            video = document.getElementById('old-video-player')
+                        }
+                        console.log(options)
                         var player = new Clappr.Player(options)
                         player.attachTo(video)
                         player.on(Clappr.Events.PLAYER_PLAY,function(){
                             if(_this.options.subjectType == 3){
                                 video.style.display = 'none'
                             }
-                            // console.log(1)
                             _this.setIsPlayLive(true)
+                            _this.setPlayFlag(1)
                             _this.controlSwitch()
                             _this.livePlayStatu = 3
                         })
 
                         player.on(Clappr.Events.PLAYER_PAUSE,function(){
+                            // player.core.MediaControl.$playPauseToggle.resetKeepVisible()
                             _this.showLiveControl = true
                             _this.liveStatus = 4
                         })
 
                         player.on(Clappr.Events.PLAYBACK_PLAY ,function(){
+                            _this.setPlayFlag(1)
                             _this.toast('暂停后开始')
                         })
 
                         player.on(Clappr.Events.PLAYER_ERROR,function(){
-                             _this.toast('主讲人已离开，请稍后再试')
+                            _this.setPlayFlag(0)
+                            _this.toast('主讲人已离开，请稍后再试')
                         })
 
+                        player.on(Clappr.Events.PLAYER_ENDED,function(){
+                            _this.setPlayFlag(0)
+                        })
 
 
                         this.coursePlayer = player
                         setTimeout(()=>{
-                            if(this.options.subjectType == 2){
-                                new Drag({
+                            if(this.options.subjectType == 2 && this.hasPPt){
+                                this.dragger = new Drag({
                                     dragEle:'#video',
                                     ondrag:function(data){
-                                    // console.log(data)
+
                                     }
                                 })
                             }
@@ -250,11 +283,10 @@ import bus from '../../../components/common/eventBus.js'
                         alert(e)
                     }
                 })
-
 			},
 			playRecord () {
-                // console.log('recordplay')
-                if(this.isOldVideo){
+                console.log('recordplay')
+                if(this.isOldVideo || (!this.hasPPt && this.options.videoStatus === 0)){
                     this.$nextTick(()=>{
                         var _this = this
                         var video = document.getElementById('old-video-player')
@@ -262,6 +294,7 @@ import bus from '../../../components/common/eventBus.js'
                             source:{source:_this.options.recordUrl,mimeType:'video/mp4'},
                             preload:true,
                             hideMediaControl:true,
+                            mediacontrol:{ buttons: "#BEBEBE"},
                             width:'100%',
                             height:'100%',
                             playInline:true,
@@ -269,6 +302,12 @@ import bus from '../../../components/common/eventBus.js'
                         }
                         var player = new Clappr.Player(options)
                         player.attachTo(video)
+                        player.on(Clappr.Events.PLAYER_PLAY,function(){
+                            _this.setPlayFlag(1)
+                        })
+                        player.on(Clappr.Events.PLAYER_ENDED,function(){
+                            _this.setPlayFlag(0)
+                        })
                         this.coursePlayer = player
                     })
                     return false
@@ -281,6 +320,7 @@ import bus from '../../../components/common/eventBus.js'
 				this.coursePlayer = new Audio()
 				let player = this.coursePlayer
 				let _this = this
+                // if (this.) {}
 				player.src = this.options.recordUrl
 				this.recordPlayStatu = 1
 				// player.load()
@@ -291,6 +331,7 @@ import bus from '../../../components/common/eventBus.js'
                         _this.recordPlayStatu = 2
                     }
 					player.play()
+                    _this.setPlayFlag(1)
                     _this.duration = player.duration
                     _this.controlSwitch()
 				})
@@ -307,7 +348,7 @@ import bus from '../../../components/common/eventBus.js'
                     // _this.toast('playing')
 					let currentTime = parseInt(player.currentTime)
 					let value = setPPT(currentTime,_this.recordPlayInfo.actionList,_this.firstImg)
-                    // console.log(value)
+                    console.log(value)
 					let url = value.url
                     _this.currentTime = currentTime
                     if(_this.canUpdateTimeLine){
@@ -318,6 +359,7 @@ import bus from '../../../components/common/eventBus.js'
 
 				player.addEventListener('pause',function(){
 					// 暂停
+                    _this.setPlayFlag(0)
                     setTimeout(()=>{
                         _this.recordPlayStatu = 4
                     },0)
@@ -332,6 +374,7 @@ import bus from '../../../components/common/eventBus.js'
 
 				player.addEventListener('ended',function(){
 					// 结束
+                    _this.setPlayFlag(0)
                     _this.toast('结束播放')
 					setTimeout(()=>{
                         _this.recordPlayStatu = 5
@@ -395,19 +438,47 @@ import bus from '../../../components/common/eventBus.js'
                 }
             },
             destoryPlayer () {
-                if(this.options.liveStatus == 9){
-                    if(this.isOldVideo){
-                        // 以前的视频，关闭播放器
-                        this.coursePlayer && this.coursePlayer.destroy()
+                try{
+                    this.setPlayFlag(0)
+                    if(this.options.liveStatus == 9){
+                        if(this.isOldVideo){
+                            // 以前的视频，关闭播放器
+                            this.coursePlayer && this.coursePlayer.destroy()
+                            if(this.dragger){
+                                this.dragger.offEvent()
+                            }
+                        }else{
+                            this.coursePlayer && this.coursePlayer.pause()
+                            clearTimeout(this.timer)
+                        }
                     }else{
-                        this.coursePlayer && this.coursePlayer.pause()
-                        clearTimeout(this.timer)
+                        console.log('end')
+                        this.coursePlayer && this.coursePlayer.destroy()
+                        if(this.dragger){
+                            this.dragger.offEvent()
+                        }
                     }
-                }else if(this.options.liveStatus == 1){
-                     console.log('end')
-                    this.coursePlayer && this.coursePlayer.destroy()
+                }catch(e){
+                    console.log(e)
+                    this.coursePlayer = null
                 }
-                this.coursePlayer = null
+            },
+            continuePlay () {
+                // 打赏的情况下 返回会导致视频暂停
+                if(this.options.liveStatus == 1){
+                    // 直播
+                    if(this.coursePlayer && !this.coursePlayer.isPlaying){
+                        this.coursePlayer.play()
+                    }
+                }
+
+                if(this.options.liveStatus == 9){
+                    // 录播
+                    if(this.coursePlayer && this.coursePlayer.paused){
+                        this.coursePlayer.play()
+                    }
+                }
+
             }
         },
         destroyed () {
@@ -428,6 +499,7 @@ import bus from '../../../components/common/eventBus.js'
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
+        position: relative;
     }
     .ppt-item{
         width: 100%;
@@ -535,14 +607,15 @@ import bus from '../../../components/common/eventBus.js'
         margin-right: 5px;
     }
     .generate-mp4{
-        position: absolute;
-        top: 50%;
         color: #fff;
-        left: 50%;
-        transform: translate(-50%,-50%);
         width: 100%;
         height: 100%;
         background-color: rgba(0,0,0,0.3);
+    }
+    .pos{
+        position: absolute;
+        left: 0;
+        top: 0;
     }
     .full-screen-btn{
         width: 15px;
@@ -553,7 +626,7 @@ import bus from '../../../components/common/eventBus.js'
         background-position: center;
         background-repeat: no-repeat;
     }
-    .old-video-player{
+    .old-video-player,.hasppt-player{
         width: 100%;
         height: 100%;
     }
