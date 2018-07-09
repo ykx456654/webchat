@@ -1,0 +1,14 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "src/lib/alloycrop/package.json",
+        "src/lib/alloyfinger/alloy_crop/package.json",
+        "src/lib/alloyfinger/package.json",
+        "src/lib/alloyfinger/transformjs/package.json",
+        "webpack-merge/package.json"
+      ]
+    }
+  }
+}
